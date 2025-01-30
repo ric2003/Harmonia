@@ -105,7 +105,7 @@ export default function StationDetailsPage() {
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-            className="ml-2 border p-1 bg-background"
+            className="ml-2 border p-1 rounded-lg bg-background"
           />
         </label>
         <label className="block mb-2">
@@ -114,7 +114,7 @@ export default function StationDetailsPage() {
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
-            className="ml-2 border p-1 bg-background"
+            className="ml-2 border p-1 bg-background rounded-lg"
           />
         </label>
         <button
