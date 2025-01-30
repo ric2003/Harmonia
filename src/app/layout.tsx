@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
+import { Header } from "@/components/Header";
+import { Sidebar } from "@/components/Sidebar";
+import { SidebarHeaderProvider } from "@/contexts/SidebarHeaderContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,20 +31,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex h-screen">
-          <div className="flex flex-col items-center h-full w-[300px] bg-white">
-            <img src="./favicon.ico" alt="" />
-            <nav>
-              <ul className="flex flex-col items-center text-blue-500">
-                <Link href={'/'}><li>HOME</li></Link>
-                <Link href={'/dams'}><li>DAMS PAGE</li></Link>
-              </ul>
-            </nav>
-          </div>
-          <div>
-            {children}
-          </div>
-        </div>
+        <ThemeProvider>
+          <SidebarHeaderProvider>
+            <div className="flex h-screen">
+              <Sidebar />
+              <div className="flex flex-1 flex-col z-[1]">
+                <Header />
+                <main className="overflow-auto bg-background h-full p-8">
+                  {children}
+                </main>
+              </div>
+            </div>
+          </SidebarHeaderProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
