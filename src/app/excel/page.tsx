@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import * as XLSX from "xlsx";
+import { FixedSizeList as List } from "react-window";//sudo npm install --save-dev @types/react-window
 
 interface ExcelData {
   [key: string]: string | number | null;
@@ -23,19 +24,17 @@ export default function ExcelUploader() {
     }
 
     try {
-      // Read file as ArrayBuffer instead of binary string
+      // Read file as ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
 
-      // Parse the workbook from the array
+      // Parse workbook and pick the first sheet
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
-
-      // You can customize which sheet to parse, here we take the first one
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
 
-      // Convert sheet to JSON with minimal data transformation
+      // Convert sheet to JSON
       const parsedData: ExcelData[] = XLSX.utils.sheet_to_json(worksheet, {
-        raw: true, // keep data as is (faster, less overhead)
+        raw: true,
       });
 
       setData(parsedData);
@@ -43,6 +42,33 @@ export default function ExcelUploader() {
       setError("Failed to parse the Excel file.");
     }
   };
+
+  // If there’s data, extract column headers from the first row.
+  const columns = data.length > 0 ? Object.keys(data[0]) : [];
+
+  // Build a grid template string with one equal-width column per header.
+  const gridTemplateColumns = columns.map(() => "1fr").join(" ");
+
+  // The row renderer for react-window.
+  const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+  const row = data[index];
+  return (
+    <div
+      style={{ ...style, display: "grid", gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}
+      className="border-b border-gray-200"
+    >
+      {columns.map((col, colIndex) => (
+        <div
+          key={colIndex}
+          className="p-2 border-r border-gray-200 overflow-hidden whitespace-nowrap text-ellipsis"
+        >
+          {row[col] !== null && row[col] !== undefined ? row[col].toString() : ""}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 
   return (
     <div className="p-4">
@@ -52,35 +78,36 @@ export default function ExcelUploader() {
         onChange={handleFileUpload}
         className="mb-4 p-2 border border-darkGray rounded text-darkGray"
       />
-
+  
       {error && <p className="text-red-600">{error}</p>}
-
+  
       {data.length > 0 && (
-        <div className="overflow-x-auto text-darkGray">
-          <table className="w-full border-collapse border border-darkGray">
-            <thead>
-              <tr className="bg-background">
-                {Object.keys(data[0]).map((key) => (
-                  <th key={key} className="border border-darkGray p-2">
-                    {key}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((row, rowIndex) => (
-                <tr key={rowIndex} className="border border-darkGrey">
-                  {Object.values(row).map((value, colIndex) => (
-                    <td key={colIndex} className="border border-darkGrey p-2">
-                      {value !== null ? value.toString() : ""}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="text-darkGray">
+          <div
+            className="grid bg-background border-b-2 border-text-darkGray"
+            style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}
+          >
+            {columns.map((col, index) => (
+              <div
+                key={index}
+                className="p-2 font-bold border-r border-gray-300"
+              >
+                {col}
+              </div>
+            ))}
+          </div>
+
+          <List
+            height={500}
+            itemCount={data.length}
+            itemSize={35}
+            width="100%"
+          >
+            {Row}
+          </List>
         </div>
       )}
     </div>
   );
+  
 }

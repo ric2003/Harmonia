@@ -11,14 +11,14 @@ export function Header() {
     const { sidebarOpen, handleChangeSidebar } = useContext(SidebarHeaderContext);
 
     return (
-        <header className="flex items-center bg-white w-full min-h-[120px] px-8 relative">
+        <header className="flex items-center bg-background w-full min-h-[120px] px-8 relative">
             <div className="flex flex-col w-full">
                 <div className="flex items-center gap-8">
                     <button onClick={handleChangeSidebar}>
                         { sidebarOpen ? 
-                            <X className="text-primary bg-secondary rounded-lg p-1" size={36} />
-                            :
                             <Menu className="text-primary bg-secondary rounded-lg p-1" size={36} />
+                            :
+                            <Menu className="text-primary bg-background rounded-lg p-1" size={36} />
                         }
                     </button>
                     <span className="text-darkGray text-4xl font-extrabold">{pageName}</span>

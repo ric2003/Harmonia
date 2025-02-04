@@ -12,11 +12,11 @@ interface LinkButtonProps {
 export function LinkButton({ route, name, icon }: LinkButtonProps) {
     const pathName = usePathname();
 
-    const backgroundColor = pathName === route ? "bg-secondary" : "bg-white"
+    const backgroundColor = pathName === route ? "bg-secondary" : "bg-background"
     
     return (
         <Link
-            className={"flex items-center justify-start w-full h-16 rounded-lg gap-4 p-4 border-2 border-white hover:border-primary transition-colors " + (backgroundColor)}
+            className={"flex items-center justify-start w-full h-16 rounded-lg gap-4 p-4 border-2 border-background hover:border-primary transition-colors " + (backgroundColor)}
             href={route}
         >
             {icon}

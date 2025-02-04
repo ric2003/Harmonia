@@ -10,16 +10,18 @@
   --gray-300: #D9D9D9;
   --gray-700: #2B3435;
   --grey-600: #4B5563;
+  --toggleBackground:#D9D9D9; 
 }
 
 .dark {
   --white: #FFFFFF;
   --background: #111111;
   --primary: #2B96F3;
-  --secondary: #E9F5FE;
+  --secondary: rgba(54, 88, 112, 0.6);
   --gray-300: #D9D9D9;
   --gray-700: #F0F0F0;
   --grey-600: #999999;
+  --toggleBackground:#333333;
 }
 
 body {

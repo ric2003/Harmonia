@@ -17,6 +17,7 @@ export default {
   			lightGray: 'var(--gray-300)',
   			darkGray: 'var(--gray-700)',
 			greySubText: 'var(--grey-600)',
+			toggleBackground: 'var(--toggleBackground)',
   		},
   	}
   },
