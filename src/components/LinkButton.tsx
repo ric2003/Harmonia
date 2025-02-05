@@ -10,9 +10,9 @@ interface LinkButtonProps {
 }
 
 export function LinkButton({ route, name, icon }: LinkButtonProps) {
-    const pathName = usePathname();
+    const pathName = usePathname().split('/');
+    const backgroundColor =`/${pathName[1]}` === route ? "bg-secondary" : "bg-background"
 
-    const backgroundColor = pathName === route ? "bg-secondary" : "bg-background"
     
     return (
         <Link

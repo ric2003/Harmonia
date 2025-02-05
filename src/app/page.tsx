@@ -23,17 +23,14 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchWeatherForStations() {
       try {
-        // Fetch all stations
         const stations = await getStations();
-
-        // For each station, fetch its latest reading using option 4.
+        //opção 4 para ir buscar info mais recent
         const weatherPromises = stations.map(async (station) => {
           try {
             const data = await getStation10MinData(station.id);
             const timestamps = Object.keys(data);
             if (timestamps.length > 0) {
-              // Sort the timestamps (assumed to be in "YYYY-MM-DD HH:mm:ss" format)
-              // in descending order to get the latest.
+              // ordenar a datas pela mais recent
               const latestTimestamp = timestamps.sort().reverse()[0];
               const latestReading = data[latestTimestamp] as Station10MinRecord;
               return { station, latestReading };
@@ -99,9 +96,7 @@ export default function HomePage() {
                 />
               </svg>
             </div>
-            {/* Info Section */}
             <div>
-              {/* Station Name replaces the large temperature display */}
               <h2 className="text-2xl font-bold">{station.estacao.slice(7)}</h2>
               {latestReading ? (
                 <div className="mt-2">

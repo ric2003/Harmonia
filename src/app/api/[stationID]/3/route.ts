@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: { params: { stationI
     // ✅ Create form data string instead of JSON
     const formData = new URLSearchParams();
     formData.append("token", tokenAPI || "");
-    formData.append("option", "2");
+    formData.append("option", "3");
     formData.append("id", stationID);
 
     // ✅ Make API request with URL-encoded body

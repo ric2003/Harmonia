@@ -38,27 +38,22 @@ export default function StationDetailsPage() {
     setLoading(true);
     setError(null);
     try {
-      // Get station list and find the current station by its id.
       const stationsData = await getStations();
       const stationFound: Station | undefined = stationsData.find(
         (station: Station) => station.id === stationID
       );
       if (stationFound) {
-        // Slice the station name from the 7th character onward if desired.
         setStationName(stationFound.estacao.slice(7));
       } else {
         setStationName("Desconhecida");
       }
 
-      // Get daily data (Option 2)
       const dailyData = await getStationDailyData(stationID, fromDate, toDate);
       setStationData(dailyData);
 
-      // Get hourly data (Option 3)
       const hourly = await getStationHourlyData(stationID);
       setHourlyData(hourly);
 
-      // Get 10-minute data (Option 4)
       const min10 = await getStation10MinData(stationID);
       setMin10Data(min10);
     } catch (err: any) {
@@ -94,7 +89,6 @@ export default function StationDetailsPage() {
       {loading && <div>A carregar...</div>}
       {error && <div className="text-red-600 mb-4">{error}</div>}
 
-      {/* Daily Data Table */}
       {stationData && Object.keys(stationData).length > 0 ? (
         <div id="daily-data" className="overflow-x-auto mb-8">
           <h2 className="text-2xl font-bold mb-4">Dados Diários</h2>
@@ -172,7 +166,6 @@ export default function StationDetailsPage() {
         )
       )}
 
-      {/* Hourly Data Table */}
       {hourlyData && Object.keys(hourlyData).length > 0 ? (
         <div id="hourly-data" className="overflow-x-auto mb-8">
           <h2 className="text-2xl font-bold mb-4">
@@ -229,7 +222,6 @@ export default function StationDetailsPage() {
         )
       )}
 
-      {/* 10-Minute Data Table */}
       {min10Data && Object.keys(min10Data).length > 0 ? (
         <div id="min10-data" className="overflow-x-auto">
           <h2 className="text-2xl font-bold mb-4">

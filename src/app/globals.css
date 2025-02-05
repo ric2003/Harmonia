@@ -28,3 +28,7 @@ body {
   color: var(--background);
   font-family: Roboto, sans-serif;
 }
+
+.disable-transitions * {
+  transition: none !important;
+}

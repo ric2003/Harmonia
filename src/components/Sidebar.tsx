@@ -9,17 +9,21 @@ import { ThemeContext } from "@/contexts/ThemeContext";
 
 export function Sidebar() {
     const { sidebarOpen } = useContext(SidebarHeaderContext);
-    const { toggleTheme } = useContext(ThemeContext);
+    const { theme, toggleTheme } = useContext(ThemeContext);
 
     function handleModeChange() {
+        document.documentElement.classList.add('disable-transitions');
         toggleTheme();
+        setTimeout(() => {
+            document.documentElement.classList.remove("disable-transitions");
+        }, 0);
     }
 
     return (
         <div className="z-[2]">
             { sidebarOpen &&
                 <div className="flex flex-col items-center h-full w-[300px] bg-background shadow-[rgba(0,0,0,0.25)_2px_0_20px_1px] z-[2]">
-                    <Image src="/logo.svg" width={139} height={117} alt="" />
+                    <Image src={theme === "light"?"/logo.svg":"/logoDarkMode.svg"} width={139} height={117} alt="" />
 
                     <hr className="h-0.5 bg-lightGray w-4/5 mt-[1px]" />
 
@@ -33,7 +37,7 @@ export function Sidebar() {
                     </nav>
 
                     <div className="w-full flex items-center justify-center absolute bottom-4">
-                        <Switch.Root onCheckedChange={handleModeChange} className="cursor-pointer relative w-[160px] h-[38px] rounded-lg bg-lightGray outline-none data-[state=checked]:bg-toggleBackground">
+                        <Switch.Root checked={theme === "dark"} onCheckedChange={handleModeChange} className="cursor-pointer relative w-[160px] h-[38px] rounded-lg bg-lightGray outline-none data-[state=checked]:bg-toggleBackground">
                             <div className="flex">
                                 <div className="flex relative z-[1] text-primary gap-1 items-center font-semibold w-1/2 justify-center">
                                     <Sun />

@@ -43,8 +43,11 @@ export default function StationsPage() {
               <p className="text-sm">
                 Lat: {station.lat}, Lon: {station.lon}
               </p>
-              <Link href={`/station/${station.id}`} className="text-blue-600 underline">
+              <Link href={`/stations/${station.id}`} className="text-blue-600 underline">
                 View Details
+              </Link>
+              <Link href={`/stations/${station.id}/graphs`} className="text-blue-600 underline m-4">
+                Ver Gráficos
               </Link>
             </li>
           ))}
