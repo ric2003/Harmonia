@@ -1,5 +1,6 @@
+"use server"
 const API_URL = "https://irristrat.com/ws/clients/meteoStations.php";
-const token = process.env.NEXT_PUBLIC_IRRISTRAT_TOKEN || "";
+const token = process.env.IRRISTRAT_TOKEN || "";
 
 // ----------------------------------------------------------------
 // Define types for the API responses

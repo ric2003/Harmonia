@@ -1,4 +1,4 @@
-const tokenAPI = process.env.NEXT_PUBLIC_IRRISTRAT_TOKEN;
+const tokenAPI = process.env.IRRISTRAT_TOKEN;
 
 export async function GET() {
   const response = await fetch("https://irristrat.com/ws/clients/meteoStations.php", {

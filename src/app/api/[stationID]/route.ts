@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-const tokenAPI = process.env.NEXT_PUBLIC_IRRISTRAT_TOKEN;
+const tokenAPI = process.env.IRRISTRAT_TOKEN;
 
 
 export async function GET(request: NextRequest, {params}: {params: Promise<{stationID: string}>} ) {
