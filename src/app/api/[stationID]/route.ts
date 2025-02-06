@@ -1,4 +1,3 @@
-import { promises } from "dns";
 import { NextRequest } from "next/server";
 const tokenAPI = process.env.NEXT_PUBLIC_IRRISTRAT_TOKEN;
 
