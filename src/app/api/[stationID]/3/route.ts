@@ -1,9 +1,16 @@
 import { NextRequest } from "next/server";
 const tokenAPI = process.env.NEXT_PUBLIC_IRRISTRAT_TOKEN;
 
-export async function GET(request: NextRequest, stationID: string ) {
+type RouteParams = {
+  params: {
+    stationID: string
+  }
+}
+
+export async function GET(request: NextRequest, params: RouteParams ) {
   try {
 
+    const{ stationID } = params.params;
     if (!stationID) {
       return new Response(JSON.stringify({ error: "Station ID is required" }), {
         status: 400,
