@@ -1,16 +1,12 @@
+import { promises } from "dns";
 import { NextRequest } from "next/server";
 const tokenAPI = process.env.NEXT_PUBLIC_IRRISTRAT_TOKEN;
 
-type RouteParams = {
-  params: {
-    stationID: string
-  }
-}
 
-export async function GET(request: NextRequest, params: RouteParams ) {
+export async function GET(request: NextRequest, {params}: {params: Promise<{stationID: string}>} ) {
   try {
 
-    const{ stationID } = params.params;
+    const{ stationID } = await params;
     if (!stationID) {
       return new Response(JSON.stringify({ error: "Station ID is required" }), {
         status: 400,
