@@ -37,15 +37,19 @@ export default function HomePage() {
             } else {
               return { station, latestReading: null };
             }
-          } catch (err) {
+          } catch {
             return { station, latestReading: null };
-          }
+          }          
         });
 
         const weatherResults = await Promise.all(weatherPromises);
         setLatestWeather(weatherResults);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred");
+        }
       } finally {
         setLoading(false);
       }

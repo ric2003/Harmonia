@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getStationDailyData, getStationHourlyData, Station,getStations} from "@/services/api";
+import {
+  getStationDailyData,
+  getStationHourlyData,
+  Station,
+  getStations,
+} from "@/services/api";
 import {
   LineChart,
   Line,
@@ -28,6 +33,19 @@ interface HourlyData {
   humidity: number;
 }
 
+// Update the raw data interfaces to have optional properties.
+interface DailyRawData {
+  air_temp_avg?: string | number;
+  air_temp_min?: string | number;
+  air_temp_max?: string | number;
+}
+
+interface HourlyRawData {
+  air_temp_avg?: string | number;
+  wind_speed_avg?: string | number;
+  relative_humidity_avg?: string | number;
+}
+
 export default function StationGraphsPage() {
   const params = useParams() as { stationID: string };
   const stationID = params.stationID;
@@ -38,18 +56,17 @@ export default function StationGraphsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-const today = new Date();
-const toDate = today.toISOString().split("T")[0];
+  const today = new Date();
+  const toDate = today.toISOString().split("T")[0];
 
-const sevenDaysAgo = new Date();
-sevenDaysAgo.setDate(today.getDate() - 7);
-const fromDate = sevenDaysAgo.toISOString().split("T")[0];
-
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(today.getDate() - 7);
+  const fromDate = sevenDaysAgo.toISOString().split("T")[0];
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // dados opcao 1, nome da estação
+        // Get the station name
         const stationsData = await getStations();
         const stationFound: Station | undefined = stationsData.find(
           (station: Station) => station.id === stationID
@@ -59,40 +76,44 @@ const fromDate = sevenDaysAgo.toISOString().split("T")[0];
         } else {
           setStationName("Desconhecida");
         }
-        // dados opcao 2, diario
-        
+
+        // Fetch daily data and transform it
         const dailyRaw = await getStationDailyData(stationID, fromDate, toDate);
         const dailyTransformed: DailyTemperatureData[] = Object.entries(dailyRaw).map(
-          ([date, data]: [string, any]) => ({
+          ([date, data]: [string, DailyRawData]) => ({
             date,
-            avg: Number(data.air_temp_avg) || 0,
-            min: Number(data.air_temp_min) || 0,
-            max: Number(data.air_temp_max) || 0,
+            avg: Number(data.air_temp_avg ?? 0),
+            min: Number(data.air_temp_min ?? 0),
+            max: Number(data.air_temp_max ?? 0),
           })
         );
 
-        // dados opcao 3, horario
+        // Fetch hourly data and transform it
         const hourlyRaw = await getStationHourlyData(stationID);
         const hourlyTransformed: HourlyData[] = Object.entries(hourlyRaw).map(
-          ([timestamp, data]: [string, any]) => ({
+          ([timestamp, data]: [string, HourlyRawData]) => ({
             timestamp,
-            temp: Number(data.air_temp_avg) || 0,
-            windSpeed: Number(data.wind_speed_avg) || 0,
-            humidity: Number(data.relative_humidity_avg) || 0,
+            temp: Number(data.air_temp_avg ?? 0),
+            windSpeed: Number(data.wind_speed_avg ?? 0),
+            humidity: Number(data.relative_humidity_avg ?? 0),
           })
         );
 
         setDailyData(dailyTransformed);
         setHourlyData(hourlyTransformed);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred");
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchData();
-  }, [stationID]);
+  }, [stationID, fromDate, toDate]);
 
   if (loading) {
     return <div className="p-6 text-darkGray">A carregar dados gráficos...</div>;
@@ -108,7 +129,7 @@ const fromDate = sevenDaysAgo.toISOString().split("T")[0];
 
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-4">Tendência Diária da Temperatura</h2>
-        <ResponsiveContainer width="100%" height={300} className={"bg-background"}>
+        <ResponsiveContainer width="100%" height={300} className="bg-background">
           <LineChart data={dailyData}>
             <XAxis dataKey="date" />
             <YAxis />
@@ -125,7 +146,13 @@ const fromDate = sevenDaysAgo.toISOString().split("T")[0];
         <h2 className="text-2xl font-bold mb-4">Variação Horária da Temperatura</h2>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={hourlyData}>
-            <XAxis dataKey="timestamp" tickFormatter={(value) => value.slice(11, 13) + "h (" + value.slice(0, 10) + ")" } tick={{ fontSize: 10 }} />
+            <XAxis
+              dataKey="timestamp"
+              tickFormatter={(value) =>
+                value.slice(11, 13) + "h (" + value.slice(0, 10) + ")"
+              }
+              tick={{ fontSize: 10 }}
+            />
             <YAxis />
             <Tooltip content={<CustomTooltip />} />
             <Line type="monotone" dataKey="temp" stroke="#8884d8" name="Temperatura" />
@@ -137,10 +164,21 @@ const fromDate = sevenDaysAgo.toISOString().split("T")[0];
         <h2 className="text-2xl font-bold mb-4">Variação Horária da Velocidade do Vento</h2>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={hourlyData}>
-            <XAxis dataKey="timestamp" tickFormatter={(value) => value.slice(11, 13) + "h (" + value.slice(0, 10) + ")" } tick={{ fontSize: 10 }} />
+            <XAxis
+              dataKey="timestamp"
+              tickFormatter={(value) =>
+                value.slice(11, 13) + "h (" + value.slice(0, 10) + ")"
+              }
+              tick={{ fontSize: 10 }}
+            />
             <YAxis />
             <Tooltip content={<CustomTooltip />} />
-            <Line type="monotone" dataKey="windSpeed" stroke="#82ca9d" name="Velocidade do Vento" />
+            <Line
+              type="monotone"
+              dataKey="windSpeed"
+              stroke="#82ca9d"
+              name="Velocidade do Vento"
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -149,9 +187,15 @@ const fromDate = sevenDaysAgo.toISOString().split("T")[0];
         <h2 className="text-2xl font-bold mb-4">Variação Horária da Humidade</h2>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={hourlyData}>
-            <XAxis dataKey="timestamp" tickFormatter={(value) => value.slice(11, 13) + "h (" + value.slice(0, 10) + ")" } tick={{ fontSize: 10 }} />
+            <XAxis
+              dataKey="timestamp"
+              tickFormatter={(value) =>
+                value.slice(11, 13) + "h (" + value.slice(0, 10) + ")"
+              }
+              tick={{ fontSize: 10 }}
+            />
             <YAxis />
-            <Tooltip content={<CustomTooltip /> } />
+            <Tooltip content={<CustomTooltip />} />
             <Line type="monotone" dataKey="humidity" stroke="#ff7300" name="Humidade" />
           </LineChart>
         </ResponsiveContainer>

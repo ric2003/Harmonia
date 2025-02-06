@@ -1,6 +1,6 @@
 "use client"
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
-import { Menu, X } from "lucide-react";
+import { Menu} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useContext } from "react";
 

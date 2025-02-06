@@ -85,7 +85,7 @@ export type Station10MinData = Record<string, Station10MinRecord>;
  * @param params - The parameters to send with the request.
  * @returns The parsed JSON response.
  */
-async function postRequest(params: Record<string, string>): Promise<any> {
+async function postRequest<T>(params: Record<string, string>): Promise<T> {
   const response = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -94,8 +94,10 @@ async function postRequest(params: Record<string, string>): Promise<any> {
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`);
   }
-  return response.json();
+  // Tell TypeScript that we expect the JSON to match type T.
+  return response.json() as Promise<T>;
 }
+
 
 // ----------------------------------------------------------------
 // API Functions
@@ -106,13 +108,14 @@ async function postRequest(params: Record<string, string>): Promise<any> {
  * @returns An array of Station objects.
  */
 export async function getStations(): Promise<Station[]> {
-  const data = await postRequest({
+  // Assuming the API returns an object where each value is a Station
+  const data = await postRequest<Record<string, Station>>({
     token,
     option: "1",
   });
-  // Convert the returned object to an array (if necessary)
   return Object.values(data) as Station[];
 }
+
 
 /**
  * Fetches daily meteorological data for a station (option 2).
@@ -139,7 +142,7 @@ export async function getStationDailyData(
     params.to_date = toDate;
   }
 
-  return postRequest(params);
+  return postRequest<StationData>(params);
 }
 
 /**
@@ -151,7 +154,7 @@ export async function getStationDailyData(
 export async function getStationHourlyData(
   stationID: string
 ): Promise<StationHourlyData> {
-  return postRequest({
+  return postRequest<StationHourlyData>({
     token,
     option: "3",
     id: stationID,
@@ -167,7 +170,7 @@ export async function getStationHourlyData(
 export async function getStation10MinData(
   stationID: string
 ): Promise<Station10MinData> {
-  return postRequest({
+  return postRequest<Station10MinData>({
     token,
     option: "4",
     id: stationID,

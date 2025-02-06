@@ -10,10 +10,46 @@ import {
   Station,
 } from "@/services/api";
 
+// Define interfaces for the API response data
+
+// Daily data: a record with date keys and daily measurements
+interface DailyDataRow {
+  air_temp_avg?: string;
+  air_temp_min?: string;
+  air_temp_max?: string;
+  relative_humidity_avg?: string;
+  wind_speed_avg?: string;
+  solar_radiation_avg?: string;
+}
+
+// Hourly data: a record with timestamp keys and hourly measurements (including separate date and hour)
+interface HourlyDataRow {
+  date: string;
+  hour: string;
+  air_temp_avg: string;
+  air_temp_min: string;
+  air_temp_max: string;
+  relative_humidity_avg: string;
+  wind_speed_avg: string;
+  solar_radiation_avg: string;
+}
+
+// 10‑minute data: a record with timestamp keys and measurements
+interface Min10DataRow {
+  date: string;
+  hour: string;
+  air_temp_avg: string;
+  p_em: string;
+  relative_humidity_avg: string;
+  wind_speed_avg: string;
+  solar_radiation_avg: string;
+  leaf_wetness: string;
+}
+
 export default function StationDetailsPage() {
   const params = useParams() as { stationID: string };
 
-  function formatDate(date: Date) {
+  function formatDate(date: Date): string {
     return date.toISOString().split("T")[0];
   }
 
@@ -28,10 +64,10 @@ export default function StationDetailsPage() {
   const [toDate, setToDate] = useState(defaultToDate);
 
   const [stationName, setStationName] = useState<string>("");
-  const [stationData, setStationData] = useState<any>({});
-  const [hourlyData, setHourlyData] = useState<any>({});
-  const [min10Data, setMin10Data] = useState<any>({});
-  const [loading, setLoading] = useState(false);
+  const [stationData, setStationData] = useState<Record<string, DailyDataRow>>({});
+  const [hourlyData, setHourlyData] = useState<Record<string, HourlyDataRow>>({});
+  const [min10Data, setMin10Data] = useState<Record<string, Min10DataRow>>({});
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   async function fetchStationData() {
@@ -56,8 +92,12 @@ export default function StationDetailsPage() {
 
       const min10 = await getStation10MinData(stationID);
       setMin10Data(min10);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -82,7 +122,7 @@ export default function StationDetailsPage() {
           Dados Horários(Últimos 7 Dias)
         </a>
         <a href="#min10-data" className="text-blue-600 underline">
-        Dados a Cada 10 Minutos(Últimas 24 Horas)
+          Dados a Cada 10 Minutos(Últimas 24 Horas)
         </a>
       </div>
 
@@ -135,14 +175,7 @@ export default function StationDetailsPage() {
             </thead>
             <tbody>
               {Object.entries(stationData).map(([date, data], index) => {
-                const row = data as {
-                  air_temp_avg?: string;
-                  air_temp_min?: string;
-                  air_temp_max?: string;
-                  relative_humidity_avg?: string;
-                  wind_speed_avg?: string;
-                  solar_radiation_avg?: string;
-                };
+                const row: DailyDataRow = data;
                 return (
                   <tr key={index} className="border-b">
                     <td className="p-3">{date}</td>
@@ -187,16 +220,7 @@ export default function StationDetailsPage() {
             </thead>
             <tbody>
               {Object.entries(hourlyData).map(([timestamp, data], index) => {
-                const row = data as {
-                  date: string;
-                  hour: string;
-                  air_temp_avg: string;
-                  air_temp_min: string;
-                  air_temp_max: string;
-                  relative_humidity_avg: string;
-                  wind_speed_avg: string;
-                  solar_radiation_avg: string;
-                };
+                const row: HourlyDataRow = data;
                 return (
                   <tr key={index} className="border-b">
                     <td className="p-3">{timestamp}</td>
@@ -243,16 +267,7 @@ export default function StationDetailsPage() {
             </thead>
             <tbody>
               {Object.entries(min10Data).map(([timestamp, data], index) => {
-                const row = data as {
-                  date: string;
-                  hour: string;
-                  air_temp_avg: string;
-                  p_em: string;
-                  relative_humidity_avg: string;
-                  wind_speed_avg: string;
-                  solar_radiation_avg: string;
-                  leaf_wetness: string;
-                };
+                const row: Min10DataRow = data;
                 return (
                   <tr key={index} className="border-b">
                     <td className="p-3">{timestamp}</td>

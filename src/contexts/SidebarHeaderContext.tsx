@@ -2,7 +2,7 @@
 import { createContext, useState } from "react";
 
 interface SidebarHeaderContextType {
-    sidebarOpen: Boolean;
+    sidebarOpen: boolean;
     handleChangeSidebar: () => void;
 }
 
@@ -13,7 +13,7 @@ interface SidebarHeaderProviderProps {
 }
 
 export function SidebarHeaderProvider({ children }: SidebarHeaderProviderProps) {
-    const [sidebarOpen, setSidebarOpen] = useState<Boolean>(true);
+    const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
 
     function handleChangeSidebar() {
         setSidebarOpen(state => !state);

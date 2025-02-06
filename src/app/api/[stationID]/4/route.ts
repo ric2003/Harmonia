@@ -47,10 +47,17 @@ export async function GET(request: NextRequest, { params }: { params: { stationI
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    } else {
+      return new Response(JSON.stringify({ error: "Unknown error occurred" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
   }
 }

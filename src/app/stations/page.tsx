@@ -14,12 +14,17 @@ export default function StationsPage() {
     try {
       const stationsData = await getStations();
       setStations(stationsData);
-    } catch (err: any) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Unknown error");
+      }
     } finally {
       setLoading(false);
     }
   }
+  
 
   useEffect(() => {
     fetchStations();

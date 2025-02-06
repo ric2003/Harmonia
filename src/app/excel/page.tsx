@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import * as XLSX from "xlsx";
-import { FixedSizeList as List } from "react-window";//sudo npm install --save-dev @types/react-window
+import { FixedSizeList as List } from "react-window";
 
 interface ExcelData {
   [key: string]: string | number | null;
@@ -38,16 +38,13 @@ export default function ExcelUploader() {
       });
 
       setData(parsedData);
-    } catch (err) {
+    } catch {
       setError("Failed to parse the Excel file.");
-    }
+    }    
   };
 
   // If there’s data, extract column headers from the first row.
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
-
-  // Build a grid template string with one equal-width column per header.
-  const gridTemplateColumns = columns.map(() => "1fr").join(" ");
 
   // The row renderer for react-window.
   const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {

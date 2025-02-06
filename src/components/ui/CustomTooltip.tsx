@@ -1,8 +1,14 @@
 import React from "react";
 
+interface PayloadItem {
+  name: string;
+  value: string | number;
+  color: string;
+}
+
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: any[];
+  payload?: PayloadItem[];
   label?: string;
 }
 
