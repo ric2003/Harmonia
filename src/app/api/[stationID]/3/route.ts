@@ -1,12 +1,8 @@
 import { NextRequest } from "next/server";
 const tokenAPI = process.env.NEXT_PUBLIC_IRRISTRAT_TOKEN;
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { stationID: string } }
-) {
+export async function GET(request: NextRequest, stationID: string ) {
   try {
-    const stationID = params.stationID; // ✅ Extract station ID from URL parameters
 
     if (!stationID) {
       return new Response(JSON.stringify({ error: "Station ID is required" }), {
@@ -15,19 +11,19 @@ export async function GET(
       });
     }
 
-    // Create form data string instead of JSON
+    // ✅ Create form data string instead of JSON
     const formData = new URLSearchParams();
     formData.append("token", tokenAPI || "");
     formData.append("option", "3");
     formData.append("id", stationID);
 
-    // Make API request with URL-encoded body
+    // ✅ Make API request with URL-encoded body
     const response = await fetch("https://irristrat.com/ws/clients/meteoStations.php", {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/x-www-form-urlencoded", // ✅ Correct content type
       },
-      body: formData.toString(),
+      body: formData.toString(), // ✅ Send as form data string
     });
 
     if (!response.ok) {
@@ -35,9 +31,9 @@ export async function GET(
     }
 
     const data = await response.json();
-    console.log("API Response:", data);
+    console.log("API Response:", data); // ✅ Debugging log
 
-    // Extract correct station data
+    // ✅ Extract correct station data
     const stationData = data[stationID] || data;
     if (!stationData) {
       return new Response(JSON.stringify({ error: "No data found for this station ID" }), {
