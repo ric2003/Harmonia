@@ -1,7 +1,11 @@
 import { NextRequest } from "next/server";
 const tokenAPI = process.env.NEXT_PUBLIC_IRRISTRAT_TOKEN;
 
-export async function GET(request: NextRequest, { params }: { params: { stationID: string } }) {
+interface RouteParams {
+  params: { stationID: string };
+}
+
+export async function GET(request: NextRequest, { params }: RouteParams ) {
   try {
     const stationID = params.stationID; // ✅ Extract station ID from URL parameters
 
