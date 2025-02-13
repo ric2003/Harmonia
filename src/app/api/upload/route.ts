@@ -4,6 +4,18 @@ import { read, utils } from 'xlsx';
 
 export const runtime = 'nodejs';
 
+interface RowType {
+    nome: string;
+    fonte: string;
+    bacia: string;
+    drap: string;
+    data_medicao: string;
+    cota_lida_m: number;
+    volume_total_hm3: number;
+    enchimento_pct: number;
+    volume_util_hm3: number;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const data = await request.formData();
@@ -24,7 +36,7 @@ export async function POST(request: NextRequest) {
     await client.sql`BEGIN`;
 
     for (const row of rows) {
-      const { nome, fonte, bacia, drap, data_medicao, cota_lida_m, volume_total_hm3, enchimento_pct, volume_util_hm3 } = row as any;
+      const { nome, fonte, bacia, drap, data_medicao, cota_lida_m, volume_total_hm3, enchimento_pct, volume_util_hm3 } = row as RowType;
 
       // Inserir Barragem
       const result = await client.sql`
