@@ -23,6 +23,25 @@ export default function ExcelUploader() {
       return;
     }
 
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert('Ficheiro carregado e dados inseridos com sucesso!');
+      } else {
+        alert(`Erro: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Erro no upload:', error);
+    }
+
     try {
       // Read file as ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
