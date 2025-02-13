@@ -27,7 +27,7 @@ export default function ExcelUploader() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('/api/upload', {
+      const response = await fetch('../api/upload', {
         method: 'POST',
         body: formData,
       });
