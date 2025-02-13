@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { FixedSizeList as List } from "react-window";
 
@@ -23,25 +23,6 @@ export default function ExcelUploader() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('../api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        alert('Ficheiro carregado e dados inseridos com sucesso!');
-      } else {
-        alert(`Erro: ${result.error}`);
-      }
-    } catch (error) {
-      console.error('Erro no upload:', error);
-    }
-
     try {
       // Read file as ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
@@ -59,8 +40,31 @@ export default function ExcelUploader() {
       setData(parsedData);
     } catch {
       setError("Failed to parse the Excel file.");
-    }    
+    }
   };
+
+  async function handleDataUpload() {
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+
+      const postResponse = await response.json();
+      console.log(postResponse);
+
+    } catch (error) {
+      console.error('Erro no upload:', error);
+    }
+  }
+
+  useEffect(() => {
+    if(data.length === 0) {
+      return;
+    }
+
+    handleDataUpload();
+  }, [data]);
 
   // If there’s data, extract column headers from the first row.
   const columns = data.length > 0 ? Object.keys(data[0]) : [];
