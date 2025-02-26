@@ -1,49 +1,42 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  getStations,
-  getStation10MinData,
-  Station,
-  Station10MinRecord,
-} from "@/services/api";
+import { getStations, Station } from "@/services/api";
+import Link from "next/link";
+import { MapPin } from "lucide-react";
+import dynamic from "next/dynamic";
 
-interface LatestStationWeather {
-  station: Station;
-  latestReading: Station10MinRecord | null;
+// Definição do tipo para as props do MapComponent
+interface MapComponentProps {
+  stations: Station[];
+  selectedStationId: string | null;
+  onMarkerHover: (stationId: string | null) => void;
 }
 
+// Importação dinâmica do componente de mapa para evitar problemas de SSR
+const MapComponent = dynamic<MapComponentProps>(
+  () => import("@/components/MapComponent"), // Ajuste o caminho conforme a estrutura do seu projeto
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-96 bg-gray-100 flex items-center justify-center">
+        <p>A carregar mapa...</p>
+      </div>
+    ),
+  }
+);
+
 export default function HomePage() {
-  const [latestWeather, setLatestWeather] = useState<LatestStationWeather[]>(
-    []
-  );
+  const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedStation, setSelectedStation] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchWeatherForStations() {
+    async function fetchStations() {
       try {
-        const stations = await getStations();
-        //opção 4 para ir buscar info mais recent
-        const weatherPromises = stations.map(async (station) => {
-          try {
-            const data = await getStation10MinData(station.id);
-            const timestamps = Object.keys(data);
-            if (timestamps.length > 0) {
-              // ordenar a datas pela mais recent
-              const latestTimestamp = timestamps.sort().reverse()[0];
-              const latestReading = data[latestTimestamp] as Station10MinRecord;
-              return { station, latestReading };
-            } else {
-              return { station, latestReading: null };
-            }
-          } catch {
-            return { station, latestReading: null };
-          }          
-        });
-
-        const weatherResults = await Promise.all(weatherPromises);
-        setLatestWeather(weatherResults);
+        const stationsData = await getStations();
+        setStations(stationsData);
       } catch (err: unknown) {
         if (err instanceof Error) {
           setError(err.message);
@@ -55,13 +48,13 @@ export default function HomePage() {
       }
     }
 
-    fetchWeatherForStations();
+    fetchStations();
   }, []);
 
   if (loading) {
     return (
       <div className="p-6 text-darkGray">
-        <p>Loading latest weather...</p>
+        <p>A carregar barragens...</p>
       </div>
     );
   }
@@ -69,60 +62,58 @@ export default function HomePage() {
   if (error) {
     return (
       <div className="p-6">
-        <p className="text-red-600">Error: {error}</p>
+        <p className="text-red-600">Erro: {error}</p>
       </div>
     );
   }
 
   return (
-<div className="p-6 pt-0">
-      <h1 className="text-3xl font-bold mb-6 text-primary">Meteorologia Atual</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {latestWeather.map(({ station, latestReading }) => (
-          <div
-            key={station.id}
-            className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-xl shadow-lg text-white flex items-center"
-          >
-            {/* Icon Section */}
-            <div className="mr-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 3v1m0 16v1m8-9h1M4 12H3m15.364-6.364l.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 110 14 7 7 0 010-14z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">{station.estacao.slice(7)}</h2>
-              {latestReading ? (
-                <div className="mt-2">
-                  <p className="text-lg">
-                    <span className="font-semibold">Temp:</span>{" "}
-                    {latestReading.air_temp_avg}°C
-                  </p>
-                  <p className="text-lg">
-                    <span className="font-semibold">Wind:</span>{" "}
-                    {latestReading.wind_speed_avg} km/h
-                  </p>
-                  <p className="text-lg">
-                    <span className="font-semibold">Humidity:</span>{" "}
-                    {latestReading.relative_humidity_avg}%
-                  </p>
-                </div>
-              ) : (
-                <p className="mt-2">No recent data.</p>
-              )}
+    <div className="p-6 pt-0">
+      <h1 className="text-3xl font-bold mb-6 text-primary">Barragens de Portugal</h1>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Lista de Barragens */}
+        <div className="lg:col-span-1">
+          <div className="bg-backgroundColor p-4 rounded-xl shadow-md">
+            <h2 className="text-xl font-bold mb-4 text-primary ">Lista de Barragens</h2>
+            <div className="space-y-2 max-h-96 overflow-y-auto text-darkGray">
+              {stations.map((station) => (
+                <Link 
+                  href={`/station/${station.id}`} 
+                  key={station.id}
+                  className="block"
+                >
+                  <div 
+                    className={`p-3 rounded-lg flex items-center ${
+                      selectedStation === station.id 
+                        ? "bg-blue50 border-l-4 border-blue-500" 
+                        : "bg-gray50 hover:bg-blue50"
+                    }`}
+                    onMouseEnter={() => setSelectedStation(station.id)}
+                    onMouseLeave={() => setSelectedStation(null)}
+                  >
+                    <MapPin className="h-5 w-5 text-blue-500 mr-2" />
+                    <span>{station.estacao.slice(7)}</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
-        ))}
+        </div>
+        
+        {/* Mapa com Mapbox */}
+        <div className="lg:col-span-2">
+          <div className="bg-backgroundColor p-4 rounded-xl shadow-md h-full">
+            <h2 className="text-xl font-bold mb-4 text-primary">Mapa de Barragens</h2>
+            <div className="rounded-lg h-96 overflow-hidden">
+              <MapComponent 
+                stations={stations} 
+                selectedStationId={selectedStation}
+                onMarkerHover={setSelectedStation}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

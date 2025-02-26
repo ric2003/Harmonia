@@ -11,6 +11,9 @@
   --gray-700: #2B3435;
   --grey-600: #4B5563;
   --toggleBackground:#D9D9D9; 
+  --backgroundColor: #FFFFFF;
+  --gray-50: #F9FAFB;
+  --blue-50: #E3F2FD;
 }
 
 .dark {
@@ -22,6 +25,9 @@
   --gray-700: #F0F0F0;
   --grey-600: #999999;
   --toggleBackground:#333333;
+  --backgroundColor: #333333;
+  --gray-50: #4b4a4a;
+  --blue-50: #0d4269;
 }
 
 body {

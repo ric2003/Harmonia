@@ -1,56 +1,31 @@
-/*import { InfluxDB, Point } from '@influxdata/influxdb-client';
+import { InfluxDB, Point } from '@influxdata/influxdb-client';
 
 // InfluxDB Configurations
 const url = 'http://localhost:8086';
 const token = '532MipF2euYi2dYfkv3DAd49GajiA5Ifenr2Jog-FGV43mdF4lVLQa7E6Y8QPNeozyPY_x1KFazjcMwiLQ7riA=='; 
 const org = 'water-wise';
-const bucket = 'test-bucket'; 
+const bucket = 'test-bucket0'; 
 
 // Create an InfluxDB client
 const client = new InfluxDB({ url, token });
-const writeApi = client.getWriteApi(org, bucket, 'ns');
+const writeApi = client.getWriteApi(org, bucket);
 const queryApi = client.getQueryApi(org);
 
 // Function to Write Data
 async function writeData() {
     const point = new Point('test_measurement')
-        .tag('location', 'test-site')
-        .floatField('temperature', 25.3);
+      .tag('device_id', 'sensor_001') // Tag: device_id
+      .floatField('temperature', 25.3) // Float field
+      .intField('battery_level', 85) // Integer field
+      .stringField('status', 'online') // String field
+      .timestamp(Date.now()); // Optional: Set timestamp in nanoseconds
 
     writeApi.writePoint(point);
     await writeApi.close();
     console.log('Data successfully written to InfluxDB.');
 }
 
-// Function to Read Data
-async function readData() {
-    const fluxQuery = `
-        from(bucket: "test-bucket")
-        |> range(start: -1h)
-        |> filter(fn: (r) => r._measurement == "test_measurement")
-    `;
-
-    console.log('Querying data...');
-    queryApi.queryRows(fluxQuery, {
-        next(row, tableMeta) {
-            const obj = tableMeta.toObject(row);
-            console.log(`Temperature at ${obj._time}: ${obj._value}°C`);
-        },
-        error(error) {
-            console.error('Query failed:', error);
-        },
-        complete() {
-            console.log('Query completed.');
-        }
-    });
-}
-
-// Run the functions
-(async () => {
-    await writeData();
-    setTimeout(readData, 2000);
-})();*/
-
+/*
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
 
 // InfluxDB Configurations
@@ -162,7 +137,7 @@ async function readData() {
     await writeData(); // Write test data
     setTimeout(readData, 2000); // Wait 2 seconds before querying
 })();
-*/
+
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { NextResponse } from 'next/server';
@@ -191,6 +166,7 @@ writeApi.close().then(() => {
 });*/
   
   // Helper function to convert numeric values (replace commas with dots if necessary)
+  /*
   const parseNumber = (value: any): number | null => {
     if (typeof value === "string") {
       const parsedValue = parseFloat(value.replace(",", "."));
@@ -279,4 +255,4 @@ export async function GET(request: Request) {
         { status: 500 }
       );
     }
-  }
+  }*/

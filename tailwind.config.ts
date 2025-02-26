@@ -18,6 +18,10 @@ export default {
   			darkGray: 'var(--gray-700)',
 			greySubText: 'var(--grey-600)',
 			toggleBackground: 'var(--toggleBackground)',
+			backgroundColor: 'var(--backgroundColor)',
+			gray50: 'var(--gray-50)',
+			blue50: 'var(--blue-50)',
+
   		},
   	}
   },
