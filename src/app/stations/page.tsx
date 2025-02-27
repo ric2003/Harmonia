@@ -3,23 +3,8 @@ import Link from "next/link";
 import Image, { ImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { getStations, Station } from "@/services/api";
+import StationImage from "@/components/StationImage";
 
-// Componente customizado para tratar fallback de imagem
-interface StationImageProps extends ImageProps {
-  fallbackSrc?: string;
-}
-
-function StationImage({ fallbackSrc = "/images/default.png", ...props }: StationImageProps) {
-  const [src, setSrc] = useState(props.src);
-
-  return (
-    <Image
-      {...props}
-      src={src as string} // assegurando que seja string
-      onError={() => setSrc(fallbackSrc)}
-    />
-  );
-}
 
 export default function StationsPage() {
   const [stations, setStations] = useState<Station[]>([]);
@@ -59,9 +44,8 @@ export default function StationsPage() {
             // Monta a URL da imagem usando o ID (ou outro atributo) da estação
             const imageUrl = `/images/${station.id}.png`;
             return (
-              <Link href={`/stations/${station.id}`}>
+              <Link href={`/stations/${station.id}`} key={station.id}>
                 <li
-                  key={station.id}
                   className="p-4 border rounded-lg shadow h-full w-full cursor-pointer"
                 >
                   <div
@@ -69,10 +53,10 @@ export default function StationsPage() {
                   >
                     <StationImage
                       src={imageUrl}
-                      alt={`Miniatura da ${station.estacao}`}
-                      width={200}
-                      height={150}
+                      width={600}
+                      height={400}
                       className="rounded w-full aspect-video"
+                      alt={`${station.estacao} thumbnail`}
                       fallbackSrc="/images/default.png"
                     />
                   </div>
