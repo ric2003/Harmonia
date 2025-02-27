@@ -79,7 +79,7 @@ export default function HomePage() {
             <div className="space-y-2 max-h-96 overflow-y-auto text-darkGray">
               {stations.map((station) => (
                 <Link 
-                  href={`/station/${station.id}`} 
+                  href={`/stations/${station.id}`} 
                   key={station.id}
                   className="block"
                 >

@@ -1,7 +1,25 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import Image, { ImageProps } from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { getStations, Station } from "@/services/api";
+
+// Componente customizado para tratar fallback de imagem
+interface StationImageProps extends ImageProps {
+  fallbackSrc?: string;
+}
+
+function StationImage({ fallbackSrc = "/images/default.png", ...props }: StationImageProps) {
+  const [src, setSrc] = useState(props.src);
+
+  return (
+    <Image
+      {...props}
+      src={src as string} // assegurando que seja string
+      onError={() => setSrc(fallbackSrc)}
+    />
+  );
+}
 
 export default function StationsPage() {
   const [stations, setStations] = useState<Station[]>([]);
@@ -24,7 +42,6 @@ export default function StationsPage() {
       setLoading(false);
     }
   }
-  
 
   useEffect(() => {
     fetchStations();
@@ -38,24 +55,36 @@ export default function StationsPage() {
         <p className="text-red-600">{error}</p>
       ) : (
         <ul className="grid grid-cols-3 gap-4">
-          {stations.map((station) => (
-            <li
-              key={station.id}
-              className="p-4 border rounded-lg shadow h-full w-full"
-            >
-              <h2 className="text-xl font-semibold">{station.estacao}</h2>
-              <p className="text-greySubText">{station.loc}</p>
-              <p className="text-sm">
-                Lat: {station.lat}, Lon: {station.lon}
-              </p>
-              <Link href={`/stations/${station.id}`} className="text-blue-600 underline">
-                View Details
+          {stations.map((station) => {
+            // Monta a URL da imagem usando o ID (ou outro atributo) da estação
+            const imageUrl = `/images/${station.id}.png`;
+            return (
+              <Link href={`/stations/${station.id}`}>
+                <li
+                  key={station.id}
+                  className="p-4 border rounded-lg shadow h-full w-full cursor-pointer"
+                >
+                  <div
+                    className="mb-4 w-full flex justify-center"
+                  >
+                    <StationImage
+                      src={imageUrl}
+                      alt={`Miniatura da ${station.estacao}`}
+                      width={200}
+                      height={150}
+                      className="rounded w-full aspect-video"
+                      fallbackSrc="/images/default.png"
+                    />
+                  </div>
+                  <h2 className="text-xl font-semibold">{station.estacao}</h2>
+                  <p className="text-greySubText">{station.loc}</p>
+                  <p className="text-sm">
+                    Lat: {station.lat}, Lon: {station.lon}
+                  </p>
+                </li>
               </Link>
-              <Link href={`/stations/${station.id}/graphs`} className="text-blue-600 underline m-4">
-                Ver Gráficos
-              </Link>
-            </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </div>

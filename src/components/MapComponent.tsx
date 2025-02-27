@@ -107,7 +107,7 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
 
   if (loading) {
     return (
-      <div className="w-full h-96 bg-gray-100 flex items-center justify-center">
+      <div className="w-full h-96 bg-gray-100 flex items-center justify-center text-black">
         <p>Loading stations...</p>
       </div>
     );
