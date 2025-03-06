@@ -10,7 +10,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoicmljMjAwMzUiLCJhIjoiY203a3dkZWc0MDRuaTJtcXR4a
 
 interface MapComponentProps {
   selectedStationId: string | null;
-  onMarkerHover: (stationId: string | null) => void;
+  onMarkerHover: ((stationId: string | null) => void) | null;
 }
 
 const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) => {
@@ -87,8 +87,8 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
 
       // Add hover interactions
       const element = marker.getElement();
-      element.addEventListener('mouseenter', () => onMarkerHover(station.id));
-      element.addEventListener('mouseleave', () => onMarkerHover(null));
+      element.addEventListener('mouseenter', () => onMarkerHover && onMarkerHover(station.id));
+      element.addEventListener('mouseleave', () => onMarkerHover && onMarkerHover(null));
 
       markers.current.push(marker);
     });

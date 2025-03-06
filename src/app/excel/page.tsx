@@ -64,7 +64,7 @@ export default function ExcelUploader() {
     }
 
     handleDataUpload();
-  }, [data]);
+  }, [data, handleDataUpload]);
 
   // If there’s data, extract column headers from the first row.
   const columns = data.length > 0 ? Object.keys(data[0]) : [];

@@ -8,12 +8,11 @@ const url = 'http://localhost:8086';
 const token = '532MipF2euYi2dYfkv3DAd49GajiA5Ifenr2Jog-FGV43mdF4lVLQa7E6Y8QPNeozyPY_x1KFazjcMwiLQ7riA==';
 const org = 'water-wise';
 const bucket = 'dados-barragens';
-var counter = 0;
+let counter = 0;
 
 // Create InfluxDB client and write API
 const client = new InfluxDB({ url, token});
 const writeApi = client.getWriteApi(org, bucket, 'ns');
-const queryApi = client.getQueryApi(org);
 
 // Function to get the Excel file URL
 function getExcelFileUrl(): string {
@@ -39,7 +38,7 @@ interface ProcessedData {
   volumeUtil: number;
 }
 
-export async function GET(request: Request): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   try {
     const fileUrl = getExcelFileUrl();
     console.log('Downloading Excel from:', fileUrl);
@@ -60,7 +59,6 @@ export async function GET(request: Request): Promise<NextResponse> {
     const sheetData = XLSX.utils.sheet_to_json<RowType>(workbook.Sheets[sheetName], { defval: "" });
 
     // Process each row to create and write points to InfluxDB
-    const processedKeys = new Set();
     const rowData: ProcessedData[] = [];
     for (const row of sheetData) {
       counter++;

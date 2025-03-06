@@ -57,7 +57,7 @@ interface Min10DataRow {
 interface MapComponentProps {
   stations: Station[];
   selectedStationId: string | null;
-  onMarkerHover: (stationId: string | null) => void;
+  onMarkerHover: ((stationId: string | null) => void) | null;
 }
 
 interface DailyTemperatureData {
@@ -105,14 +105,12 @@ export default function StationDetailsPage() {
   const [activeTab, setActiveTab] = useState("daily");
 
   const [stations, setStations] = useState<Station[]>([]);
-  const [station, setStation] = useState<Station | null>(null);
   const [stationName, setStationName] = useState<string>("");
   const [stationData, setStationData] = useState<Record<string, DailyDataRow>>({});
   const [hourlyData, setHourlyData] = useState<Record<string, HourlyDataRow>>({});
   const [min10Data, setMin10Data] = useState<Record<string, Min10DataRow>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [hoveredStationId, setHoveredStationId] = useState<string | null>(null);
   const [dailyData, setDailyData] = useState<DailyTemperatureData[]>([]);
 
   async function fetchStationData() {
@@ -127,7 +125,6 @@ export default function StationDetailsPage() {
       );
       
       if (stationFound) {
-        setStation(stationFound);
         setStationName(stationFound.estacao.slice(7));
       } else {
         setStationName("Desconhecida");
@@ -165,11 +162,7 @@ export default function StationDetailsPage() {
     if (stationID) {
       fetchStationData();
     }
-  }, [stationID]);
-
-  const handleMarkerHover = (stationId: string | null) => {
-    setHoveredStationId(stationId);
-  };
+  }, [stationID, fetchStationData]);
 
   const imageUrl = `/images/${stationID}.png`;
 
@@ -220,7 +213,7 @@ export default function StationDetailsPage() {
                   <MapComponent
                     stations={stations}
                     selectedStationId={stationID}
-                    onMarkerHover={handleMarkerHover}
+                    onMarkerHover={null}
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-100 flex items-center justify-center">
