@@ -2,16 +2,16 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
 import { NextResponse } from 'next/server';
-import { parseISO, isValid } from 'date-fns';
 
 // InfluxDB configurations
 const url = 'http://localhost:8086';
 const token = '532MipF2euYi2dYfkv3DAd49GajiA5Ifenr2Jog-FGV43mdF4lVLQa7E6Y8QPNeozyPY_x1KFazjcMwiLQ7riA==';
 const org = 'water-wise';
-const bucket = 'dados-barragens2';
+const bucket = 'dados-barragens';
+var counter = 0;
 
 // Create InfluxDB client and write API
-const client = new InfluxDB({ url, token });
+const client = new InfluxDB({ url, token});
 const writeApi = client.getWriteApi(org, bucket, 'ns');
 const queryApi = client.getQueryApi(org);
 
@@ -60,17 +60,20 @@ export async function GET(request: Request): Promise<NextResponse> {
     const sheetData = XLSX.utils.sheet_to_json<RowType>(workbook.Sheets[sheetName], { defval: "" });
 
     // Process each row to create and write points to InfluxDB
+    const processedKeys = new Set();
     const rowData: ProcessedData[] = [];
     for (const row of sheetData) {
-      const cotaLida = Number(row['Cota_Lida_m']) || null;
-      const volumeTotal = Number(row['Volume_Total_hm3']) || null;
-      const enchimento = Number(row['Enchimento_%']) || null;
-      const volumeUtil = Number(row['Volume_Util__hm3']) || null;
+      counter++;
+      const cotaLida = isNaN(Number(row['Cota_Lida_m'])) ? null : Number(row['Cota_Lida_m']);
+      const volumeTotal = isNaN(Number(row['Volume_Total_hm3'])) ? null : Number(row['Volume_Total_hm3']);
+      const enchimento = isNaN(Number(row['Enchimento_%'])) ? null : Number(row['Enchimento_%']);
+      const volumeUtil = isNaN(Number(row['Volume_Util__hm3'])) ? null : Number(row['Volume_Util__hm3']);
 
-      if ([cotaLida, volumeTotal, enchimento, volumeUtil].some(val => val === null)) {
+      /*if ([cotaLida, volumeTotal, enchimento, volumeUtil].some(val => val === null)) {
         console.log("Skipping row due to invalid numeric fields:", row);
+        counter++;
         continue;
-      }
+      }*/
 
       rowData.push({
         barragem: row['Barragem'],
@@ -83,19 +86,22 @@ export async function GET(request: Request): Promise<NextResponse> {
 
       const timestamp = new Date(row['Data']);
 
-      const point = new Point('barragem_data')
+      const point = new Point('barragem_data')//TODO add Fonte,	Bacia	and DRAP
         .tag('barragem', row['Barragem'])
-        .floatField('cota_lida', cotaLida!)
+        /*.floatField('cota_lida', cotaLida!)
         .floatField('volume_total', volumeTotal!)
         .floatField('enchimento', enchimento!)
-        .floatField('volume_util', volumeUtil!)
+        .floatField('volume_util', volumeUtil!)*/
         .timestamp(timestamp);
 
-      // Log the line protocol for debugging
-      console.log(`Line protocol: ${point.toLineProtocol()}`);
+      if (cotaLida !== null) point.floatField('cota_lida', cotaLida);
+      if (volumeTotal !== null) point.floatField('volume_total', volumeTotal);
+      if (enchimento !== null) point.floatField('enchimento', enchimento);
+      if (volumeUtil !== null) point.floatField('volume_util', volumeUtil);
+
+      console.log(`Line protocol: ${point.toLineProtocol()} line:${counter}`);
       writeApi.writePoint(point);
     }
-
     return NextResponse.json(
       { message: rowData },
       { status: 200 }
@@ -112,7 +118,6 @@ export async function GET(request: Request): Promise<NextResponse> {
 }
 
 /*
-
 
 export async function GET(request: Request) {
   try {

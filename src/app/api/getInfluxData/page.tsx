@@ -95,7 +95,7 @@ export default function InfluxData() {
     if (data.length === 0) return <div className="p-10 text-center text-darkGray">No dam data available</div>;
 
     // Helper function to safely format date
-    const formatDate = (dateString: string | undefined) => {
+    /*const formatDate = (dateString: string | undefined) => {
         if (!dateString) return 'N/A';
         try {
             return new Date(dateString).toLocaleDateString();
@@ -103,7 +103,29 @@ export default function InfluxData() {
             console.error('Error formatting date:', dateString, error);
             return dateString;
         }
+    };*/
+
+    const formatDate = (dateString: string | undefined) => {
+        if (!dateString) return 'N/A';
+        try {
+            // Create a Date object from the provided string
+            const originalDate = new Date(dateString);
+            // Subtract one day (86400000 milliseconds)
+            const adjustedDate = new Date(originalDate.getTime() - 86400000);// TODO find out why its one day ahead then the date shown on the excel
+            // Extract the day, month, and year from the adjusted date using UTC to avoid local timezone shifts
+            const day = adjustedDate.getUTCDate().toString().padStart(2, '0');
+            const month = (adjustedDate.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
+            const year = adjustedDate.getUTCFullYear();
+            // Return in dd-mm-yyyy format
+            return `${day}-${month}-${year}`;
+        } catch (error) {
+            console.error('Error formatting date:', dateString, error);
+            return dateString;
+        }
     };
+    
+    
+    
 
     return (
         <div className="my-5">
@@ -112,6 +134,7 @@ export default function InfluxData() {
             <table className="w-full mt-5 border-collapse">
                 <thead>
                     <tr className="bg-darkGray font-bold text-left text-white">
+                        <th className="px-3 py-4">num linha</th>
                         <th className="px-3 py-4">Dam</th>
                         <th className="px-3 py-4">Date</th>
                         <th className="px-3 py-4 text-right">Cota Lida</th>
@@ -123,20 +146,31 @@ export default function InfluxData() {
                 <tbody>
                     {data.map((record, index) => (
                         <tr key={index} className={`border-b border-white font-bold ${index % 2 == 0 ? "bg-primary" : "bg-blue-500"}`}>
+                            <td className="px-3 py-4">{index + 1}</td>
                             <td className="px-3 py-4">{record.barragem || 'N/A'}</td>
                             <td className="px-3 py-4">{formatDate(record._time)}</td>
+                            
                             <td className="px-3 py-4 text-right">
-                                {record.cota_lida ? Number(record.cota_lida).toFixed(2) : 'N/A'}
+                            {record.cota_lida !== null && record.cota_lida !== undefined
+                                ? Number(record.cota_lida).toFixed(2)
+                                : 'N/A'}
                             </td>
                             <td className="px-3 py-4 text-right">
-                                {record.enchimento ? Number(record.enchimento).toFixed(2) : 'N/A'}
+                            {record.enchimento !== null && record.enchimento !== undefined
+                                ? Number(record.enchimento).toFixed(2)
+                                : 'N/A'}
                             </td>
                             <td className="px-3 py-4 text-right">
-                                {record.volume_total ? Number(record.volume_total).toFixed(2) : 'N/A'}
+                            {record.volume_total !== null && record.volume_total !== undefined
+                                ? Number(record.volume_total).toFixed(2)
+                                : 'N/A'}
                             </td>
                             <td className="px-3 py-4 text-right">
-                                {record.volume_util ? Number(record.volume_util).toFixed(2) : 'N/A'}
+                            {record.volume_util !== null && record.volume_util !== undefined
+                                ? Number(record.volume_util).toFixed(2)
+                                : 'N/A'}
                             </td>
+
                         </tr>
                     ))}
                 </tbody>

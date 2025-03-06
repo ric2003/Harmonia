@@ -4,7 +4,7 @@ import { InfluxDB, Point } from '@influxdata/influxdb-client';
 const url = 'http://localhost:8086';
 const token = '532MipF2euYi2dYfkv3DAd49GajiA5Ifenr2Jog-FGV43mdF4lVLQa7E6Y8QPNeozyPY_x1KFazjcMwiLQ7riA==';
 const org = 'water-wise';
-const bucket = 'dados-barragens2';
+const bucket = 'dados-barragens';
   
 interface QueryResult {
     _time?: string;
