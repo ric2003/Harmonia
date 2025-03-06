@@ -8,6 +8,14 @@ import { getStations } from '@/services/api';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoicmljMjAwMzUiLCJhIjoiY203a3dkZWc0MDRuaTJtcXR4aHU5anY1ayJ9.pMwtXTwsROsnc-Ye3SRmIA';
 
+interface Station {
+  id: string;
+  estacao: string;
+  loc: string;
+  lat: number;
+  lon: number;
+}
+
 interface MapComponentProps {
   selectedStationId: string | null;
   onMarkerHover: ((stationId: string | null) => void) | null;
@@ -19,7 +27,7 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
   const markers = useRef<Marker[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [stations, setStations] = useState<any[]>([]);
+  const [stations, setStations] = useState<Station[]>([]);
 
   // Fetch stations directly in the MapComponent
   useEffect(() => {
@@ -28,7 +36,7 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
         const data = await getStations();
         setStations(data);
         setError(null);
-      } catch (err) {
+      } catch {
         setError('Failed to load stations');
       } finally {
         setLoading(false);
@@ -78,7 +86,7 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
       const marker = new mapboxgl.Marker({
         color: selectedStationId === station.id ? '#FF0000' : '#3B82F6'
       })
-      .setLngLat([parseFloat(station.lon), parseFloat(station.lat)])
+      .setLngLat([station.lon, station.lat])
       .setPopup(new mapboxgl.Popup().setHTML(`
         <h3 class="font-bold">${station.estacao}</h3>
         <p>${station.loc}</p>
@@ -98,7 +106,7 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
       const selectedStation = stations.find(s => s.id === selectedStationId);
       if (selectedStation) {
         map.current.flyTo({
-          center: [parseFloat(selectedStation.lon), parseFloat(selectedStation.lat)],
+          center: [selectedStation.lon, selectedStation.lat],
           zoom: 12
         });
       }
