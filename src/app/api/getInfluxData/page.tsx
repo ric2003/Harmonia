@@ -3,44 +3,10 @@ import { useEffect, useState } from "react";
 import { getInfluxData } from "./influx";
 
 interface QueryResult {
-    _time?: string;
+    _time: string;
+    barragem: string;
     [key: string]: string | number | boolean | null | undefined;
 }
-
-/*export default function InfluxData() {
-    const [data, setData] = useState<QueryResult[]>([]);
-
-    async function getInfluxDataFromQuery() {
-        // Assuming the API returns an object where each value is a Station
-        const importedData = getInfluxData();
-        setData(Object.values(importedData) as QueryResult[]);
-    }
-
-    useEffect(() => {
-        getInfluxDataFromQuery();
-    }, []);
-
-    useEffect(() => {
-        console.log(data);
-    }, [data])
-
-    return (
-        <div>
-            <table>
-                {data.map((line) => {
-                    return (
-                        <tr>
-                            <td>{line.barragem}</td>
-                            <td>{line._time}</td>
-                            <td>{line.cota_lida}</td>
-                        </tr>
-                    );
-                })}
-            </table>
-        </div>
-    );
-}
-*/
 
 export default function InfluxData() {
     const [data, setData] = useState<QueryResult[]>([]);
@@ -94,17 +60,6 @@ export default function InfluxData() {
     
     if (data.length === 0) return <div className="p-10 text-center text-darkGray">No dam data available</div>;
 
-    // Helper function to safely format date
-    /*const formatDate = (dateString: string | undefined) => {
-        if (!dateString) return 'N/A';
-        try {
-            return new Date(dateString).toLocaleDateString();
-        } catch (error) {
-            console.error('Error formatting date:', dateString, error);
-            return dateString;
-        }
-    };*/
-
     const formatDate = (dateString: string | undefined) => {
         if (!dateString) return 'N/A';
         try {
@@ -123,58 +78,150 @@ export default function InfluxData() {
             return dateString;
         }
     };
-    
-    
-    
 
-    return (
-        <div className="my-5">
-            <h2 className="mb-4 text-darkGray text-2xl font-bold">Dam Monitoring Data</h2>
-            
-            <table className="w-full mt-5 border-collapse">
-                <thead>
-                    <tr className="bg-darkGray font-bold text-left text-white">
-                        <th className="px-3 py-4">num linha</th>
-                        <th className="px-3 py-4">Dam</th>
-                        <th className="px-3 py-4">Date</th>
-                        <th className="px-3 py-4 text-right">Cota Lida</th>
-                        <th className="px-3 py-4 text-right">Enchimento</th>
-                        <th className="px-3 py-4 text-right">Volume Total</th>
-                        <th className="px-3 py-4 text-right">Volume Util</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map((record, index) => (
-                        <tr key={index} className={`border-b border-white font-bold ${index % 2 == 0 ? "bg-primary" : "bg-blue-500"}`}>
-                            <td className="px-3 py-4">{index + 1}</td>
-                            <td className="px-3 py-4">{record.barragem || 'N/A'}</td>
-                            <td className="px-3 py-4">{formatDate(record._time)}</td>
-                            
-                            <td className="px-3 py-4 text-right">
-                            {record.cota_lida !== null && record.cota_lida !== undefined
-                                ? Number(record.cota_lida).toFixed(2)
-                                : 'N/A'}
-                            </td>
-                            <td className="px-3 py-4 text-right">
-                            {record.enchimento !== null && record.enchimento !== undefined
-                                ? Number(record.enchimento).toFixed(2)
-                                : 'N/A'}
-                            </td>
-                            <td className="px-3 py-4 text-right">
-                            {record.volume_total !== null && record.volume_total !== undefined
-                                ? Number(record.volume_total).toFixed(2)
-                                : 'N/A'}
-                            </td>
-                            <td className="px-3 py-4 text-right">
-                            {record.volume_util !== null && record.volume_util !== undefined
-                                ? Number(record.volume_util).toFixed(2)
-                                : 'N/A'}
-                            </td>
+    const DamTable = () => {
+        const [currentPage, setCurrentPage] = useState(1);
+        const recordsPerPage = 10; // Change this number as needed
 
+        // Estados dos filtros
+        const [filterDam, setFilterDam] = useState("");
+        const [filterDate, setFilterDate] = useState("");
+        const [filterMinVolume, setFilterMinVolume] = useState("");
+
+        // Filtragem dos dados
+        const filteredData = data.filter((record) => {
+            const matchesDam = filterDam.trim() === "" || record.barragem?.toLowerCase().includes(filterDam.trim().toLowerCase());
+            const matchesDate = filterDate === "" || formatDate(new Date(record._time).toISOString()) === filterDate.split("-").reverse().join("-");
+            const matchesMinVolume = filterMinVolume === "" ||
+                (record.volume_total !== null && Number(record.volume_total) >= Number(filterMinVolume));
+
+            return matchesDam && matchesDate && matchesMinVolume;
+        });
+    
+        const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+        const startIndex = (currentPage - 1) * recordsPerPage;
+        const endIndex = startIndex + recordsPerPage;
+        const currentRecords = filteredData.slice(startIndex, endIndex);
+
+        const handlePageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            const pageNumber = Number(value);
+        
+            if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
+              setCurrentPage(pageNumber);
+            }
+        };
+    
+        return (
+            <div className="my-5">
+                <div className="flex flex-row justify-between items-center mb-4">
+                    <div className="flex flex-row items-center space-x-2">
+                        <h2 className="text-darkGray text-2xl font-bold">Dam Monitoring Data</h2>
+
+                        <div className="space-x-2">
+                            <input
+                                type="text"
+                                placeholder="Filtrar por barragem"
+                                value={filterDam}
+                                onChange={(e) => setFilterDam(e.target.value)}
+                                className="border px-3 py-2 rounded text-primary"
+                            />
+                            <input
+                                type="date"
+                                value={filterDate}
+                                onChange={(e) => setFilterDate(e.target.value)}
+                                className="border px-3 py-2 rounded text-primary"
+                            />
+                            <input
+                                type="number"
+                                placeholder="Volume mínimo"
+                                value={filterMinVolume}
+                                onChange={(e) => setFilterMinVolume(e.target.value)}
+                                className="border px-3 py-2 rounded text-primary"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex justify-center space-x-4 items-center">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 bg-primary rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Anterior
+                        </button>
+
+                        <div>
+                            <input
+                                type="number"
+                                value={currentPage}
+                                onChange={handlePageChange}
+                                className="w-16 text-center border border-primary rounded text-primary"
+                                min={1}
+                                max={totalPages}
+                            />
+
+                            <span className="pl-2 text-primary">of {totalPages}</span>
+                        </div>
+
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 bg-primary rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Próxima
+                        </button>
+                    </div>
+                </div>
+                
+                <table className="w-full mt-5 border-collapse">
+                    <thead>
+                        <tr className="bg-darkGray font-bold text-left text-white">
+                            <th className="px-3 py-4">Linha</th>
+                            <th className="px-3 py-4">Dam</th>
+                            <th className="px-3 py-4">Date</th>
+                            <th className="px-3 py-4 text-right">Cota Lida</th>
+                            <th className="px-3 py-4 text-right">Enchimento</th>
+                            <th className="px-3 py-4 text-right">Volume Total</th>
+                            <th className="px-3 py-4 text-right">Volume Util</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        {currentRecords.map((record, index) => (
+                            <tr key={index} className={`border-b border-white font-bold ${index % 2 == 0 ? "bg-primary" : "bg-blue-500"}`}>
+                                <td className="px-3 py-4">{index + 1}</td>
+                                <td className="px-3 py-4">{record.barragem || 'N/A'}</td>
+                                <td className="px-3 py-4">{formatDate(record._time)}</td>
+                                
+                                <td className="px-3 py-4 text-right">
+                                {record.cota_lida !== null && record.cota_lida !== undefined
+                                    ? Number(record.cota_lida).toFixed(2)
+                                    : 'N/A'}
+                                </td>
+                                <td className="px-3 py-4 text-right">
+                                {record.enchimento !== null && record.enchimento !== undefined
+                                    ? Number(record.enchimento).toFixed(2)
+                                    : 'N/A'}
+                                </td>
+                                <td className="px-3 py-4 text-right">
+                                {record.volume_total !== null && record.volume_total !== undefined
+                                    ? Number(record.volume_total).toFixed(2)
+                                    : 'N/A'}
+                                </td>
+                                <td className="px-3 py-4 text-right">
+                                {record.volume_util !== null && record.volume_util !== undefined
+                                    ? Number(record.volume_util).toFixed(2)
+                                    : 'N/A'}
+                                </td>
+    
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+    
+    return (
+        <DamTable />
     );
 }

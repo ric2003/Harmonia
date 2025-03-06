@@ -15,12 +15,12 @@ interface MapComponentProps {
 
 // Importação dinâmica do componente de mapa para evitar problemas de SSR
 const MapComponent = dynamic<MapComponentProps>(
-  () => import("@/components/MapComponent"), // Ajuste o caminho conforme a estrutura do seu projeto
+  () => import("@/components/MapComponent"),
   {
     ssr: false,
     loading: () => (
       <div className="w-full h-96 bg-gray-100 flex items-center justify-center">
-        <p>A carregar mapa...</p>
+        <div className="w-full h-full bg-gray-200 animate-pulse rounded-lg"></div>
       </div>
     ),
   }
@@ -53,8 +53,35 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="p-6 text-darkGray">
-        <p>A carregar barragens...</p>
+      <div className="px-6 text-darkGray">
+        <div className="h-10 bg-gray-200 rounded w-2/5 mb-6 animate-pulse"></div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Skeleton para Lista de Barragens */}
+          <div className="lg:col-span-1">
+            <div className="bg-backgroundColor p-4 rounded-xl shadow-md">
+              <div className="h-6 bg-gray-200 rounded w-1/3 mb-4 animate-pulse"></div>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {[...Array(7)].map((_, index) => (
+                  <div key={index} className="p-3 rounded-lg bg-gray-100 animate-pulse">
+                    <div className="flex items-center">
+                      <div className="h-6 w-5 bg-gray-200 rounded-full mr-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-4/5"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Skeleton para o Mapa */}
+          <div className="lg:col-span-2">
+            <div className="bg-backgroundColor p-4 rounded-xl shadow-md h-full">
+              <div className="h-6 bg-gray-200 rounded w-1/4 mb-4 animate-pulse"></div>
+              <div className="rounded-lg h-96 overflow-hidden bg-gray-200 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

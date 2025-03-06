@@ -1,10 +1,8 @@
 "use client";
 import Link from "next/link";
-import Image, { ImageProps } from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { getStations, Station } from "@/services/api";
 import StationImage from "@/components/StationImage";
-
 
 export default function StationsPage() {
   const [stations, setStations] = useState<Station[]>([]);
@@ -35,22 +33,28 @@ export default function StationsPage() {
   return (
     <div className="text-darkGray">
       {loading ? (
-        <p>Loading stations...</p>
+        <div className="grid grid-cols-3 gap-4">
+          {[...Array(6)].map((_, index) => (
+            <div key={index} className="p-4 border rounded-lg shadow h-full w-full animate-pulse">
+              <div className="mb-4 w-full">
+                <div className="bg-gray-200 rounded w-full aspect-video"></div>
+              </div>
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
       ) : error ? (
         <p className="text-red-600">{error}</p>
       ) : (
         <ul className="grid grid-cols-3 gap-4">
           {stations.map((station) => {
-            // Monta a URL da imagem usando o ID (ou outro atributo) da estação
             const imageUrl = `/images/${station.id}.png`;
             return (
               <Link href={`/stations/${station.id}`} key={station.id}>
-                <li
-                  className="p-4 border rounded-lg shadow h-full w-full cursor-pointer"
-                >
-                  <div
-                    className="mb-4 w-full flex justify-center"
-                  >
+                <li className="p-4 border rounded-lg shadow h-full w-full cursor-pointer">
+                  <div className="mb-4 w-full flex justify-center">
                     <StationImage
                       src={imageUrl}
                       width={600}
