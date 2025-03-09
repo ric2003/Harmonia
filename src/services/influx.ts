@@ -2,10 +2,10 @@
 import { NextResponse } from 'next/server';
 import { InfluxDB } from '@influxdata/influxdb-client';
 
-const url = process.env.NEXT_PUBLIC_INFLUX_URL || "";
-const token = process.env.NEXT_PUBLIC_INFLUX_TOKEN || "";
-const org = process.env.NEXT_PUBLIC_INFLUX_ORG || "";
-const bucket = process.env.NEXT_PUBLIC_INFLUX_BUCKET || "";
+const url = process.env.INFLUX_URL || "";
+const token = process.env.INFLUX_TOKEN || "";
+const org = process.env.INFLUX_ORG || "";
+const bucket = process.env.INFLUX_BUCKET || "";
   
 export interface QueryResult {
     _time?: string;

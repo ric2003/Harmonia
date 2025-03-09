@@ -80,36 +80,6 @@ export default function DamData() {
         );
     }
 
-    const formatDate = (dateString: string | undefined) => {
-        if (!dateString) return 'N/A';
-        try {
-            // Create a Date object from the provided string
-            const originalDate = new Date(dateString);
-            // Subtract one day (86400000 milliseconds)
-            const adjustedDate = new Date(originalDate.getTime() - 86400000);// TODO find out why its one day ahead then the date shown on the excel
-            // Extract the day, month, and year from the adjusted date using UTC to avoid local timezone shifts
-            const day = adjustedDate.getUTCDate().toString().padStart(2, '0');
-            const month = (adjustedDate.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
-            const year = adjustedDate.getUTCFullYear();
-            // Return in dd-mm-yyyy format
-            return `${day}-${month}-${year}`;
-        } catch (error) {
-            console.error('Error formatting date:', dateString, error);
-            return dateString;
-        }
-    };
-
-    const getDateObject = (dateString: string | undefined): Date | null => {
-        if (!dateString) return null;
-        try {
-            const originalDate = new Date(dateString);
-            const adjustedDate = new Date(originalDate.getTime() - 86400000);
-            return adjustedDate;
-        } catch {
-            return null;
-        }
-    };
-
     const DamTable = () => {
         const [currentPage, setCurrentPage] = useState(1);
         const recordsPerPage = 10; // Change this number as needed
@@ -138,7 +108,7 @@ export default function DamData() {
             
             // Date range filter
             let matchesDateRange = true;
-            const recordDate = getDateObject(record._time);
+            const recordDate = record._time ? new Date(record._time) : null;
             
             if (filterStartDate && recordDate) {
                 const startDate = new Date(filterStartDate);
@@ -712,7 +682,7 @@ export default function DamData() {
                                             <div className="font-medium text-darkGray">{record.barragem || 'N/A'}</div>
                                         </td>
                                         <td className="py-4 whitespace-nowrap text-sm text-greySubText">
-                                            {formatDate(record._time)}
+                                            {record._time ? new Date(record._time).toLocaleDateString('en-GB') : ''}
                                         </td>
                                         <td className="py-4 whitespace-nowrap text-sm text-right text-greySubText">
                                             {record.cota_lida !== null && record.cota_lida !== undefined
