@@ -21,6 +21,11 @@ export default {
 			backgroundColor: 'var(--backgroundColor)',
 			gray50: 'var(--gray-50)',
 			blue50: 'var(--blue-50)',
+			gray100: 'var(--gray-100)',
+			gray200: 'var(--gray-200)',
+			gray400: 'var(--gray-400)',
+			gray600: 'var(--gray-600)',
+			gray700: 'var(--gray-700)',
 
   		},
   	}

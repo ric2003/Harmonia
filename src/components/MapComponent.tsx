@@ -1,4 +1,3 @@
-// components/MapComponent.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -6,7 +5,7 @@ import mapboxgl, { Map, GeolocateControl, Marker } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { getStations } from '@/services/api';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoicmljMjAwMzUiLCJhIjoiY203a3dkZWc0MDRuaTJtcXR4aHU5anY1ayJ9.pMwtXTwsROsnc-Ye3SRmIA';
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 interface Station {
   id: string;

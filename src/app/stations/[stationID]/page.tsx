@@ -162,7 +162,7 @@ export default function StationDetailsPage() {
     if (stationID) {
       fetchStationData();
     }
-  }, [stationID, fetchStationData]);
+  }, [stationID]);
 
   const imageUrl = `/images/${stationID}.png`;
 
