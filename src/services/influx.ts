@@ -2,10 +2,10 @@
 import { NextResponse } from 'next/server';
 import { InfluxDB } from '@influxdata/influxdb-client';
 
-const url = 'https://b91b-79-169-229-233.ngrok-free.app';
-const token = '532MipF2euYi2dYfkv3DAd49GajiA5Ifenr2Jog-FGV43mdF4lVLQa7E6Y8QPNeozyPY_x1KFazjcMwiLQ7riA==';
-const org = 'water-wise';
-const bucket = 'dados-barragens';
+const url = process.env.NEXT_PUBLIC_INFLUX_URL || "";
+const token = process.env.NEXT_PUBLIC_INFLUX_TOKEN || "";
+const org = process.env.NEXT_PUBLIC_INFLUX_ORG || "";
+const bucket = process.env.NEXT_PUBLIC_INFLUX_BUCKET || "";
   
 export interface QueryResult {
     _time?: string;
