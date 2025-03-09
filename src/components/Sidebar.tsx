@@ -36,7 +36,7 @@ export function Sidebar() {
                         </ul>
                     </nav>
 
-                    <div className="w-full flex items-center justify-center absolute bottom-4">
+                    <div className="flex items-center justify-center absolute bottom-4">
                         <Switch.Root checked={theme === "dark"} onCheckedChange={handleModeChange} className="cursor-pointer relative w-[160px] h-[38px] rounded-lg bg-lightGray outline-none data-[state=checked]:bg-toggleBackground">
                             <div className="flex">
                                 <div className="flex relative z-[1] text-primary gap-1 items-center font-semibold w-1/2 justify-center">
@@ -48,7 +48,7 @@ export function Sidebar() {
                                     Dark
                                 </div>
                             </div>
-                            <Switch.Thumb className="top-1 absolute block w-[72px] h-[30px] translate-x-1 rounded-lg bg-background data-[state=checked]:translate-x-[84px] transition-transform" />
+                            <Switch.Thumb className="top-1 absolute block w-[72px] h-[30px] translate-x-1 rounded-lg bg-background data-[state=checked]:translate-x-[84px] transition-transform preserve-transition" />
                         </Switch.Root>
                     </div>
                 </div>

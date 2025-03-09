@@ -173,41 +173,41 @@ export default function InfluxData() {
                     </div>
                 </div>
                 
-                <table className="w-full mt-5 border-collapse">
+                <table className="w-full mt-5 border-collapse table-fixed">
                     <thead>
                         <tr className="bg-darkGray font-bold text-left text-white">
-                            <th className="px-3 py-4">Linha</th>
-                            <th className="px-3 py-4">Dam</th>
-                            <th className="px-3 py-4">Date</th>
-                            <th className="px-3 py-4 text-right">Cota Lida</th>
-                            <th className="px-3 py-4 text-right">Enchimento</th>
-                            <th className="px-3 py-4 text-right">Volume Total</th>
-                            <th className="px-3 py-4 text-right">Volume Util</th>
+                            <th className="pl-3 py-4 w-24">Linha</th>
+                            <th className="py-4 w-auto">Dam</th>
+                            <th className="py-4 w-28">Date</th>
+                            <th className="py-4 text-right w-40">Cota Lida</th>
+                            <th className="py-4 text-right w-40">Enchimento</th>
+                            <th className="py-4 text-right w-40">Volume Total</th>
+                            <th className="pr-3 py-4 text-right w-40">Volume Util</th>
                         </tr>
                     </thead>
                     <tbody>
                         {currentRecords.map((record, index) => (
                             <tr key={index} className={`border-b border-white font-bold ${index % 2 == 0 ? "bg-primary" : "bg-blue-500"}`}>
-                                <td className="px-3 py-4">{index + 1}</td>
-                                <td className="px-3 py-4">{record.barragem || 'N/A'}</td>
-                                <td className="px-3 py-4">{formatDate(record._time)}</td>
+                                <td className="pl-3 py-4 w-24">{index + 1}</td>
+                                <td className="py-4">{record.barragem || 'N/A'}</td>
+                                <td className="py-4 w-24">{formatDate(record._time)}</td>
                                 
-                                <td className="px-3 py-4 text-right">
+                                <td className="py-4 text-right">
                                 {record.cota_lida !== null && record.cota_lida !== undefined
                                     ? Number(record.cota_lida).toFixed(2)
                                     : 'N/A'}
                                 </td>
-                                <td className="px-3 py-4 text-right">
+                                <td className="py-4 text-right">
                                 {record.enchimento !== null && record.enchimento !== undefined
                                     ? Number(record.enchimento).toFixed(2)
                                     : 'N/A'}
                                 </td>
-                                <td className="px-3 py-4 text-right">
+                                <td className="py-4 text-right">
                                 {record.volume_total !== null && record.volume_total !== undefined
                                     ? Number(record.volume_total).toFixed(2)
                                     : 'N/A'}
                                 </td>
-                                <td className="px-3 py-4 text-right">
+                                <td className="pr-3 py-4 text-right">
                                 {record.volume_util !== null && record.volume_util !== undefined
                                     ? Number(record.volume_util).toFixed(2)
                                     : 'N/A'}

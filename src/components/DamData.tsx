@@ -592,9 +592,9 @@ export default function DamData() {
                     <table className="w-full">
                     <thead>
                         <tr className="bg-gray100 text-left text-darkGray">
-                            <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider">#</th>
+                            <th className="pl-6 py-3 text-xs font-semibold uppercase tracking-wider">#</th>
                             <th 
-                                className="px-6 py-3 text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-gray200"
+                                className="py-3 text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-gray200"
                                 onClick={() => handleSort("barragem")}
                             >
                                 <div className="flex items-center">
@@ -610,7 +610,7 @@ export default function DamData() {
                                 </div>
                             </th>
                             <th 
-                                className="px-6 py-3 text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-gray200"
+                                className="py-3 text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-gray200"
                                 onClick={() => handleSort("_time")}
                             >
                                 <div className="flex items-center">
@@ -626,7 +626,7 @@ export default function DamData() {
                                 </div>
                             </th>
                             <th 
-                                className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-right cursor-pointer hover:bg-gray200"
+                                className="py-3 text-xs font-semibold uppercase tracking-wider text-right cursor-pointer hover:bg-gray200"
                                 onClick={() => handleSort("cota_lida")}
                             >
                                 <div className="flex items-center justify-end">
@@ -642,7 +642,7 @@ export default function DamData() {
                                 </div>
                             </th>
                             <th 
-                                className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-right cursor-pointer hover:bg-gray200"
+                                className="py-3 text-xs font-semibold uppercase tracking-wider text-right cursor-pointer hover:bg-gray200"
                                 onClick={() => handleSort("enchimento")}
                             >
                                 <div className="flex items-center justify-end">
@@ -658,7 +658,7 @@ export default function DamData() {
                                 </div>
                             </th>
                             <th 
-                                className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-right cursor-pointer hover:bg-gray200"
+                                className="py-3 text-xs font-semibold uppercase tracking-wider text-right cursor-pointer hover:bg-gray200"
                                 onClick={() => handleSort("volume_total")}
                             >
                                 <div className="flex items-center justify-end">
@@ -674,7 +674,7 @@ export default function DamData() {
                                 </div>
                             </th>
                             <th 
-                                className="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-right cursor-pointer hover:bg-gray200"
+                                className="pr-6 py-3 text-xs font-semibold uppercase tracking-wider text-right cursor-pointer hover:bg-gray200"
                                 onClick={() => handleSort("volume_util")}
                             >
                                 <div className="flex items-center justify-end">
@@ -707,19 +707,19 @@ export default function DamData() {
                                 
                                 return (
                                     <tr key={index} className={index % 2 === 0 ? "bg-gray50" : "bg-backgroundColor"}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-greySubText">{startIndex + index + 1}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="pl-6 py-4 whitespace-nowrap text-sm text-greySubText">{startIndex + index + 1}</td>
+                                        <td className="py-4 whitespace-nowrap w-60">
                                             <div className="font-medium text-darkGray">{record.barragem || 'N/A'}</div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-greySubText">
+                                        <td className="py-4 whitespace-nowrap text-sm text-greySubText">
                                             {formatDate(record._time)}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-greySubText">
+                                        <td className="py-4 whitespace-nowrap text-sm text-right text-greySubText">
                                             {record.cota_lida !== null && record.cota_lida !== undefined
                                                 ? Number(record.cota_lida).toFixed(2)
                                                 : 'N/A'}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                        <td className="py-4 whitespace-nowrap text-sm text-right">
                                             {record.enchimento !== null && record.enchimento !== undefined ? (
                                                 <div className="flex items-center justify-end">
                                                     <span className="text-greySubText mr-2">{Number(record.enchimento).toFixed(2)}</span>
@@ -732,14 +732,14 @@ export default function DamData() {
                                                 </div>
                                             ) : 'N/A'}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                                        <td className="py-4 whitespace-nowrap text-right">
                                             {record.volume_total !== null && record.volume_total !== undefined ? (
                                                 <div className="flex items-center justify-end">
                                                     <span className="text-darkGray font-medium">{Number(record.volume_total).toFixed(2)}</span>
                                                 </div>
                                             ) : 'N/A'}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-greySubText">
+                                        <td className="pr-6 py-4 whitespace-nowrap text-sm text-right text-greySubText">
                                             {record.volume_util !== null && record.volume_util !== undefined
                                                 ? Number(record.volume_util).toFixed(2)
                                                 : 'N/A'}

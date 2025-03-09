@@ -41,6 +41,6 @@ body {
   font-family: Roboto, sans-serif;
 }
 
-.disable-transitions * {
+.disable-transitions *:not(.preserve-transition) {
   transition: none !important;
 }
