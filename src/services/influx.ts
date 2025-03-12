@@ -18,8 +18,8 @@ export async function getInfluxData(): Promise<NextResponse> {
     const influxDB = new InfluxDB({ url, token });
     const queryApi = influxDB.getQueryApi(org);
 
-    const timeRangeStart = new Date("2000-01-01").toISOString();
-    const timeRangeStop = new Date("2025-03-03").toISOString();
+    const timeRangeStart = new Date("1970-01-01").toISOString();
+    const timeRangeStop = new Date().toISOString();
     const windowPeriod = "24h";
 
     // Flux query com parâmetros dinâmicos

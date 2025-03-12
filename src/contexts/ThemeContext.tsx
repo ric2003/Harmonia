@@ -9,9 +9,11 @@ interface ThemeContextType {
 export const ThemeContext = createContext({} as ThemeContextType);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("theme") || "light";
-  });
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    setTheme(localStorage.getItem("theme") || "light");
+  }, []);
 
   useEffect(() => {
     if (theme === "dark") {

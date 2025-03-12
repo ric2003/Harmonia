@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image";
 import { LinkButton } from "./LinkButton";
-import { Building, Home, Moon, NotebookText, Sheet, Sun } from "lucide-react";
+import { Building, Home, Moon, NotebookText, Sheet, Sun, Droplets } from "lucide-react";
 import { useContext } from "react";
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import * as Switch from "@radix-ui/react-switch";
@@ -30,9 +30,10 @@ export function Sidebar() {
                     <nav className="pt-16 w-full px-8">
                         <ul className="flex flex-col items-center text-primary gap-4">
                         <LinkButton route="/" name="Home" icon={<Home size={24} />} />
-                        <LinkButton route="/api" name="Api Page" icon={<NotebookText size={24} />} />
                         <LinkButton route="/stations" name="Stations Page" icon={<Building size={24} />} />
+                        <LinkButton route="/dam-monitoring" name="Reservoir Monitor" icon={<Droplets size={24} />} />
                         <LinkButton route="/excel" name="Excel Page" icon={<Sheet size={24} />} />
+                        <LinkButton route="/api" name="Api Page" icon={<NotebookText size={24} />} />
                         </ul>
                     </nav>
 
