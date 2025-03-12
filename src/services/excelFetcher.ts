@@ -17,40 +17,33 @@ const client = new InfluxDB({ url, token });
  * Where dd = last day of trimester (31MAR, 30JUN, 30SET, 31DEZ)
  */
 function getExcelFileUrl(): string {
-  /*const now = new Date();
+  const now = new Date();
   const currentYear = now.getFullYear();
   
   // Determine the most recent trimester end date
-  const currentMonth = now.getMonth(); // 0-11*/
-
-  return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/2024/Ficheiro_Trimestral_res_agua/Historico_2005_2024_V31DEZ2024.xlsx`;
+  const currentMonth = now.getMonth(); // 0-11
   
-  /*let trimesterEndDay: number;
-  let trimesterEndMonth: number;
+  let trimesterEndDay: number;
   let trimesterEndMonthName: string;
   
   if (currentMonth < 3) { // Jan-Mar, use previous year's December
     trimesterEndDay = 31;
-    trimesterEndMonth = 11; // December (0-based)
     trimesterEndMonthName = 'DEZ';
     // Use previous year for both the filename year and trimester date
     return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/${currentYear-1}/Ficheiro_Trimestral_res_agua/Historico_2005_${currentYear-1}_V31DEZ${currentYear-1}.xlsx`;
   } else if (currentMonth < 6) { // Apr-Jun, use March
     trimesterEndDay = 31;
-    trimesterEndMonth = 2; // March (0-based)
     trimesterEndMonthName = 'MAR';
   } else if (currentMonth < 9) { // Jul-Sep, use June
     trimesterEndDay = 30;
-    trimesterEndMonth = 5; // June (0-based)
     trimesterEndMonthName = 'JUN';
   } else { // Oct-Dec, use September
     trimesterEndDay = 30;
-    trimesterEndMonth = 8; // September (0-based)
     trimesterEndMonthName = 'SET';
   }
   
   // Format the URL
-  return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/${currentYear}/Ficheiro_Trimestral_res_agua/Historico_2005_${currentYear}_V${trimesterEndDay}${trimesterEndMonthName}${currentYear}.xlsx`;*/
+  return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/${currentYear}/Ficheiro_Trimestral_res_agua/Historico_2005_${currentYear}_V${trimesterEndDay}${trimesterEndMonthName}${currentYear}.xlsx`;
 }
 
 export async function GET(): Promise<NextResponse> {
