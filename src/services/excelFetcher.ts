@@ -17,13 +17,15 @@ const client = new InfluxDB({ url, token });
  * Where dd = last day of trimester (31MAR, 30JUN, 30SET, 31DEZ)
  */
 function getExcelFileUrl(): string {
-  const now = new Date();
+  /*const now = new Date();
   const currentYear = now.getFullYear();
   
   // Determine the most recent trimester end date
-  const currentMonth = now.getMonth(); // 0-11
+  const currentMonth = now.getMonth(); // 0-11*/
+
+  return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/2024/Ficheiro_Trimestral_res_agua/Historico_2005_2024_V31DEZ2024.xlsx`;
   
-  let trimesterEndDay: number;
+  /*let trimesterEndDay: number;
   let trimesterEndMonth: number;
   let trimesterEndMonthName: string;
   
@@ -48,7 +50,7 @@ function getExcelFileUrl(): string {
   }
   
   // Format the URL
-  return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/${currentYear}/Ficheiro_Trimestral_res_agua/Historico_2005_${currentYear}_V${trimesterEndDay}${trimesterEndMonthName}${currentYear}.xlsx`;
+  return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/${currentYear}/Ficheiro_Trimestral_res_agua/Historico_2005_${currentYear}_V${trimesterEndDay}${trimesterEndMonthName}${currentYear}.xlsx`;*/
 }
 
 export async function GET(): Promise<NextResponse> {
