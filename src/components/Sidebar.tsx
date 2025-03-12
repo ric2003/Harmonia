@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image";
 import { LinkButton } from "./LinkButton";
-import { Building, Home, Moon, NotebookText, Sheet, Sun, Droplets } from "lucide-react";
+import { Building, Home, Moon, Sheet, Sun, Droplets } from "lucide-react";
 import { useContext } from "react";
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import * as Switch from "@radix-ui/react-switch";

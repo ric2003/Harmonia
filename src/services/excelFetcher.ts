@@ -1,6 +1,5 @@
 import axios from 'axios';
-import * as XLSX from 'xlsx';
-import { InfluxDB, Point } from '@influxdata/influxdb-client';
+import { InfluxDB } from '@influxdata/influxdb-client';
 import { NextResponse } from 'next/server';
 import { processExcelData } from '@/services/excel-processor'; // New shared utility
 
@@ -25,26 +24,21 @@ function getExcelFileUrl(): string {
   const currentMonth = now.getMonth(); // 0-11
   
   let trimesterEndDay: number;
-  let trimesterEndMonth: number;
   let trimesterEndMonthName: string;
   
   if (currentMonth < 3) { // Jan-Mar, use previous year's December
     trimesterEndDay = 31;
-    trimesterEndMonth = 11; // December (0-based)
     trimesterEndMonthName = 'DEZ';
     // Use previous year for both the filename year and trimester date
     return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/${currentYear-1}/Ficheiro_Trimestral_res_agua/Historico_2005_${currentYear-1}_V31DEZ${currentYear-1}.xlsx`;
   } else if (currentMonth < 6) { // Apr-Jun, use March
     trimesterEndDay = 31;
-    trimesterEndMonth = 2; // March (0-based)
     trimesterEndMonthName = 'MAR';
   } else if (currentMonth < 9) { // Jul-Sep, use June
     trimesterEndDay = 30;
-    trimesterEndMonth = 5; // June (0-based)
     trimesterEndMonthName = 'JUN';
   } else { // Oct-Dec, use September
     trimesterEndDay = 30;
-    trimesterEndMonth = 8; // September (0-based)
     trimesterEndMonthName = 'SET';
   }
   
