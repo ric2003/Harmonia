@@ -13,7 +13,6 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{stat
       });
     }
 
-    // ✅ Create form data string instead of JSON
     const formData = new URLSearchParams();
     formData.append("token", tokenAPI || "");
     formData.append("option", "4");
@@ -23,9 +22,9 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{stat
     const response = await fetch("https://irristrat.com/ws/clients/meteoStations.php", {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded", // ✅ Correct content type
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: formData.toString(), // ✅ Send as form data string
+      body: formData.toString(),
     });
 
     if (!response.ok) {
@@ -33,7 +32,6 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{stat
     }
 
     const data = await response.json();
-    console.log("API Response:", data); // ✅ Debugging log
 
     // ✅ Extract correct station data
     const stationData = data[stationID] || data;

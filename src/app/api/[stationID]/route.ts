@@ -33,7 +33,6 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{stat
     }
 
     const data = await response.json();
-    console.log("API Response:", data); // ✅ Debugging log
 
     // ✅ Extract correct station data
     const stationData = data[stationID] || data;

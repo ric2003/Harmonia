@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { SidebarHeaderProvider } from "@/contexts/SidebarHeaderContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { PageTitleProvider } from "@/contexts/PageTitleContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,17 +33,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider>
-          <SidebarHeaderProvider>
-            <div className="flex h-screen">
-              <Sidebar />
-              <div className="flex flex-1 flex-col z-[1]">
-                <Header />
-                <main className="overflow-auto bg-background h-full p-8">
-                  {children}
-                </main>
+          <PageTitleProvider>
+            <SidebarHeaderProvider>
+              <div className="flex h-screen">
+                <Sidebar />
+                <div className="flex flex-1 flex-col z-[1]">
+                  <Header />
+                  <main className="overflow-auto bg-background h-full p-8">
+                    {children}
+                  </main>
+                </div>
               </div>
-            </div>
-          </SidebarHeaderProvider>
+            </SidebarHeaderProvider>
+          </PageTitleProvider>
         </ThemeProvider>
       </body>
     </html>

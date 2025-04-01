@@ -21,6 +21,8 @@ import {
   Legend,
 } from "recharts";
 import CustomTooltip from "@/components/ui/CustomTooltip";
+import { useSetPageTitle } from '@/hooks/useSetPageTitle';
+
 
 // Define interfaces for the API response data
 interface DailyDataRow {
@@ -57,7 +59,9 @@ interface Min10DataRow {
 interface MapComponentProps {
   stations: Station[];
   selectedStationId: string | null;
-  onMarkerHover: ((stationId: string | null) => void) | null;
+  onMarkerHover: (stationId: string | null) => void;
+  onStationSelect: (stationId: string | null) => void;
+  shoeMenu: boolean | null;
 }
 
 interface DailyTemperatureData {
@@ -74,17 +78,7 @@ interface DailyRawData {
 }
 
 // Dynamic import of map component to avoid SSR issues
-const MapComponent = dynamic<MapComponentProps>(
-  () => import("@/components/MapComponent"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-black">
-        <p>A carregar mapa...</p>
-      </div>
-    ),
-  }
-);
+const MapComponent = dynamic<MapComponentProps>(() => import("@/components/MapComponent"));
 
 export default function StationDetailsPage() {
   const params = useParams() as { stationID: string };
@@ -164,6 +158,7 @@ export default function StationDetailsPage() {
     }
   }, [stationID]);
 
+  useSetPageTitle(stationName);
   const imageUrl = `/images/${stationID}.png`;
 
   return (
@@ -191,7 +186,10 @@ export default function StationDetailsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             {/* Temperature trend graph */}
             <div className="lg:col-span-2 bg-background p-4 rounded-lg shadow-sm">
+              <div className="flex items-baseline justify-between mb-4">
               <h2 className="text-xl font-semibold mb-4">Tendência Diária da Temperatura</h2>
+              <a className = "text-blue-500" href={`/stations/${stationID}/graphs`}>Ver mais Gráficos</a>
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={dailyData}>
                   <XAxis dataKey="date" />
@@ -213,10 +211,12 @@ export default function StationDetailsPage() {
                   <MapComponent
                     stations={stations}
                     selectedStationId={stationID}
-                    onMarkerHover={null}
+                    onMarkerHover={() => {}}
+                    onStationSelect={() => {}}
+                    shoeMenu={false}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                  <div className="w-full h-full bg-gray200 flex items-center justify-center text-darkGray">
                     <p>A carregar mapa...</p>
                   </div>
                 )}
@@ -232,7 +232,7 @@ export default function StationDetailsPage() {
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === "daily" 
                     ? "border-blue-500 text-blue-600" 
-                    : "border-transparent text-greySubText hover:text-gray-700 hover:border-gray-300"
+                    : "border-transparent text-gray600 hover:text-gray700 hover:border-gray300"
                 }`}
               >
                 Dados Diários
@@ -242,7 +242,7 @@ export default function StationDetailsPage() {
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === "hourly" 
                     ? "border-blue-500 text-blue-600" 
-                    : "border-transparent text-greySubText hover:text-gray-700 hover:border-gray-300"
+                    : "border-transparent text-gray600 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 Dados Horários
@@ -252,7 +252,7 @@ export default function StationDetailsPage() {
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === "min10" 
                     ? "border-blue-500 text-blue-600" 
-                    : "border-transparent text-greySubText hover:text-gray-700 hover:border-gray-300"
+                    : "border-transparent text-gray600 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 Dados a Cada 10 Minutos
@@ -312,13 +312,13 @@ export default function StationDetailsPage() {
                   <table className="min-w-full divide-y divide-lightGray">
                     <thead className="bg-gray50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Data</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Temp. Média (°C)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Temp. Mínima (°C)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Temp. Máxima (°C)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Humidade (%)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Vento (km/h)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Radiação Solar</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Data</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Temp. Média (°C)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Temp. Mínima (°C)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Temp. Máxima (°C)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Humidade (%)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Vento (km/h)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Radiação Solar</th>
                       </tr>
                     </thead>
                     <tbody className="bg-background divide-y divide-lightGray">
@@ -357,14 +357,14 @@ export default function StationDetailsPage() {
                   <table className="min-w-full divide-y divide-lightGray">
                     <thead className="bg-gray50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Data</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Hora</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Temp. Média (°C)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Temp. Mínima (°C)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Temp. Máxima (°C)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Umidade (%)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Vento (km/h)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Radiação Solar</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Data</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Hora</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Temp. Média (°C)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Temp. Mínima (°C)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Temp. Máxima (°C)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Umidade (%)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Vento (km/h)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Radiação Solar</th>
                       </tr>
                     </thead>
                     <tbody className="bg-background divide-y divide-lightGray">
@@ -404,13 +404,13 @@ export default function StationDetailsPage() {
                   <table className="min-w-full divide-y divide-lightGray">
                     <thead className="bg-gray50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Data</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Hora</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Temp. Média (°C)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">P_em</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Umidade (%)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Vento (km/h)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-greySubText uppercase tracking-wider">Radiação Solar</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Data</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Hora</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Temp. Média (°C)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">P_em</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Umidade (%)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Vento (km/h)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">Radiação Solar</th>
                       </tr>
                     </thead>
                     <tbody className="bg-background divide-y divide-lightGray">

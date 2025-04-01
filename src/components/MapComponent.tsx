@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import mapboxgl, { Map, GeolocateControl, Marker } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { getStations } from '@/services/api';
+import Link from 'next/link';
+import { MapPin } from 'lucide-react';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
@@ -16,38 +17,22 @@ interface Station {
 }
 
 interface MapComponentProps {
+  stations: Station[];
   selectedStationId: string | null;
-  onMarkerHover: ((stationId: string | null) => void) | null;
+  onMarkerHover: (stationId: string | null) => void;
+  onStationSelect: (stationId: string | null) => void;
+  shoeMenu: boolean | null;
 }
 
-const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) => {
+const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSelect, shoeMenu }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<Map | null>(null);
   const markers = useRef<Marker[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [stations, setStations] = useState<Station[]>([]);
-
-  // Fetch stations directly in the MapComponent
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getStations();
-        setStations(data);
-        setError(null);
-      } catch {
-        setError('Failed to load stations');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [showList, setShowList] = useState(true);
 
   useEffect(() => {
-    if (!mapContainer.current || loading || error) return;
+    if (!mapContainer.current) return;
 
     map.current = new Map({
       container: mapContainer.current,
@@ -63,6 +48,10 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
 
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
+    map.current.on('load', () => {
+      setMapLoaded(true);
+    });
+
     // Cleanup
     return () => {
       if (map.current) {
@@ -70,11 +59,11 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
         map.current = null;
       }
     };
-  }, [loading, error]);
+  }, []);
 
-  // Update markers when stations data changes
+  // Update markers when stations data changes or map loads
   useEffect(() => {
-    if (!map.current || loading || error) return;
+    if (!map.current || !mapLoaded) return;
 
     // Clear existing markers
     markers.current.forEach(marker => marker.remove());
@@ -87,7 +76,7 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
       })
       .setLngLat([station.lon, station.lat])
       .setPopup(new mapboxgl.Popup().setHTML(`
-        <h3 class="font-bold">${station.estacao}</h3>
+        <h3 class="font-bold">${station.estacao.slice(7)}</h3>
         <p>${station.loc}</p>
       `))
       .addTo(map.current!);
@@ -96,6 +85,7 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
       const element = marker.getElement();
       element.addEventListener('mouseenter', () => onMarkerHover && onMarkerHover(station.id));
       element.addEventListener('mouseleave', () => onMarkerHover && onMarkerHover(null));
+      element.addEventListener('click', () => onStationSelect && onStationSelect(station.id));
 
       markers.current.push(marker);
     });
@@ -106,29 +96,56 @@ const MapComponent = ({ selectedStationId, onMarkerHover }: MapComponentProps) =
       if (selectedStation) {
         map.current.flyTo({
           center: [selectedStation.lon, selectedStation.lat],
-          zoom: 12
+          zoom: 11
         });
       }
     }
-  }, [stations, selectedStationId, loading, error, onMarkerHover]);
+  }, [stations, selectedStationId, mapLoaded, onMarkerHover, onStationSelect]);
 
-  if (loading) {
-    return (
-      <div className="w-full h-96 bg-gray-100 flex items-center justify-center text-black">
-        <p>Loading stations...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full h-96 bg-gray-100 flex items-center justify-center">
-        <p className="text-red-600">{error}</p>
-      </div>
-    );
-  }
-
-  return <div ref={mapContainer} className="w-full h-full" />;
+  return (
+    <div className="relative w-full h-full">
+      <div ref={mapContainer} className="w-full h-full" />
+      
+      {/* Station list panel */}
+      {shoeMenu && (
+        <div className="absolute top-4 left-4 z-10 rounded-lg shadow-md overflow-hidden transition-all duration-300" 
+             style={{ maxHeight: showList ? '60vh' : '40px', width: '250px' }}>
+          <div className="p-2 bg-backgroundColor cursor-pointer flex justify-between items-center" 
+               onClick={() => setShowList(!showList)}>
+            <h3 className="text-sm font-bold text-primary">Lista de Barragens</h3>
+            <span className="text-xs text-darkGray">{showList ? '▲' : '▼'}</span>
+          </div>
+          
+          {showList && (
+            <div className="p-2 max-h-[calc(60vh-40px)] overflow-y-auto bg-gray100">
+              <div className="space-y-1 text-darkGray">
+                {stations.map((station) => (
+                  <Link 
+                    href={`/stations/${station.id}`} 
+                    key={station.id}
+                    className="block"
+                  >
+                    <div 
+                      className={`p-1.5 rounded-lg flex items-center text-xs ${
+                        selectedStationId === station.id 
+                          ? "bg-blue50 border-l-4 border-blue-500" 
+                          : "bg-gray50 hover:bg-blue50"
+                      }`}
+                      onMouseEnter={() => onMarkerHover(station.id)}
+                      onMouseLeave={() => onMarkerHover(null)}
+                    >
+                      <MapPin className="h-3 w-3 text-blue-500 mr-1.5" />
+                      <span className="truncate">{station.estacao.slice(7)}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default MapComponent;

@@ -16,7 +16,6 @@ export default {
   			secondary: 'var(--secondary)',
   			lightGray: 'var(--gray-300)',
   			darkGray: 'var(--gray-700)',
-			greySubText: 'var(--grey-600)',
 			toggleBackground: 'var(--toggleBackground)',
 			backgroundColor: 'var(--backgroundColor)',
 			blue50: 'var(--blue-50)',
@@ -29,6 +28,7 @@ export default {
 			gray500: 'var(--gray-500)',
 			gray600: 'var(--gray-600)',
 			gray700: 'var(--gray-700)',
+			slate100: 'var(--slate-100)',
 
   		},
   	}

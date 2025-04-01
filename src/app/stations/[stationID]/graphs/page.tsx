@@ -18,6 +18,9 @@ import {
   Legend,
 } from "recharts";
 import CustomTooltip from "@/components/ui/CustomTooltip";
+import { useSetPageTitle } from '@/hooks/useSetPageTitle';
+import {LoadingSpinner} from "@/components/ui/LoadingSpinner";
+import {AlertMessage} from "@/components/ui/AlertMessage";
 
 interface DailyTemperatureData {
   date: string;
@@ -114,21 +117,26 @@ export default function StationGraphsPage() {
 
     fetchData();
   }, [stationID, fromDate, toDate]);
+  const title = stationName === "Desconhecida" ? '' : `Gráficos de ${stationName}`;
+  useSetPageTitle(title);
 
-  if (loading) {
-    return <div className="p-6 text-darkGray">A carregar dados gráficos...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-red-600">Erro: {error}</div>;
+  if (loading) return <LoadingSpinner message="A carregar os dados dos gráficos"/>;
+  if (error) return <AlertMessage type="error" message={error} />;
+  if (stationName === "Desconhecida"){
+    return <AlertMessage type="error" message={"erro de id da estacao"} />;
   }
 
   return (
     <div className="p-6 text-darkGray">
-      <h1 className="text-3xl font-bold mb-6">Gráficos de {stationName}</h1>
-
+      
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Tendência Diária da Temperatura</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold mb-4">Tendência Diária da Temperatura</h2>
+          <a href={`/stations/${stationID}`} className="flex items-center gap-2 text-sm font-medium text-blue-500 hover:text-blue-700 transition-colors">
+            <span className="text-lg">←</span>
+            Voltar à estação
+          </a>
+        </div>
         <ResponsiveContainer width="100%" height={300} className="bg-background">
           <LineChart data={dailyData}>
             <XAxis dataKey="date" />

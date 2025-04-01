@@ -7,7 +7,12 @@ const token = process.env.INFLUX_TOKEN || "";
 const org = process.env.INFLUX_ORG || "";
 const bucket = process.env.INFLUX_BUCKET || "";
 
-const cacheStore: Record<string, { data: any; timestamp: number }> = {};
+interface CacheData {
+  data: QueryResult[];
+  timestamp: number;
+}
+
+const cacheStore: Record<string, CacheData> = {};
 
 export interface QueryResult {
   _time?: string;

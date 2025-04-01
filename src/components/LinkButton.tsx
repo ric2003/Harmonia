@@ -16,11 +16,11 @@ export function LinkButton({ route, name, icon }: LinkButtonProps) {
     
     return (
         <Link
-            className={"flex items-center justify-start w-full h-16 rounded-lg gap-4 p-4 border-2 border-background hover:border-primary transition-colors " + (backgroundColor)}
+            className={"flex items-center justify-start w-full h-12 rounded-lg gap-3 p-3 border-2 border-background hover:border-primary " + (backgroundColor)}
             href={route}
         >
             {icon}
-            <li className="text-[20px] font-semibold">{name}</li>
+            <li className="text-[15px] font-semibold">{name}</li>
         </Link>
     );
 }

@@ -85,7 +85,11 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
-const cache: Record<string, CacheEntry<any>> = {};
+type CacheStore = {
+  [key: string]: CacheEntry<unknown>;
+}
+
+const cache: CacheStore = {};
 
 /**
  * Returns cached data if available and not expired.

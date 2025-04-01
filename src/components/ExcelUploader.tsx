@@ -61,11 +61,11 @@ export default function ExcelUploader() {
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-backgroundColor rounded-xl shadow-md">
-      <h2 className="text-xl font-bold mb-4 text-darkGray">Upload Excel Data Manually</h2>
+    <div className="p-4 max-w-sm mx-auto bg-backgroundColor rounded-lg shadow-md">
+      <h2 className="text-base font-bold mb-3 text-darkGray">Upload Excel Data Manually</h2>
       
-      <div className="mb-4">
-        <label htmlFor="excel-file" className="block text-sm font-medium text-gray700 mb-2">
+      <div className="mb-3">
+        <label htmlFor="excel-file" className="block text-xs font-medium text-gray700 mb-1.5">
           Select Excel File
         </label>
         <input
@@ -73,16 +73,16 @@ export default function ExcelUploader() {
           id="excel-file"
           accept=".xlsx,.xls"
           onChange={handleFileChange}
-          className="block w-full text-sm text-gray500
-            file:mr-4 file:py-2 file:px-4
+          className="block w-full text-xs text-gray500
+            file:mr-3 file:py-1.5 file:px-3
             file:rounded-md file:border-0
-            file:text-sm file:font-semibold
+            file:text-xs file:font-semibold
             file:bg-blue50 file:text-primary
             file:hover:bg-blue200 file:hover:text-primary
             "
         />
         {file && (
-          <p className="mt-2 text-sm text-gray500">
+          <p className="mt-1.5 text-xs text-gray500">
             Selected file: {file.name}
           </p>
         )}
@@ -91,7 +91,7 @@ export default function ExcelUploader() {
       <button
         onClick={handleUpload}
         disabled={loading || !file}
-        className={`w-full py-2 px-4 rounded-md font-medium text-white 
+        className={`w-full py-1.5 px-3 rounded-md font-medium text-white text-xs
           ${loading || !file 
             ? 'bg-gray400 cursor-not-allowed' 
             : 'bg-blue-600 hover:bg-blue-700'}`}
@@ -100,13 +100,13 @@ export default function ExcelUploader() {
       </button>
 
       {message && (
-        <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-md">
+        <div className="mt-3 p-2 bg-green-100 text-green-700 rounded-md text-xs">
           {message}
         </div>
       )}
 
       {error && (
-        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
+        <div className="mt-3 p-2 bg-red-100 text-red-700 rounded-md text-xs">
           {error}
         </div>
       )}
