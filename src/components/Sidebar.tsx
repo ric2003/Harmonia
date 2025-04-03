@@ -29,6 +29,7 @@ export function Sidebar() {
                         <LinkButton route="/stations" name="Stations Page" icon={<Building size={18} />} />
                         <LinkButton route="/dam-monitoring" name="Reservoir Monitor" icon={<Droplets size={18} />} />
                         <LinkButton route="/sentinel" name="Sentinel Map" icon={<Map size={18} />} />
+                        <LinkButton route="/sorraia-map" name="Sorraia Map" icon={<Map size={18} />} />
                         <LinkButton route="/excel" name="Excel Upload" icon={<Sheet size={18} />} />
                         </ul>
                     </nav>
