@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface FilterState {
   filterDam: string;
@@ -25,11 +25,6 @@ interface DamFiltersProps {
 
 export function DamFilters({ filters, setFilters, onReset }: DamFiltersProps) {
   const [showFilters, setShowFilters] = useState(false);
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFilters({ ...filters, [name]: value });
-  };
 
   return (
     <div>

@@ -53,31 +53,38 @@ export function DamMonitoringTable({
       key: 'barragem' as keyof DamData,
       header: 'Dam',
       sortable: true,
-      width: '200px'
+      width: '200px',
+      render: (value: DamData[keyof DamData]) => {
+        return typeof value === 'string' ? value : 'N/A';
+      }
     },
     {
       key: '_time' as keyof DamData,
       header: 'Date',
       sortable: true,
       width: '120px',
-      render: (value: string) => new Date(value).toLocaleDateString('en-GB')
+      render: (value: DamData[keyof DamData]) => {
+        return typeof value === 'string' ? new Date(value).toLocaleDateString('en-GB') : 'N/A';
+      }
     },
     {
       key: 'cota_lida' as keyof DamData,
       header: 'Cota Lida',
       sortable: true,
       width: '120px',
-      render: (value: number) => value?.toFixed(2) || 'N/A'
+      render: (value: DamData[keyof DamData]) => {
+        return typeof value === 'number' ? value.toFixed(2) : 'N/A';
+      }
     },
     {
       key: 'enchimento' as keyof DamData,
       header: 'Enchimento',
       sortable: true,
       width: '150px',
-      render: (value: number, item: DamData) => {
-        const enchimentoPercentage = value !== null && value !== undefined 
-          ? Math.min(Number(value) * 100, 100)
-          : 0;
+      render: (value: DamData[keyof DamData]) => {
+        if (typeof value !== 'number') return 'N/A';
+        
+        const enchimentoPercentage = Math.min(value * 100, 100);
 
         const getBarColor = (percentage: number) => {
           if (percentage > 70) return "bg-green-500";
@@ -86,9 +93,9 @@ export function DamMonitoringTable({
           return "bg-red-500";
         };
 
-        return value !== null && value !== undefined ? (
+        return (
           <div className="flex items-center justify-center">
-            <span className="text-darkGray mr-1.5">{(Number(value) * 100).toFixed(0)+'%'}</span>
+            <span className="text-darkGray mr-1.5">{(value * 100).toFixed(0)+'%'}</span>
             <div className="w-10 bg-lightGray rounded-full h-1.5">
               <div 
                 className={`${getBarColor(enchimentoPercentage)} h-1.5 rounded-full`}
@@ -96,7 +103,7 @@ export function DamMonitoringTable({
               ></div>
             </div>
           </div>
-        ) : 'N/A'
+        );
       }
     },
     {
@@ -104,14 +111,18 @@ export function DamMonitoringTable({
       header: 'Volume Total',
       sortable: true,
       width: '120px',
-      render: (value: number) => value?.toFixed(2) || 'N/A'
+      render: (value: DamData[keyof DamData]) => {
+        return typeof value === 'number' ? value.toFixed(2) : 'N/A';
+      }
     },
     {
       key: 'volume_util' as keyof DamData,
       header: 'Volume Util',
       sortable: true,
       width: '120px',
-      render: (value: number) => value?.toFixed(2) || 'N/A'
+      render: (value: DamData[keyof DamData]) => {
+        return typeof value === 'number' ? value.toFixed(2) : 'N/A';
+      }
     }
   ];
 

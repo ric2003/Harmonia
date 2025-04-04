@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { SentinelFilter } from '@/services/sentinelService'; // Adjust path if needed
@@ -136,7 +136,7 @@ export function FilterControls({ currentFilter, onFilterChange }: FilterControls
         position: 'topright',
       },
 
-      onAdd: function (mapInstance: L.Map) {
+      onAdd: function () {
         // Create container without 'leaflet-bar' to avoid default border/bg
         const container = L.DomUtil.create('div', 'leaflet-control custom-filter-control-container');
 
@@ -182,7 +182,7 @@ export function FilterControls({ currentFilter, onFilterChange }: FilterControls
         return container;
       },
 
-      onRemove: function (mapInstance: L.Map) {
+      onRemove: function () {
         // Clean up if needed, though React usually handles component unmount
       },
     });

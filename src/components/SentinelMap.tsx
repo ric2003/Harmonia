@@ -36,68 +36,6 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-// MapEventHandler component to listen for map movement
-function MapEventHandler({ 
-  onMapMove, 
-  minZoom 
-}: { 
-  onMapMove: (bounds: [[number, number], [number, number]], zoom: number) => void;
-  minZoom: number;
-}) {
-  const mapRef = useRef(null);
-  const initialLoadRef = useRef(false);
-  
-  const map = useMapEvents({
-    moveend: () => {
-      const zoom = map.getZoom();
-      if (zoom >= minZoom) {
-        const bounds = map.getBounds();
-        const sw = bounds.getSouthWest();
-        const ne = bounds.getNorthEast();
-        onMapMove([
-          [sw.lat, sw.lng],
-          [ne.lat, ne.lng]
-        ], zoom);
-      }
-    },
-    zoomend: () => {
-      const zoom = map.getZoom();
-      if (zoom >= minZoom) {
-        const bounds = map.getBounds();
-        const sw = bounds.getSouthWest();
-        const ne = bounds.getNorthEast();
-        onMapMove([
-          [sw.lat, sw.lng],
-          [ne.lat, ne.lng]
-        ], zoom);
-      }
-    }
-  });
-  
-  // Trigger initial load when map is ready
-  useEffect(() => {
-    if (map && !initialLoadRef.current) {
-      initialLoadRef.current = true;
-      
-      // Short timeout to ensure map is fully rendered
-      setTimeout(() => {
-        const zoom = map.getZoom();
-        if (zoom >= minZoom) {
-          const bounds = map.getBounds();
-          const sw = bounds.getSouthWest();
-          const ne = bounds.getNorthEast();
-          onMapMove([
-            [sw.lat, sw.lng],
-            [ne.lat, ne.lng]
-          ], zoom);
-        }
-      }, 100);
-    }
-  }, [map, minZoom, onMapMove]);
-  
-  return null;
-}
-
 function SentinelMap() {
   const [gridImages, setGridImages] = useState<GridImage[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -109,7 +47,6 @@ function SentinelMap() {
     [46.5, 15.0]  // Default northeast
   ]);
   const [currentZoom, setCurrentZoom] = useState(9);
-  const [mapInstance, setMapInstance] = useState(null);
   
   // Cache to store already fetched images
   const imageCache = useRef<Map<string, GridImage>>(new Map());
