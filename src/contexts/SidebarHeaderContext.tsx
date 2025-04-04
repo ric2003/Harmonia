@@ -1,5 +1,5 @@
 "use client"
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 interface SidebarHeaderContextType {
     sidebarOpen: boolean;
@@ -13,11 +13,26 @@ interface SidebarHeaderProviderProps {
 }
 
 export function SidebarHeaderProvider({ children }: SidebarHeaderProviderProps) {
-    const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+    const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
+        const saved = localStorage.getItem("sidebarOpen");
+        return saved !== null ? JSON.parse(saved) : true;
+    });
+
+    // function handleChangeSidebar() {
+    //     setSidebarOpen(state => !state);
+    // }
 
     function handleChangeSidebar() {
-        setSidebarOpen(state => !state);
+        setSidebarOpen(prev => {
+            const newValue = !prev;
+            localStorage.setItem("sidebarOpen", JSON.stringify(newValue));
+            return newValue;
+        });
     }
+
+    useEffect(() => {
+        localStorage.setItem("sidebarOpen", JSON.stringify(sidebarOpen));
+    }, [sidebarOpen]);
     
     return (
         <SidebarHeaderContext.Provider value={{sidebarOpen, handleChangeSidebar}}>
