@@ -15,7 +15,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors",
+          "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium",
           className
         )}
         {...props}

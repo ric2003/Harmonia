@@ -5,6 +5,7 @@ import mapboxgl, { Map, GeolocateControl, Marker } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
@@ -30,6 +31,7 @@ const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSel
   const markers = useRef<Marker[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [showList, setShowList] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -75,17 +77,18 @@ const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSel
         color: selectedStationId === station.id ? '#FF0000' : '#3B82F6'
       })
       .setLngLat([station.lon, station.lat])
-      .setPopup(new mapboxgl.Popup().setHTML(`
-        <h3 class="font-bold">${station.estacao.slice(7)}</h3>
-        <p>${station.loc}</p>
-      `))
       .addTo(map.current!);
 
       // Add hover interactions
       const element = marker.getElement();
       element.addEventListener('mouseenter', () => onMarkerHover && onMarkerHover(station.id));
       element.addEventListener('mouseleave', () => onMarkerHover && onMarkerHover(null));
-      element.addEventListener('click', () => onStationSelect && onStationSelect(station.id));
+      
+      // Replace popup with direct navigation on click
+      element.addEventListener('click', () => {
+        onStationSelect && onStationSelect(station.id);
+        router.push(`/stations/${station.id}`);
+      });
 
       markers.current.push(marker);
     });
@@ -100,7 +103,7 @@ const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSel
         });
       }
     }
-  }, [stations, selectedStationId, mapLoaded, onMarkerHover, onStationSelect]);
+  }, [stations, selectedStationId, mapLoaded, onMarkerHover, onStationSelect, router]);
 
   return (
     <div className="relative w-full h-full">

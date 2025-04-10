@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface AlertMessageProps {
   type: 'error' | 'info' | 'warning';
@@ -6,6 +7,7 @@ interface AlertMessageProps {
 }
 
 export function AlertMessage({ type, message }: AlertMessageProps) {
+  const { t } = useTranslation();
   const getAlertStyles = () => {
     switch (type) {
       case 'error':
@@ -36,7 +38,7 @@ export function AlertMessage({ type, message }: AlertMessageProps) {
   };
 
   const styles = getAlertStyles();
-  
+
   return (
     <div className={`bg-blue50 border-l-4 ${styles.borderColor} p-4 rounded shadow-md my-6`}>
       <div className="flex items-center">
@@ -47,7 +49,7 @@ export function AlertMessage({ type, message }: AlertMessageProps) {
         </div>
         <div className="ml-3">
           <p className="text-sm text-darkGray">
-            {type === 'error' && <span className="font-medium">Error: </span>}
+            {type === 'error' && <span className="font-medium">{t('common.error')}: </span>}
             {message}
           </p>
         </div>

@@ -3,7 +3,10 @@ import { useEffect, useState } from "react";
 import { DamMonitoringTable } from "@/components/dam/DamTable";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { AlertMessage } from "@/components/ui/AlertMessage";
-import { useSetPageTitle } from '@/hooks/useSetPageTitle';
+import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
+import { useTranslation } from 'react-i18next';
+import DataSourceFooter from "@/components/DataSourceFooter";
+
 
 interface QueryResult {
   _time: string | undefined;
@@ -55,8 +58,9 @@ export default function DamMonitoringPage() {
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(initialFilterState);
   const [currentPage, setCurrentPage] = useState(1);
+  const { t } = useTranslation();
   
-  useSetPageTitle('Reservoir Monitor');
+  useTranslatedPageTitle('title.damMonitoring');
 
   useEffect(() => {
     async function fetchInfluxData() {
@@ -160,6 +164,12 @@ export default function DamMonitoringPage() {
         setCurrentPage={setCurrentPage}
         onSort={handleSort}
         onResetFilters={resetFilters}
+      />
+      
+      <DataSourceFooter 
+        textKey="dam.dataSource"
+        linkKey="dam.sir"
+        linkUrl="https://sir.dgadr.gov.pt/outras/reserva-de-agua-nas-albufeiras"
       />
     </div>
   );

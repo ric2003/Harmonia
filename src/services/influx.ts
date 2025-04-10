@@ -31,6 +31,46 @@ function getCacheKey(): string {
   return `T4_${year}`;
 }
 
+/**
+ * Returns a set of unique dam names (barragens) from the cached data
+ * @returns A set of unique dam names
+ */
+export async function getUniqueDamNames(): Promise<Set<string>> {
+  const cacheKey = getCacheKey();
+  const damNames = new Set<string>();
+  
+  // If cache is empty, fetch data first
+  if (!cacheStore[cacheKey]) {
+    try {
+      const response = await getInfluxData();
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          cacheStore[cacheKey] = {
+            data: data.data,
+            timestamp: Date.now()
+          };
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+  
+  // Extract dam names from cache
+  if (cacheStore[cacheKey]) {
+    cacheStore[cacheKey].data.forEach(item => {
+      if (item.barragem) {
+        damNames.add(item.barragem);
+      }
+    });
+  } else {
+    console.log("No cache data available after fetch attempt");
+  }
+  
+  return damNames;
+}
+
 export async function getInfluxData(): Promise<NextResponse> {
   const cacheKey = getCacheKey();
 
@@ -48,13 +88,15 @@ export async function getInfluxData(): Promise<NextResponse> {
 
   const fluxQuery = `
         from(bucket: "${bucket}")
-            |> range(start: 1970-01-01T00:00:00Z, stop: now())
-            |> filter(fn: (r) => r["_measurement"] == "barragem_data")
-            |> aggregateWindow(every: 24h, fn: mean, createEmpty: false)
-            |> pivot(rowKey:["_time", "barragem"], columnKey: ["_field"], valueColumn: "_value")
-            |> group(columns: ["barragem", "_time"])
-            |> drop(columns: ["_start", "_stop"])
-            |> yield(name: "mean_joined")
+        |> range(start: 1970-01-01T00:00:00Z, stop: now())
+        |> filter(fn: (r) => r["_measurement"] == "barragem_data")
+        |> aggregateWindow(every: 24h, fn: mean, createEmpty: false)
+        |> pivot(rowKey:["_time", "barragem"], columnKey: ["_field"], valueColumn: "_value")
+        |> group(columns: ["barragem", "_time"])
+        |> group()
+        |> drop(columns: ["_start", "_stop"])
+        |> sort(columns: ["_time"], desc: true)
+        |> yield(name: "mean_joined")
   `;
 
   const results: QueryResult[] = [];

@@ -6,6 +6,8 @@ import { Sidebar } from "@/components/Sidebar";
 import { SidebarHeaderProvider } from "@/contexts/SidebarHeaderContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { PageTitleProvider } from "@/contexts/PageTitleContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import I18nClientProvider from "@/components/I18nClientProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,23 +30,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt">
+    <html lang="pt" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider>
           <PageTitleProvider>
-            <SidebarHeaderProvider>
-              <div className="flex h-screen">
-                <Sidebar />
-                <div className="flex flex-1 flex-col z-[1]">
-                  <Header />
-                  <main className="overflow-auto bg-background h-full p-8">
-                    {children}
-                  </main>
-                </div>
-              </div>
-            </SidebarHeaderProvider>
+            <I18nClientProvider>
+              <LanguageProvider>
+                <SidebarHeaderProvider>
+                  <div className="flex h-screen">
+                    <Sidebar />
+                    <div className="flex flex-1 flex-col z-[1]">
+                      <Header />
+                      <main className="overflow-auto bg-background h-full p-8">
+                        {children}
+                      </main>
+                    </div>
+                  </div>
+                </SidebarHeaderProvider>
+              </LanguageProvider>
+            </I18nClientProvider>
           </PageTitleProvider>
         </ThemeProvider>
       </body>

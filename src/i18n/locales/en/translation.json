@@ -1,0 +1,247 @@
+{
+  "app": {
+    "title": "Water Wise",
+    "description": "Water resource management application"
+  },
+  "navigation": {
+    "home": "Home",
+    "stations": "Met. Stations",
+    "damMonitoring": "Dam Monitoring",
+    "sentinelMap": "Satellite Images",
+    "sorraiaMap": "Predictive Model",
+    "excelUpload": "Excel Upload"
+  },
+  "title": {
+    "home": "Home",
+    "stations": "Meteorological Stations",
+    "damMonitoring": "Dam Monitoring",
+    "station": "Meteorological Station of {{station}}",
+    "sentinelMap": "Satellite Images",
+    "sorraiaMap": "Predictive Water Simulation Map of the Sorraia River",
+    "excelUpload": "Excel Upload"
+  },
+  "home": {
+    "title": "Meteorological Stations",
+    "intro": "Welcome to Water Wise, a platform dedicated to monitoring and managing water resources in Portugal. Our system integrates data from various sources to provide accurate and up-to-date information on the status of dams, weather conditions, and water resources throughout the country.",
+    "purpose": "This website was developed to assist in sustainable water management, providing visualization and analysis tools for researchers, water resource managers, and the general public.",
+    "monitoredData": "Monitored Data:",
+    "scrollForInfo": "Scroll for more info",
+    "dataSource": "Data source:",
+    "irristrat": "Irristrat - Irrigation Management",
+    "dataList": [
+      "Water levels in dams",
+      "Air temperature (average, minimum, and maximum)",
+      "Relative humidity",
+      "Wind speed",
+      "Solar radiation",
+      "Precipitation",
+      "Satellite imagery (Sentinel)",
+      "Hydrological data from the Sorraia basin"
+    ]
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "theme": {
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "language": {
+      "en": "English",
+      "pt": "Portuguese"
+    },
+    "unknown": "Unknown",
+    "noData": "No data to display.",
+    "getDataButton": "Get Data"
+  },
+  "station": {
+    "imageAlt": "Image of {{station}} station",
+    "location": "Location",
+    "loadingMap": "Loading map...",
+    "dailyTemperatureTrend": "Daily Temperature Trend",
+    "viewMoreGraphs": "View More Graphs",
+    "backToStation": "Back to station",
+    "tabs": {
+      "daily": "Daily Data",
+      "hourly": "Hourly Data",
+      "min10": "10-Minute Data"
+    },
+    "dateRange": {
+      "startDate": "Start Date:",
+      "endDate": "End Date:"
+    },
+    "hourlyTitle": "Hourly Data (Last 7 days)",
+    "min10Title": "10-Minute Data (Last 48 hours)",
+    "table": {
+      "date": "Date",
+      "hour": "Hour",
+      "avgTemp": "Avg. Temp. (°C)",
+      "minTemp": "Min. Temp. (°C)",
+      "maxTemp": "Max. Temp. (°C)",
+      "humidity": "Humidity (%)",
+      "wind": "Wind (km/h)",
+      "radiation": "Solar Radiation",
+      "p_em": "P_em",
+      "leafWetness": "Leaf Wetness"
+    },
+    "chart": {
+      "average": "Average",
+      "minimum": "Minimum",
+      "maximum": "Maximum",
+      "temperature": "Temperature",
+      "windSpeed": "Wind Speed",
+      "humidity": "Humidity"
+    },
+    "graphs": {
+      "title": "Graphs of {{station}}",
+      "loading": "Loading graph data",
+      "stationIdError": "Station ID error",
+      "hourlyTemperature": "Hourly Temperature Variation",
+      "hourlyWindSpeed": "Hourly Wind Speed Variation",
+      "hourlyHumidity": "Hourly Humidity Variation"
+    }
+  },
+  "dam": {
+    "title": "Reservoir Monitoring",
+    "dataSource": "Data source:",
+    "sir": "SIR - Irrigation Information System",
+    "monitoring": {
+      "title": "Dam Monitoring Table",
+      "showFilters": "Show Filters",
+      "hideFilters": "Hide Filters",
+      "resetFilters": "Reset All Filters",
+      "filterData": "Filter Data"
+    },
+    "filters": {
+      "damName": "Dam Name",
+      "filterByDamName": "Filter by dam name",
+      "dateRange": "Date Range",
+      "volumeTotal": "Volume Total Range",
+      "minVolume": "Min Volume",
+      "maxVolume": "Max Volume",
+      "cotaLida": "Read Level Range",
+      "minCota": "Minimum Level",
+      "maxCota": "Maximum Level",
+      "enchimento": "Filled Range (%)",
+      "min": "Min",
+      "max": "Max",
+      "volumeUtil": "Useful Volume Range"
+    },
+    "table": {
+      "dam": "Dam",
+      "date": "Date",
+      "cotaLida": "Read Level",
+      "enchimento": "Filled (%)",
+      "volumeTotal": "Total Volume",
+      "volumeUtil": "Useful Volume",
+      "noRecords": "No records match your filter criteria."
+    },
+    "footer": {
+      "data": "Data source:",
+      "source": "SIR - Sistema de Informação de Regadio"
+    }
+  },
+  "filterControls": {
+    "title": "Layer Type",
+    "filters": {
+      "natural": {
+        "label": "Natural Color",
+        "description": "True color representation of the Earth's surface"
+      },
+      "ndvi": {
+        "label": "Vegetation (NDVI)",
+        "description": "Normalized Difference Vegetation Index - Shows plant health and density"
+      },
+      "moisture": {
+        "label": "Moisture Index",
+        "description": "Shows water content in vegetation and soil"
+      },
+      "urban": {
+        "label": "Urban Areas",
+        "description": "Highlights built-up areas and urban development"
+      }
+    }
+  },
+  "simulationMap": {
+    "loading": "Loading map base data...",
+    "error": "Error: {{message}}",
+    "noData": "No time series data found in this file.",
+    "dateControls": {
+      "day": "Day",
+      "month": "Month",
+      "year": "Year"
+    },
+    "parameters": {
+      "flowout_m3_s": {
+        "label": "Flow (m³/s)",
+        "description": "Water Flow Rate"
+      },
+      "ammonia_mg_l": {
+        "label": "NH₄ (mg/l)",
+        "description": "Ammonia Concentration"
+      },
+      "dissolved_phosphorus_mg_l": {
+        "label": "PO₄ (mg/l)",
+        "description": "Dissolved Phosphorus"
+      },
+      "dissolved_oxygen_mg_l": {
+        "label": "DO (mg/l)",
+        "description": "Dissolved Oxygen"
+      },
+      "nitrate_mg_l": {
+        "label": "NO₃ (mg/l)",
+        "description": "Nitrate"
+      },
+      "nitrite_mg_l": {
+        "label": "NO₂ (mg/l)",
+        "description": "Nitrite"
+      },
+      "organic_nitrogen_mg_l": {
+        "label": "Org-N (mg/l)",
+        "description": "Organic Nitrogen"
+      },
+      "organic_phosphorus_mg_l": {
+        "label": "Org-P (mg/l)",
+        "description": "Organic Phosphorus"
+      },
+      "saturation_oxygen_mg_l": {
+        "label": "DO-Sat (mg/l)",
+        "description": "Oxygen Saturation Level"
+      },
+      "temperature_cc": {
+        "label": "Temp (°C)",
+        "description": "Water Temperature"
+      },
+      "sediments_tons": {
+        "label": "Sed (tons)",
+        "description": "Sediment Load"
+      }
+    }
+  },
+  "excelUploader": {
+    "title": "Upload Excel Data Manually",
+    "infoButton": "File Requirements Info",
+    "selectFile": "Select Excel File",
+    "chooseFile": "Choose File",
+    "noFileSelected": "No file selected",
+    "selectedFile": "Selected file: {{fileName}}",
+    "uploadButton": "Upload Excel",
+    "uploading": "Uploading...",
+    "errors": {
+      "selectFile": "Please select a file first",
+      "excelOnly": "Please upload an Excel file (.xlsx or .xls)",
+      "unknown": "An unknown error occurred"
+    },
+    "modal": {
+      "title": "File Upload",
+      "description": "We accept Excel files (.xlsx) with specific columns: Dam, Date, Level, Volume, Fill, Source, Basin and DRAP. The file must have correct headers and be well structured.",
+      "exampleTitle": "Example File",
+      "exampleDescription": "See a valid template before uploading:",
+      "downloadButton": "Download template.xlsx"
+    }
+  },
+  "sentinel": {
+    "dataSource": "Data source:",
+    "sentinelHub": "Sentinel Hub - Sentinel Satellite Data"
+  }
+}

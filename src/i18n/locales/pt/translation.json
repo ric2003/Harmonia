@@ -1,0 +1,243 @@
+{
+  "app": {
+    "title": "Water Wise",
+    "description": "Aplicação de gestão de recursos hídricos"
+  },
+  "navigation": {
+    "home": "Início",
+    "stations": "Estações Met.",
+    "damMonitoring": "Mon. Barragens",
+    "sentinelMap": "Imagens Satélite",
+    "sorraiaMap": "Modelo Preditivo",
+    "excelUpload": "Carregar Excel"
+  },
+  "title": {
+    "home": "Início",
+    "stations": "Estações Meteorológicas",
+    "damMonitoring": "Monitorização de Barragens",
+    "station": "Estação Meteorológica de {{station}}",
+    "sentinelMap": "Imagens de Satélite",
+    "sorraiaMap": "Mapa Preditivo de Simulação de Água do Sorraia",
+    "excelUpload": "Carregar Excel"
+  },
+  "home": {
+    "title": "Estações Meteorológicas",
+    "intro": "Bem-vindo ao Water Wise, uma plataforma dedicada à monitorização e gestão de recursos hídricos em Portugal. O nosso sistema integra dados de várias fontes para fornecer informações precisas e atualizadas sobre o estado das barragens, condições meteorológicas e recursos hídricos em todo o país.",
+    "purpose": "Este site foi desenvolvido para auxiliar na gestão sustentável da água, fornecendo ferramentas de visualização e análise para investigadores, gestores de recursos hídricos e o público em geral.",
+    "monitoredData": "Dados Monitorizados:",
+    "scrollForInfo": "Deslize para mais informações",
+    "dataSource": "Fonte de dados:",
+    "irristrat": "Irristrat - Gestão de Rega",
+    "dataList": [
+      "Níveis de água nas barragens",
+      "Temperatura do ar (média, mínima e máxima)",
+      "Humidade relativa",
+      "Velocidade do vento",
+      "Radiação solar",
+      "Precipitação",
+      "Imagens de satélite (Sentinel)",
+      "Dados hidrológicos da bacia do Sorraia"
+    ]
+  },
+  "common": {
+    "loading": "A carregar...",
+    "error": "Erro",
+    "theme": {
+      "light": "Claro",
+      "dark": "Escuro"
+    },
+    "language": {
+      "en": "Inglês",
+      "pt": "Português"
+    },
+    "unknown": "Desconhecida",
+    "noData": "Não existem dados para mostrar.",
+    "getDataButton": "Obter Dados"
+  },
+  "station": {
+    "imageAlt": "Imagem da estação {{station}}",
+    "location": "Localização",
+    "loadingMap": "A carregar mapa...",
+    "dailyTemperatureTrend": "Tendência Diária da Temperatura",
+    "viewMoreGraphs": "Ver mais Gráficos",
+    "backToStation": "Voltar à estação",
+    "tabs": {
+      "daily": "Dados Diários",
+      "hourly": "Dados Horários",
+      "min10": "Dados a Cada 10 Minutos"
+    },
+    "dateRange": {
+      "startDate": "Data Inicial:",
+      "endDate": "Data Final:"
+    },
+    "hourlyTitle": "Dados Horários (Últimos 7 dias)",
+    "min10Title": "Dados a cada 10 minutos (Últimas 48 horas)",
+    "table": {
+      "date": "Data",
+      "hour": "Hora",
+      "avgTemp": "Temp. Média (°C)",
+      "minTemp": "Temp. Mínima (°C)",
+      "maxTemp": "Temp. Máxima (°C)",
+      "humidity": "Humidade (%)",
+      "wind": "Vento (km/h)",
+      "radiation": "Radiação Solar",
+      "p_em": "P_em",
+      "leafWetness": "Humidade Foliar"
+    },
+    "chart": {
+      "average": "Média",
+      "minimum": "Mínima",
+      "maximum": "Máxima",
+      "temperature": "Temperatura",
+      "windSpeed": "Velocidade do Vento",
+      "humidity": "Humidade"
+    },
+    "graphs": {
+      "title": "Gráficos de {{station}}",
+      "loading": "A carregar os dados dos gráficos",
+      "stationIdError": "Erro de ID da estação",
+      "hourlyTemperature": "Variação Horária da Temperatura",
+      "hourlyWindSpeed": "Variação Horária da Velocidade do Vento",
+      "hourlyHumidity": "Variação Horária da Humidade"
+    }
+  },
+  "dam": {
+    "title": "Monitorização de Albufeiras",
+    "dataSource": "Fonte de dados:",
+    "sir": "SIR - Sistema de Informação de Regadio",
+    "monitoring": {
+      "title": "Tabela de Monitorização das Barragens",
+      "showFilters": "Mostrar Filtros",
+      "hideFilters": "Ocultar Filtros",
+      "resetFilters": "Redefinir Todos os Filtros",
+      "filterData": "Filtrar Dados"
+    },
+    "filters": {
+      "damName": "Nome da Barragem",
+      "filterByDamName": "Filtrar por nome da barragem",
+      "dateRange": "Intervalo de Datas",
+      "volumeTotal": "Intervalo de Volume Total",
+      "minVolume": "Volume Mínimo",
+      "maxVolume": "Volume Máximo",
+      "cotaLida": "Intervalo de Cota Lida",
+      "minCota": "Cota Mínima",
+      "maxCota": "Cota Máxima",
+      "enchimento": "Intervalo de Enchimento (%)",
+      "min": "Mín",
+      "max": "Máx",
+      "volumeUtil": "Intervalo de Volume Útil"
+    },
+    "table": {
+      "dam": "Barragem",
+      "date": "Data",
+      "cotaLida": "Cota Lida",
+      "enchimento": "Enchimento",
+      "volumeTotal": "Volume Total",
+      "volumeUtil": "Volume Útil",
+      "noRecords": "Nenhum registro corresponde aos seus critérios de filtro."
+    }
+  },
+  "filterControls": {
+    "title": "Tipo de Camada",
+    "filters": {
+      "natural": {
+        "label": "Cor Natural",
+        "description": "Representação em cores reais da superfície da Terra"
+      },
+      "ndvi": {
+        "label": "Vegetação (NDVI)",
+        "description": "Índice de Vegetação por Diferença Normalizada - Mostra saúde e densidade das plantas"
+      },
+      "moisture": {
+        "label": "Índice de Umidade",
+        "description": "Mostra o conteúdo de água na vegetação e no solo"
+      },
+      "urban": {
+        "label": "Áreas Urbanas",
+        "description": "Destaca áreas construídas e desenvolvimento urbano"
+      }
+    }
+  },
+  "simulationMap": {
+    "loading": "A carregar dados base do mapa...",
+    "error": "Erro: {{message}}",
+    "noData": "Nenhuma série temporal encontrada neste arquivo.",
+    "dateControls": {
+      "day": "Dia",
+      "month": "Mês",
+      "year": "Ano"
+    },
+    "parameters": {
+      "flowout_m3_s": {
+        "label": "Fluxo (m³/s)",
+        "description": "Taxa de Fluxo de Água"
+      },
+      "ammonia_mg_l": {
+        "label": "NH₄ (mg/l)",
+        "description": "Concentração de Amônia"
+      },
+      "dissolved_phosphorus_mg_l": {
+        "label": "PO₄ (mg/l)",
+        "description": "Fósforo Dissolvido"
+      },
+      "dissolved_oxygen_mg_l": {
+        "label": "OD (mg/l)",
+        "description": "Oxigênio Dissolvido"
+      },
+      "nitrate_mg_l": {
+        "label": "NO₃ (mg/l)",
+        "description": "Nitrato"
+      },
+      "nitrite_mg_l": {
+        "label": "NO₂ (mg/l)",
+        "description": "Nitrito"
+      },
+      "organic_nitrogen_mg_l": {
+        "label": "N-Org (mg/l)",
+        "description": "Nitrogênio Orgânico"
+      },
+      "organic_phosphorus_mg_l": {
+        "label": "P-Org (mg/l)",
+        "description": "Fósforo Orgânico"
+      },
+      "saturation_oxygen_mg_l": {
+        "label": "OD-Sat (mg/l)",
+        "description": "Nível de Saturação de Oxigênio"
+      },
+      "temperature_cc": {
+        "label": "Temp (°C)",
+        "description": "Temperatura da Água"
+      },
+      "sediments_tons": {
+        "label": "Sed (ton)",
+        "description": "Carga de Sedimentos"
+      }
+    }
+  },
+  "excelUploader": {
+    "title": "Carregar Dados Excel Manualmente",
+    "infoButton": "Informações de Requisitos do Arquivo",
+    "selectFile": "Selecionar Arquivo Excel",
+    "chooseFile": "Escolher Arquivo",
+    "noFileSelected": "Nenhum arquivo selecionado",
+    "selectedFile": "Arquivo selecionado: {{fileName}}",
+    "uploadButton": "Carregar Excel",
+    "uploading": "A carregar...",
+    "errors": {
+      "selectFile": "Por favor, selecione um arquivo primeiro",
+      "excelOnly": "Por favor, carregue um arquivo Excel (.xlsx ou .xls)",
+      "unknown": "Ocorreu um erro desconhecido"
+    },
+    "modal": {
+      "title": "Carregar Arquivo",
+      "description": "Aceitamos arquivos Excel (.xlsx) com colunas específicas: Barragem, Data, Nível, Volume, Enchimento, Fonte, Bacia e DRAP. O arquivo deve ter cabeçalhos corretos e estar bem estruturado.",
+      "exampleTitle": "Arquivo de Exemplo",
+      "exampleDescription": "Veja um modelo válido antes de carregar:",
+      "downloadButton": "Baixar template.xlsx"
+    }
+  },
+  "sentinel": {
+    "dataSource": "Fonte de dados:",
+    "sentinelHub": "Sentinel Hub - Dados de Satélite Sentinel"
+  }
+}

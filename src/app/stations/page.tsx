@@ -3,13 +3,16 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getStations, Station } from "@/services/api";
 import StationImage from "@/components/StationImage";
-import { useSetPageTitle } from '@/hooks/useSetPageTitle';
+import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
+import { useTranslation } from 'react-i18next';
+import DataSourceFooter from "@/components/DataSourceFooter";
 
 export default function StationsPage() {
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  useSetPageTitle('STATIONS');
+  const { t } = useTranslation();
+  useTranslatedPageTitle('title.stations');
 
   async function fetchStations() {
     setLoading(true);
@@ -62,11 +65,11 @@ export default function StationsPage() {
                       width={600}
                       height={400}
                       className="rounded w-full aspect-video"
-                      alt={`${station.estacao} thumbnail`}
+                      alt={`${station.estacao.slice(7,)} thumbnail`}
                       fallbackSrc="/images/default.png"
                     />
                   </div>
-                  <h2 className="text-xl font-semibold">{station.estacao}</h2>
+                  <h2 className="text-xl font-semibold">{station.estacao.slice(7,)}</h2>
                   <p className="text-gray600 text-sm">{station.loc}</p>
                 </li>
               </Link>
@@ -74,6 +77,12 @@ export default function StationsPage() {
           })}
         </ul>
       )}
+      
+      <DataSourceFooter 
+        textKey="home.dataSource"
+        linkKey="home.irristrat"
+        linkUrl="https://irristrat.com/new/index.php"
+      />
     </div>
   );
 }

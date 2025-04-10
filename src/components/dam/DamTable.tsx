@@ -2,6 +2,7 @@
 import React from 'react';
 import { DamFilters } from './DamFilters';
 import { Table } from '@/components/ui/Table';
+import { useTranslation } from 'react-i18next';
 
 interface DamData {
   barragem?: string;
@@ -39,7 +40,7 @@ interface DamMonitoringTableProps {
   onResetFilters: () => void;
 }
 
-export function DamMonitoringTable({ 
+export function DamMonitoringTable({
   data,
   filters,
   setFilters,
@@ -48,10 +49,11 @@ export function DamMonitoringTable({
   onSort,
   onResetFilters
 }: DamMonitoringTableProps) {
+  const { t } = useTranslation();
   const columns = [
     {
       key: 'barragem' as keyof DamData,
-      header: 'Dam',
+      header: t('dam.table.dam'),
       sortable: true,
       width: '200px',
       render: (value: DamData[keyof DamData]) => {
@@ -60,7 +62,7 @@ export function DamMonitoringTable({
     },
     {
       key: '_time' as keyof DamData,
-      header: 'Date',
+      header: t('dam.table.date'),
       sortable: true,
       width: '120px',
       render: (value: DamData[keyof DamData]) => {
@@ -69,7 +71,7 @@ export function DamMonitoringTable({
     },
     {
       key: 'cota_lida' as keyof DamData,
-      header: 'Cota Lida',
+      header: t('dam.table.cotaLida'),
       sortable: true,
       width: '120px',
       render: (value: DamData[keyof DamData]) => {
@@ -78,12 +80,12 @@ export function DamMonitoringTable({
     },
     {
       key: 'enchimento' as keyof DamData,
-      header: 'Enchimento',
+      header: t('dam.table.enchimento'),
       sortable: true,
       width: '150px',
       render: (value: DamData[keyof DamData]) => {
         if (typeof value !== 'number') return 'N/A';
-        
+
         const enchimentoPercentage = Math.min(value * 100, 100);
 
         const getBarColor = (percentage: number) => {
@@ -97,7 +99,7 @@ export function DamMonitoringTable({
           <div className="flex items-center justify-center">
             <span className="text-darkGray mr-1.5">{(value * 100).toFixed(0)+'%'}</span>
             <div className="w-10 bg-lightGray rounded-full h-1.5">
-              <div 
+              <div
                 className={`${getBarColor(enchimentoPercentage)} h-1.5 rounded-full`}
                 style={{ width: `${enchimentoPercentage}%` }}
               ></div>
@@ -108,7 +110,7 @@ export function DamMonitoringTable({
     },
     {
       key: 'volume_total' as keyof DamData,
-      header: 'Volume Total',
+      header: t('dam.table.volumeTotal'),
       sortable: true,
       width: '120px',
       render: (value: DamData[keyof DamData]) => {
@@ -117,7 +119,7 @@ export function DamMonitoringTable({
     },
     {
       key: 'volume_util' as keyof DamData,
-      header: 'Volume Util',
+      header: t('dam.table.volumeUtil'),
       sortable: true,
       width: '120px',
       render: (value: DamData[keyof DamData]) => {
@@ -132,7 +134,7 @@ export function DamMonitoringTable({
     if (filters.filterDam && item.barragem?.toLowerCase().indexOf(filters.filterDam.toLowerCase()) === -1) {
       return false;
     }
-    
+
     // Filter by date range
     if (filters.filterStartDate && item._time && new Date(item._time) < new Date(filters.filterStartDate)) {
       return false;
@@ -140,7 +142,7 @@ export function DamMonitoringTable({
     if (filters.filterEndDate && item._time && new Date(item._time) > new Date(filters.filterEndDate)) {
       return false;
     }
-    
+
     // Filter by volume total
     if (filters.filterMinVolume && item.volume_total !== undefined && item.volume_total < Number(filters.filterMinVolume)) {
       return false;
@@ -148,7 +150,7 @@ export function DamMonitoringTable({
     if (filters.filterMaxVolume && item.volume_total !== undefined && item.volume_total > Number(filters.filterMaxVolume)) {
       return false;
     }
-    
+
     // Filter by cota lida
     if (filters.filterMinCotaLida && item.cota_lida !== undefined && item.cota_lida < Number(filters.filterMinCotaLida)) {
       return false;
@@ -156,7 +158,7 @@ export function DamMonitoringTable({
     if (filters.filterMaxCotaLida && item.cota_lida !== undefined && item.cota_lida > Number(filters.filterMaxCotaLida)) {
       return false;
     }
-    
+
     // Filter by enchimento
     if (filters.filterMinEnchimento && item.enchimento !== undefined && item.enchimento < Number(filters.filterMinEnchimento)) {
       return false;
@@ -164,7 +166,7 @@ export function DamMonitoringTable({
     if (filters.filterMaxEnchimento && item.enchimento !== undefined && item.enchimento > Number(filters.filterMaxEnchimento)) {
       return false;
     }
-    
+
     // Filter by volume util
     if (filters.filterMinVolumeUtil && item.volume_util !== undefined && item.volume_util < Number(filters.filterMinVolumeUtil)) {
       return false;
@@ -172,13 +174,13 @@ export function DamMonitoringTable({
     if (filters.filterMaxVolumeUtil && item.volume_util !== undefined && item.volume_util > Number(filters.filterMaxVolumeUtil)) {
       return false;
     }
-    
+
     return true;
   });
 
   return (
     <div className="bg-background rounded-lg max-h-[100%] shadow-lg overflow-hidden">
-      <DamFilters 
+      <DamFilters
         filters={filters}
         setFilters={setFilters}
         onReset={onResetFilters}
@@ -193,7 +195,7 @@ export function DamMonitoringTable({
         onSort={onSort}
         onPageChange={setCurrentPage}
         onResetFilters={onResetFilters}
-        emptyMessage="No records match your filter criteria."
+        emptyMessage={t('dam.table.noRecords')}
       />
     </div>
   );

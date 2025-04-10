@@ -223,14 +223,12 @@ function SentinelMap() {
           } catch (err) {
             failedCells++;
             console.error(`Failed to fetch image for grid cell ${index} at bounds [${cell.bbox.join(', ')}]:`, err);
-            
-            // Skip the failed cell but don't crash the entire grid
+
             return null;
           }
         });
 
         const fetchedImages = await Promise.all(imagePromises);
-        // Filter out null values from failed fetches
         const validNewImages = fetchedImages.filter(img => img !== null) as GridImage[];
         const allImages = [...cachedImages, ...validNewImages];
         
@@ -241,8 +239,7 @@ function SentinelMap() {
         });
         
         setGridImages(allImages);
-        
-        // Set a warning if some cells failed but we still have some images
+
         if (failedCells > 0 && validNewImages.length < imagesToFetch.length) {
           if (validNewImages.length === 0 && cachedImages.length === 0) {
             setError(`Failed to load any Sentinel imagery for this region. Try zooming or panning to a different area.`);

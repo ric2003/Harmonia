@@ -1,13 +1,19 @@
 'use client';
 
 import React from 'react';
+import { useContext } from "react";
 import SimulationMap from '@/components/SimulationMap';
-import { useSetPageTitle } from '@/hooks/useSetPageTitle';
+import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
+import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
+
 
 const SimulationPage = () => {
-  useSetPageTitle("Sorraia Water Simulation Map");
+  useTranslatedPageTitle('title.sorraiaMap');
+  const { sidebarOpen } = useContext(SidebarHeaderContext);
   return (
-    <SimulationMap />
+    <SimulationMap 
+      key={sidebarOpen ? 'sidebar-open' : 'sidebar-closed'} 
+    />
   );
 };
 

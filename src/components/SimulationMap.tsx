@@ -2,30 +2,19 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import L, { Layer, LeafletMouseEvent } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { RchParsedData } from '@/utils/rchParser'; 
+import { RchParsedData } from '@/utils/rchParser';
 import { getParsedRchData } from '@/services/simulationService';
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { Feature, Geometry } from 'geojson';
+import { useTranslation } from 'react-i18next';
+import i18next from 'i18next';
 
 interface GeoJsonFeatureCollection {
   type: "FeatureCollection";
   features: Array<Feature>;
 }
 
-// Parameter descriptions for tooltips
-const parameterDescriptions: Record<string, string> = {
-  flowout_m3_s: "Water Flow Rate",
-  ammonia_mg_l: "Ammonia Concentration",
-  dissolved_phosphorus_mg_l: "Dissolved Phosphorus",
-  dissolved_oxygen_mg_l: "Dissolved Oxygen",
-  nitrate_mg_l: "Nitrate",
-  nitrite_mg_l: "Nitrite",
-  organic_nitrogen_mg_l: "Organic Nitrogen",
-  organic_phosphorus_mg_l: "Organic Phosphorus",
-  saturation_oxygen_mg_l: "Oxygen Saturation Level",
-  temperature_cc: "Water Temperature",
-  sediments_tons: "Sediment Load"
-};
+// Parameter descriptions are now handled through translations
 
 // Tooltip component
 const Tooltip: React.FC<{ title: string; description: string }> = ({ title, description }) => (
@@ -42,16 +31,27 @@ const Tooltip: React.FC<{ title: string; description: string }> = ({ title, desc
 const formatDate = (dateString: string): string => {
   try {
     const date = new Date(dateString);
+    // Get the current language from i18next
+    const currentLang = i18next.language || 'en';
+    // For date formatting, we'll stick with numeric format for consistency
+    // but use the language's preferred date separator
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+
+    // Different date formats based on language
+    if (currentLang === 'pt') {
+      return `${day}/${month}/${year}`; // Portuguese format: dd/mm/yyyy
+    } else {
+      return `${day}/${month}/${year}`; // Default format: dd/mm/yyyy
+    }
   } catch {
     return dateString;
   }
 };
 
 const SimulationMap: React.FC = () => {
+  const { t } = useTranslation();
   const today = new Date();
   const todayFormatted = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
 
@@ -70,7 +70,7 @@ const SimulationMap: React.FC = () => {
   const [isPanelVisible, setIsPanelVisible] = useState<boolean>(true);
   let lastClickedLayer: Layer | null = null;
 
-  const mapCenter: L.LatLngExpression = [38.8, -8.2];
+  const mapCenter: L.LatLngExpression = [38.8, -8.5];
   const initialZoom: number = 9;
 
   // Helper function to update selected date
@@ -106,6 +106,43 @@ const SimulationMap: React.FC = () => {
         }
         const localizJson: GeoJsonFeatureCollection = await localizResponse.json();
         const riv1Json: GeoJsonFeatureCollection = await riv1Response.json();
+        
+        // Transform coordinates for river data (smaller adjustment)
+        const transformRiverCoordinates = (coords: number[]): number[] => {
+          // Add ~0.0015° to latitude (moving north)
+          // Subtract ~0.0015° from longitude (moving west)
+          return [coords[0] - 0.0015, coords[1] + 0.0015];
+        };
+
+        // Transform coordinates for location points (larger adjustment)
+        const transformLocationCoordinates = (coords: number[]): number[] => {
+          // Add ~0.001° to latitude (moving north)
+          // Subtract ~0.001° from longitude (moving west)
+          return [coords[0] - 0.001, coords[1] + 0.001];
+        };
+
+        // Transform point coordinates
+        if (localizJson.features) {
+          localizJson.features.forEach(feature => {
+            if (feature.geometry.type === 'Point' && feature.geometry.coordinates) {
+              feature.geometry.coordinates = transformLocationCoordinates(feature.geometry.coordinates);
+            }
+          });
+        }
+
+        // Transform river coordinates
+        if (riv1Json.features) {
+          riv1Json.features.forEach(feature => {
+            if (feature.geometry.type === 'MultiLineString' && feature.geometry.coordinates) {
+              feature.geometry.coordinates.forEach(line => {
+                line.forEach((point, index) => {
+                  line[index] = transformRiverCoordinates(point);
+                });
+              });
+            }
+          });
+        }
+        
         setLocalizData(localizJson);
         setRiv1Data(riv1Json);
       } catch (err: Error | unknown) {
@@ -124,12 +161,12 @@ const SimulationMap: React.FC = () => {
       setSelectedRchData(null);
       return;
     }
-    
+
     const fetchRchData = async () => {
       setLoadingRch(true);
       setErrorRch(null);
       setSelectedRchData(null);
-      
+
       try {
         const data = await getParsedRchData(selectedLocationId.toString());
         setSelectedRchData(data);
@@ -175,9 +212,8 @@ const SimulationMap: React.FC = () => {
             return;
           }
 
-          // If clicking a different point
           resetPointStyle();
-          
+
           setSelectedLocationId(locationId);
           setIsPanelVisible(true);
           if (layer instanceof L.Path) {
@@ -206,8 +242,8 @@ const SimulationMap: React.FC = () => {
     return L.circleMarker(latlng, pointStyle);
   }
 
-  if (loadingGeoJson) return <div>Loading map base data...</div>;
-  if (errorGeoJson) return <div style={{ color: 'red' }}>Error: {errorGeoJson}</div>;
+  if (loadingGeoJson) return <div>{t('simulationMap.loading')}</div>;
+  if (errorGeoJson) return <div style={{ color: 'red' }}>{t('simulationMap.error', { message: errorGeoJson })}</div>;
 
   // Helper function to format values (optional but useful)
   const formatValue = (value: number | string | undefined | null, decimalPlaces: number = 2): string => {
@@ -226,7 +262,7 @@ const SimulationMap: React.FC = () => {
   // Helper function to get unique years from timeseries
   const getUniqueYears = (): number[] => {
     if (!selectedRchData?.timeseries) return [];
-    const years = [...new Set(selectedRchData.timeseries.map(entry => 
+    const years = [...new Set(selectedRchData.timeseries.map(entry =>
       new Date(entry.timestamp).getFullYear()
     ))];
     return years.sort();
@@ -313,7 +349,7 @@ const SimulationMap: React.FC = () => {
                     {/* Date Selection Controls */}
                     <div className="flex flex-wrap gap-2 items-end">
                     <div className="w-32">
-                        <label className="block text-xs font-medium text-gray700 mb-1">Day</label>
+                        <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.day')}</label>
                         <select
                             className="w-full p-1 border rounded-md bg-background text-sm text-darkGray"
                             value={selectedDay}
@@ -331,7 +367,7 @@ const SimulationMap: React.FC = () => {
                     </div>
 
                     <div className="w-32">
-                        <label className="block text-xs font-medium text-gray700 mb-1">Month</label>
+                        <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.month')}</label>
                         <select
                           className="w-full p-1 border rounded-md bg-background text-sm text-darkGray"
                           value={selectedMonth}
@@ -341,16 +377,20 @@ const SimulationMap: React.FC = () => {
                             updateSelectedDate(selectedYear, newMonth, selectedDay);
                           }}
                         >
-                          {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                            <option key={month} value={month}>
-                              {new Date(2000, month - 1, 1).toLocaleString('default', { month: 'long' })}
-                            </option>
-                          ))}
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
+                            const currentLang = i18next.language || 'en';
+                            const monthName = new Date(2000, month - 1, 1).toLocaleString(currentLang, { month: 'long' });
+                            return (
+                              <option key={month} value={month}>
+                                {monthName}
+                              </option>
+                            );
+                          })}
                         </select>
                       </div>
 
                       <div className="w-32">
-                        <label className="block text-xs font-medium text-gray700 mb-1">Year</label>
+                        <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.year')}</label>
                         <select
                           className="w-full p-1 border rounded-md bg-background text-sm text-darkGray"
                           value={selectedYear}
@@ -373,67 +413,67 @@ const SimulationMap: React.FC = () => {
                         <div className="grid grid-cols-4 md:grid-cols-6 gap-2 text-sm">
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="Flow (m³/s)" description={parameterDescriptions.flowout_m3_s} />
+                              <Tooltip title={t('simulationMap.parameters.flowout_m3_s.label')} description={t('simulationMap.parameters.flowout_m3_s.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.flowout_m3_s)}</div>
                           </div>
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="NH₄ (mg/l)" description={parameterDescriptions.ammonia_mg_l} />
+                              <Tooltip title={t('simulationMap.parameters.ammonia_mg_l.label')} description={t('simulationMap.parameters.ammonia_mg_l.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.ammonia_mg_l)}</div>
                           </div>
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="PO₄ (mg/l)" description={parameterDescriptions.dissolved_phosphorus_mg_l} />
+                              <Tooltip title={t('simulationMap.parameters.dissolved_phosphorus_mg_l.label')} description={t('simulationMap.parameters.dissolved_phosphorus_mg_l.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.dissolved_phosphorus_mg_l)}</div>
                           </div>
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="DO (mg/l)" description={parameterDescriptions.dissolved_oxygen_mg_l} />
+                              <Tooltip title={t('simulationMap.parameters.dissolved_oxygen_mg_l.label')} description={t('simulationMap.parameters.dissolved_oxygen_mg_l.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.dissolved_oxygen_mg_l)}</div>
                           </div>
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="NO₃ (mg/l)" description={parameterDescriptions.nitrate_mg_l} />
+                              <Tooltip title={t('simulationMap.parameters.nitrate_mg_l.label')} description={t('simulationMap.parameters.nitrate_mg_l.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.nitrate_mg_l)}</div>
                           </div>
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="NO₂ (mg/l)" description={parameterDescriptions.nitrite_mg_l} />
+                              <Tooltip title={t('simulationMap.parameters.nitrite_mg_l.label')} description={t('simulationMap.parameters.nitrite_mg_l.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.nitrite_mg_l)}</div>
                           </div>
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="Org-N (mg/l)" description={parameterDescriptions.organic_nitrogen_mg_l} />
+                              <Tooltip title={t('simulationMap.parameters.organic_nitrogen_mg_l.label')} description={t('simulationMap.parameters.organic_nitrogen_mg_l.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.organic_nitrogen_mg_l)}</div>
                           </div>
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="Org-P (mg/l)" description={parameterDescriptions.organic_phosphorus_mg_l} />
+                              <Tooltip title={t('simulationMap.parameters.organic_phosphorus_mg_l.label')} description={t('simulationMap.parameters.organic_phosphorus_mg_l.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.organic_phosphorus_mg_l)}</div>
                           </div>
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="DO-Sat (mg/l)" description={parameterDescriptions.saturation_oxygen_mg_l} />
+                              <Tooltip title={t('simulationMap.parameters.saturation_oxygen_mg_l.label')} description={t('simulationMap.parameters.saturation_oxygen_mg_l.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.saturation_oxygen_mg_l)}</div>
                           </div>
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="Temp (°C)" description={parameterDescriptions.temperature_cc} />
+                              <Tooltip title={t('simulationMap.parameters.temperature_cc.label')} description={t('simulationMap.parameters.temperature_cc.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.temperature_cc)}</div>
                           </div>
                           <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
                             <div className="text-xs text-gray600">
-                              <Tooltip title="Sed (tons)" description={parameterDescriptions.sediments_tons} />
+                              <Tooltip title={t('simulationMap.parameters.sediments_tons.label')} description={t('simulationMap.parameters.sediments_tons.description')} />
                             </div>
                             <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.sediments_tons)}</div>
                           </div>
@@ -442,7 +482,7 @@ const SimulationMap: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray600 text-sm">No time series data found in this file.</p>
+                  <p className="text-gray600 text-sm">{t('simulationMap.noData')}</p>
                 )}
               </div>
             )}

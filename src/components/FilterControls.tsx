@@ -2,33 +2,35 @@ import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { SentinelFilter } from '@/services/sentinelService'; // Adjust path if needed
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 interface FilterControlsProps {
   currentFilter: SentinelFilter;
   onFilterChange: (filter: SentinelFilter) => void;
 }
 
-// Define filter options directly within the component file
-const filterOptions: { value: SentinelFilter; label: string; description: string }[] = [
+// Define filter options with translations
+const getFilterOptions = (t: TFunction): { value: SentinelFilter; label: string; description: string }[] => [
   {
     value: 'natural',
-    label: 'Natural Color',
-    description: 'True color representation of the Earth\'s surface'
+    label: t('filterControls.filters.natural.label'),
+    description: t('filterControls.filters.natural.description')
   },
   {
     value: 'ndvi',
-    label: 'Vegetation (NDVI)',
-    description: 'Normalized Difference Vegetation Index - Shows plant health and density'
+    label: t('filterControls.filters.ndvi.label'),
+    description: t('filterControls.filters.ndvi.description')
   },
   {
     value: 'moisture',
-    label: 'Moisture Index',
-    description: 'Shows water content in vegetation and soil'
+    label: t('filterControls.filters.moisture.label'),
+    description: t('filterControls.filters.moisture.description')
   },
   {
     value: 'urban',
-    label: 'Urban Areas',
-    description: 'Highlights built-up areas and urban development'
+    label: t('filterControls.filters.urban.label'),
+    description: t('filterControls.filters.urban.description')
   }
 ];
 
@@ -116,6 +118,7 @@ const STYLE_ELEMENT_ID = 'leaflet-custom-filter-styles';
 
 export function FilterControls({ currentFilter, onFilterChange }: FilterControlsProps) {
   const map = useMap();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!map) return;
@@ -146,13 +149,14 @@ export function FilterControls({ currentFilter, onFilterChange }: FilterControls
 
         const title = document.createElement('h3');
         title.className = 'filter-title';
-        title.textContent = 'Layer Type';
+        title.textContent = t('filterControls.title');
         contentDiv.appendChild(title);
 
         const optionsDiv = document.createElement('div');
         optionsDiv.className = 'filter-options';
 
-        filterOptions.forEach(option => {
+        const options = getFilterOptions(t);
+        options.forEach(option => {
           const button = document.createElement('button');
           // Set base class + 'active' class conditionally based on the CURRENT prop value
           button.className = `filter-button ${currentFilter === option.value ? 'active' : ''}`;
@@ -210,7 +214,7 @@ export function FilterControls({ currentFilter, onFilterChange }: FilterControls
     // Re-run the effect if the map instance changes, or if the filter changes
     // (to rebuild the control with the correct 'active' button),
     // or if the callback changes (less likely, but good practice).
-  }, [map, currentFilter, onFilterChange]);
+  }, [map, currentFilter, onFilterChange, t]);
 
   return null;
 }

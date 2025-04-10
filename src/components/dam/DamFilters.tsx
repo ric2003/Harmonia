@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { getUniqueDamNames } from '@/services/influx';
 
 interface FilterState {
   filterDam: string;
@@ -25,6 +27,7 @@ interface DamFiltersProps {
 
 export function DamFilters({ filters, setFilters, onReset }: DamFiltersProps) {
   const [showFilters, setShowFilters] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div>
@@ -42,48 +45,48 @@ export function DamFilters({ filters, setFilters, onReset }: DamFiltersProps) {
           cursor: pointer;
         }
       `}</style>
-      
+
       <div className="px-4 py-3 bg-primary">
         <div className="flex justify-between items-center ">
           <div>
-            <h2 className="text-white text-xl font-bold">Dam Monitoring Data</h2>
+            <h2 className="text-white text-xl font-bold">{t('dam.monitoring.title')}</h2>
           </div>
           <div className="flex items-center">
             {!showFilters && (
-              <button 
+              <button
                 onClick={onReset}
                 className="text-xs text-white hover:text-opacity-80 font-medium flex items-center px-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Reset All Filters
+                {t('dam.monitoring.resetFilters')}
               </button>
             )}
-            <button 
+            <button
               onClick={() => setShowFilters(!showFilters)}
-              className="px-3 py-1.5 bg-background bg-opacity-20 hover:bg-opacity-30 rounded-md text-darkGray font-medium transition-all flex items-center text-xs"
+              className="px-3 py-1.5 bg-background bg-opacity-20 hover:bg-opacity-30 rounded-md text-darkGray font-medium flex items-center text-xs"
             >
-              {showFilters ? 'Hide Filters' : 'Show Filters'}
+              {showFilters ? t('dam.monitoring.hideFilters') : t('dam.monitoring.showFilters')}
             </button>
           </div>
         </div>
       </div>
-      
+
       {showFilters && (
         <div className="p-4 bg-gray50 border-b">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-darkGray font-semibold text-sm">Filter Data</h3>
-            
-            <button 
+            <h3 className="text-darkGray font-semibold text-sm">{t('dam.monitoring.filterData')}</h3>
+
+            <button
               onClick={onReset}
               className="text-xs text-darkGray hover:text-opacity-80 font-medium flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Reset All Filters
+              {t('dam.monitoring.resetFilters')}
             </button>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <DamNameFilter filters={filters} setFilters={setFilters} />
             <DateRangeFilter filters={filters} setFilters={setFilters} />
@@ -100,9 +103,86 @@ export function DamFilters({ filters, setFilters, onReset }: DamFiltersProps) {
 
 // Individual filter components
 function DamNameFilter({ filters, setFilters }: { filters: FilterState; setFilters: (filters: FilterState) => void }) {
+  const { t } = useTranslation();
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [inputValue, setInputValue] = useState(filters.filterDam);
+  const [uniqueDamNames, setUniqueDamNames] = useState<string[]>([]);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load unique dam names once when component mounts
+  useEffect(() => {
+    const loadDamNames = async () => {
+      try {
+        console.log("Loading dam names...");
+        const damNamesSet = await getUniqueDamNames();
+        const damNamesArray = Array.from(damNamesSet);
+        console.log("Loaded dam names:", damNamesArray);
+        setUniqueDamNames(damNamesArray);
+        
+        // If there's an initial filter value, show suggestions for it
+        if (filters.filterDam) {
+          const filtered = damNamesArray.filter(name => 
+            name.toLowerCase().includes(filters.filterDam.toLowerCase())
+          );
+          setSuggestions(filtered);
+          setShowSuggestions(true);
+        }
+      } catch (error) {
+        console.error('Error loading dam names:', error);
+        setUniqueDamNames([]);
+      }
+    };
+    loadDamNames();
+  }, []); // Only run once on mount
+
+  // Handle click outside to close suggestions
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node) &&
+          inputRef.current && !inputRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Filter suggestions based on input - this is now just a local operation
+  const filterSuggestions = (value: string) => {
+    if (value.trim() === '') {
+      setSuggestions([]);
+      return;
+    }
+
+    const filtered = uniqueDamNames.filter(name => 
+      name.toLowerCase().includes(value.toLowerCase())
+    );
+    console.log("Filtered suggestions:", filtered);
+    setSuggestions(filtered);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+    setShowSuggestions(true);
+    setFilters({ ...filters, filterDam: value });
+    filterSuggestions(value);
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setInputValue(suggestion);
+    setFilters({ ...filters, filterDam: suggestion });
+    setShowSuggestions(false);
+  };
+
   return (
     <div className="bg-backgroundColor p-3 rounded-lg shadow-sm">
-      <label className="block text-xs font-medium text-darkGray mb-1.5">Dam Name</label>
+      <label className="block text-xs font-medium text-darkGray mb-1.5">{t('dam.filters.damName')}</label>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,22 +190,47 @@ function DamNameFilter({ filters, setFilters }: { filters: FilterState; setFilte
           </svg>
         </div>
         <input
+          ref={inputRef}
           type="text"
           name="filterDam"
-          value={filters.filterDam}
-          onChange={(e) => setFilters({ ...filters, filterDam: e.target.value })}
-          placeholder="Filter by dam name"
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={() => {
+            setShowSuggestions(true);
+            filterSuggestions(inputValue);
+          }}
+          placeholder={t('dam.filters.filterByDamName')}
           className="pl-10 w-full bg-backgroundColor border border-lightGray rounded-md shadow-sm px-3 py-1.5 focus:ring-primary focus:border-primary text-darkGray text-xs"
         />
+        
+        {showSuggestions && suggestions.length > 0 && (
+          <div 
+            ref={suggestionsRef}
+            className="absolute z-50 w-full mt-1 bg-backgroundColor border border-lightGray rounded-md shadow-lg max-h-60 overflow-auto"
+            style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}
+          >
+            {suggestions.map((suggestion, index) => (
+              <div
+                key={index}
+                className="px-3 py-2 text-xs text-darkGray hover:bg-gray100 cursor-pointer"
+                onClick={() => handleSuggestionClick(suggestion)}
+              >
+                {suggestion}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 function DateRangeFilter({ filters, setFilters }: { filters: FilterState; setFilters: (filters: FilterState) => void }) {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-backgroundColor p-3 rounded-lg shadow-sm">
-      <label className="block text-xs font-medium text-darkGray mb-1.5">Date Range</label>
+      <label className="block text-xs font-medium text-darkGray mb-1.5">{t('dam.filters.dateRange')}</label>
       <div className="grid grid-cols-2 gap-2">
         <div className="relative">
           <input
@@ -135,7 +240,7 @@ function DateRangeFilter({ filters, setFilters }: { filters: FilterState; setFil
             placeholder="DD/MM/YYYY"
             className="w-full bg-backgroundColor border border-lightGray rounded-md shadow-sm px-3 py-1.5 focus:ring-primary focus:border-primary text-darkGray text-xs"
           />
-          
+
         </div>
         <div className="relative">
           <input
@@ -152,19 +257,20 @@ function DateRangeFilter({ filters, setFilters }: { filters: FilterState; setFil
 }
 
 function VolumeRangeFilter({ filters, setFilters }: { filters: FilterState; setFilters: (filters: FilterState) => void }) {
+  const { t } = useTranslation();
   const minVolume = filters.filterMinVolume ? parseInt(filters.filterMinVolume) : 0;
   const maxVolume = filters.filterMaxVolume ? parseInt(filters.filterMaxVolume) : 5000;
-  
+
   return (
     <div className="bg-backgroundColor p-3 rounded-lg shadow-sm">
-      <label className="block text-xs font-medium text-darkGray mb-1.5">Volume Total Range</label>
+      <label className="block text-xs font-medium text-darkGray mb-1.5">{t('dam.filters.volumeTotal')}</label>
       <div className="mt-2 mb-4">
         <div className="h-2 relative w-full bg-gray200 rounded">
-          <div 
-            className="absolute h-2 bg-primary rounded" 
-            style={{ 
-              left: `${(minVolume / 5000) * 100}%`, 
-              width: `${((maxVolume - minVolume ) / 5000) * 100}%` 
+          <div
+            className="absolute h-2 bg-primary rounded"
+            style={{
+              left: `${(minVolume / 5000) * 100}%`,
+              width: `${((maxVolume - minVolume ) / 5000) * 100}%`
             }}
           ></div>
         </div>
@@ -186,7 +292,7 @@ function VolumeRangeFilter({ filters, setFilters }: { filters: FilterState; setF
           />
           <input
             type="range"
-            min="0" 
+            min="0"
             max="5000"
             step="50"
             value={maxVolume}
@@ -202,27 +308,28 @@ function VolumeRangeFilter({ filters, setFilters }: { filters: FilterState; setF
         </div>
       </div>
       <div className="flex justify-between mt-2">
-        <span className="text-xs text-gray600">Min Volume: {minVolume}</span>
-        <span className="text-xs text-gray600">Max Volume: {maxVolume}</span>
+        <span className="text-xs text-gray600">{t('dam.filters.minVolume')}: {minVolume}</span>
+        <span className="text-xs text-gray600">{t('dam.filters.maxVolume')}: {maxVolume}</span>
       </div>
     </div>
   );
 }
 
 function CotaLidaFilter({ filters, setFilters }: { filters: FilterState; setFilters: (filters: FilterState) => void }) {
+  const { t } = useTranslation();
   const minCota = filters.filterMinCotaLida ? parseInt(filters.filterMinCotaLida) : 0;
   const maxCota = filters.filterMaxCotaLida ? parseInt(filters.filterMaxCotaLida) : 1000;
-  
+
   return (
     <div className="bg-backgroundColor p-3 rounded-lg shadow-sm">
-      <label className="block text-xs font-medium text-darkGray mb-1.5">Cota Lida Range</label>
+      <label className="block text-xs font-medium text-darkGray mb-1.5">{t('dam.filters.cotaLida')}</label>
       <div className="mt-2 mb-4">
         <div className="h-2 relative w-full bg-gray200 rounded">
-          <div 
-            className="absolute h-2 bg-primary rounded" 
-            style={{ 
-              left: `${((minCota) / 1000) * 100}%`, 
-              width: `${((maxCota - minCota) / 1000) * 100}%` 
+          <div
+            className="absolute h-2 bg-primary rounded"
+            style={{
+              left: `${((minCota) / 1000) * 100}%`,
+              width: `${((maxCota - minCota) / 1000) * 100}%`
             }}
           ></div>
         </div>
@@ -260,27 +367,28 @@ function CotaLidaFilter({ filters, setFilters }: { filters: FilterState; setFilt
         </div>
       </div>
       <div className="flex justify-between mt-2">
-        <span className="text-xs text-gray600">Min Cota: {minCota}</span>
-        <span className="text-xs text-gray600">Max Cota: {maxCota}</span>
+        <span className="text-xs text-gray600">{t('dam.filters.minCota')}: {minCota}</span>
+        <span className="text-xs text-gray600">{t('dam.filters.maxCota')}: {maxCota}</span>
       </div>
     </div>
   );
 }
 
 function EnchimentoFilter({ filters, setFilters }: { filters: FilterState; setFilters: (filters: FilterState) => void }) {
+  const { t } = useTranslation();
   const minEnch = filters.filterMinEnchimento ? parseFloat(filters.filterMinEnchimento) : 0;
   const maxEnch = filters.filterMaxEnchimento ? parseFloat(filters.filterMaxEnchimento) : 1;
-  
+
   return (
     <div className="bg-backgroundColor p-3 rounded-lg shadow-sm">
-      <label className="block text-xs font-medium text-darkGray mb-1.5">Enchimento Range (%)</label>
+      <label className="block text-xs font-medium text-darkGray mb-1.5">{t('dam.filters.enchimento')}</label>
       <div className="mt-2 mb-4">
         <div className="h-2 relative w-full bg-gray200 rounded">
-          <div 
-            className="absolute h-2 bg-primary rounded" 
-            style={{ 
-              left: `${minEnch * 100}%`, 
-              width: `${(maxEnch - minEnch) * 100}%` 
+          <div
+            className="absolute h-2 bg-primary rounded"
+            style={{
+              left: `${minEnch * 100}%`,
+              width: `${(maxEnch - minEnch) * 100}%`
             }}
           ></div>
         </div>
@@ -318,27 +426,28 @@ function EnchimentoFilter({ filters, setFilters }: { filters: FilterState; setFi
         </div>
       </div>
       <div className="flex justify-between mt-2">
-        <span className="text-xs text-gray600">Min: {(minEnch * 100).toFixed(0)}%</span>
-        <span className="text-xs text-gray600">Max: {(maxEnch * 100).toFixed(0)}%</span>
+        <span className="text-xs text-gray600">{t('dam.filters.min')}: {(minEnch * 100).toFixed(0)}%</span>
+        <span className="text-xs text-gray600">{t('dam.filters.max')}: {(maxEnch * 100).toFixed(0)}%</span>
       </div>
     </div>
   );
 }
 
 function VolumeUtilFilter({ filters, setFilters }: { filters: FilterState; setFilters: (filters: FilterState) => void }) {
+  const { t } = useTranslation();
   const minVolumeUtil = filters.filterMinVolumeUtil ? parseInt(filters.filterMinVolumeUtil) : 0;
   const maxVolumeUtil = filters.filterMaxVolumeUtil ? parseInt(filters.filterMaxVolumeUtil) : 5000;
-  
+
   return (
     <div className="bg-backgroundColor p-3 rounded-lg shadow-sm">
-      <label className="block text-xs font-medium text-darkGray mb-1.5">Volume Util Range</label>
+      <label className="block text-xs font-medium text-darkGray mb-1.5">{t('dam.filters.volumeUtil')}</label>
       <div className="mt-2 mb-4">
         <div className="h-2 relative w-full bg-gray200 rounded">
-          <div 
-            className="absolute h-2 bg-primary rounded" 
-            style={{ 
-              left: `${(minVolumeUtil / 5000) * 100}%`, 
-              width: `${((maxVolumeUtil - minVolumeUtil) / 5000) * 100}%` 
+          <div
+            className="absolute h-2 bg-primary rounded"
+            style={{
+              left: `${(minVolumeUtil / 5000) * 100}%`,
+              width: `${((maxVolumeUtil - minVolumeUtil) / 5000) * 100}%`
             }}
           ></div>
         </div>
@@ -352,8 +461,8 @@ function VolumeUtilFilter({ filters, setFilters }: { filters: FilterState; setFi
             onChange={(e) => {
               const newMin = parseInt(e.target.value);
               if (newMin+200 < maxVolumeUtil) {
-                setFilters({ 
-                  ...filters, 
+                setFilters({
+                  ...filters,
                   filterMinVolumeUtil: e.target.value,
                 });
               }
@@ -370,8 +479,8 @@ function VolumeUtilFilter({ filters, setFilters }: { filters: FilterState; setFi
             onChange={(e) => {
               const newMax = parseInt(e.target.value);
               if (newMax > minVolumeUtil+200) {
-                setFilters({ 
-                  ...filters, 
+                setFilters({
+                  ...filters,
                   filterMaxVolumeUtil: e.target.value,
                 });
               }
@@ -381,10 +490,10 @@ function VolumeUtilFilter({ filters, setFilters }: { filters: FilterState; setFi
           />
         </div>
       </div>
-      
+
       <div className="flex justify-between mt-2">
-        <span className="text-xs text-gray600">Min Volume: {minVolumeUtil}</span>
-        <span className="text-xs text-gray600">Max Volume: {maxVolumeUtil}</span>
+        <span className="text-xs text-gray600">{t('dam.filters.minVolume')}: {minVolumeUtil}</span>
+        <span className="text-xs text-gray600">{t('dam.filters.maxVolume')}: {maxVolumeUtil}</span>
       </div>
     </div>
   );

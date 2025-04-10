@@ -5,7 +5,10 @@ import { getStations, Station } from "@/services/api";
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import dynamic from "next/dynamic";
 import {AlertMessage} from "@/components/ui/AlertMessage";
-import { useSetPageTitle } from '@/hooks/useSetPageTitle';
+import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
+import { useTranslation } from 'react-i18next';
+import ScrollIndicator from "@/components/ScrollIndicator";
+import DataSourceFooter from "@/components/DataSourceFooter";
 
 // Definição do tipo para as props do MapComponent
 interface MapComponentProps {
@@ -27,7 +30,8 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedStation, setSelectedStation] = useState<string | null>(null);
   const { sidebarOpen } = useContext(SidebarHeaderContext);
-  useSetPageTitle('HOME');
+  const { t } = useTranslation();
+  useTranslatedPageTitle('navigation.home');
 
   useEffect(() => {
     async function fetchStations() {
@@ -50,11 +54,23 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="">
-        <div className="bg-backgroundColor p-4 rounded-xl shadow-md">
-          <div className="rounded-lg h-[75vh] overflow-hidden w-full">
-            <div className="h-7 bg-gray200 rounded w-1/4 mb-4 animate-pulse"></div>
-            <div className="h-full bg-gray200 rounded animate-pulse"></div>
+      <div>
+        {/* First container - Map and title */}
+        <div className="bg-backgroundColor p-4 rounded-xl shadow-md flex flex-col gap-2">
+          <div className="h-8 bg-gray200 rounded w-1/3 animate-pulse"></div>
+          <div className="h-[65vh] bg-gray200 rounded-lg animate-pulse"></div>
+        </div>
+        
+        {/* Second container - Information section */}
+        <div className="bg-backgroundColor rounded-lg p-6 mt-6 shadow-md">
+          <div className="h-6 bg-gray200 rounded w-1/4 mb-4 animate-pulse"></div>
+          <div className="h-4 bg-gray200 rounded w-3/4 mb-3 animate-pulse"></div>
+          <div className="h-4 bg-gray200 rounded w-2/3 mb-3 animate-pulse"></div>
+          <div className="h-6 bg-gray200 rounded w-1/3 mt-6 mb-3 animate-pulse"></div>
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-4 bg-gray200 rounded w-3/4 animate-pulse"></div>
+            ))}
           </div>
         </div>
       </div>
@@ -62,20 +78,44 @@ export default function HomePage() {
   }
   if (error) return <AlertMessage type="error" message={error} />;
 
-  return (  
-    <div className="bg-backgroundColor h-[100%] p-4 rounded-xl shadow-md flex flex-col">
-    <h1 className="pb-4 text-xl font-bold text-primary">Barragens de Portugal</h1>
-    <div className="rounded-lg flex-1 overflow-hidden w-full">
-      <MapComponent 
-        key={sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}
-        stations={stations} 
-        selectedStationId={selectedStation}
-        onMarkerHover={setSelectedStation}
-        onStationSelect={setSelectedStation}
-        shoeMenu={true}
+  return (
+    <div>
+      <div className="bg-backgroundColor h-[100%] p-4 rounded-xl shadow-md flex flex-col gap-2">
+        <h1 className="text-2xl font-bold text-primary">{t('home.title')}</h1>
+
+        <div className="relative rounded-lg overflow-hidden w-full border border-gray200 shadow-sm map-container-fixed">
+          <MapComponent
+            key={sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}
+            stations={stations}
+            selectedStationId={selectedStation}
+            onMarkerHover={setSelectedStation}
+            onStationSelect={setSelectedStation}
+            shoeMenu={true}
+          />
+        </div>
+      </div>
+
+      <ScrollIndicator targetId="intro-section" text={t('home.scrollForInfo')} />
+
+      <div id="intro-section" className="bg-backgroundColor rounded-lg p-6 mt-6 shadow-md">
+        <div className="prose max-w-none text-darkGray">
+          <p className="mb-4">{t('home.intro')}</p>
+          <p className="mb-4">{t('home.purpose')}</p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2">{t('home.monitoredData')}</h3>
+          <ul className="list-disc pl-6 space-y-1">
+            {(t('home.dataList', { returnObjects: true }) as string[]).map((item: string, index: number) => (
+              <li key={index}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      
+      <DataSourceFooter 
+        textKey="home.dataSource"
+        linkKey="home.irristrat"
+        linkUrl="https://irristrat.com/new/index.php"
       />
-    </div>
-  </div>
-  
+      </div>
   );
 }
