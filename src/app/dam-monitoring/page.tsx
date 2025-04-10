@@ -4,7 +4,6 @@ import { DamMonitoringTable } from "@/components/dam/DamTable";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
-import { useTranslation } from 'react-i18next';
 import DataSourceFooter from "@/components/DataSourceFooter";
 
 

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { getStations, Station } from "@/services/api";
 import StationImage from "@/components/StationImage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
-import { useTranslation } from 'react-i18next';
 import DataSourceFooter from "@/components/DataSourceFooter";
 
 export default function StationsPage() {
