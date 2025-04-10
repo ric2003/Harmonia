@@ -86,7 +86,10 @@ const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSel
       
       // Replace popup with direct navigation on click
       element.addEventListener('click', () => {
-        onStationSelect && onStationSelect(station.id);
+        if(onStationSelect){
+          onStationSelect(station.id);
+        }
+        
         router.push(`/stations/${station.id}`);
       });
 

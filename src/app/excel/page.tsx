@@ -1,6 +1,5 @@
 "use client"
 import ExcelUploader from '@/components/ExcelUploader';
-import { useSetPageTitle } from '@/hooks/useSetPageTitle';
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 
 

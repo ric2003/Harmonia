@@ -11,7 +11,6 @@ export default function StationsPage() {
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useTranslation();
   useTranslatedPageTitle('title.stations');
 
   async function fetchStations() {

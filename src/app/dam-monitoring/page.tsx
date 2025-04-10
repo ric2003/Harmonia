@@ -58,7 +58,6 @@ export default function DamMonitoringPage() {
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(initialFilterState);
   const [currentPage, setCurrentPage] = useState(1);
-  const { t } = useTranslation();
   
   useTranslatedPageTitle('title.damMonitoring');
 
