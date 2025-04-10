@@ -65,15 +65,9 @@ export function Sidebar() {
                             <div className="flex h-full">
                                 <div className="flex relative z-[1] text-primary gap-1 items-center font-semibold w-1/2 justify-center text-sm px-2">
                                     <Sun size={16} />
-                                    <span ref={lightTextRef} className="text-center">
-                                        {t('common.theme.light')}
-                                    </span>
                                 </div>
                                 <div className="flex relative z-[1] text-primary gap-1 items-center font-semibold w-1/2 justify-center text-sm px-2">
                                     <Moon size={16} />
-                                    <span ref={darkTextRef} className="text-center">
-                                        {t('common.theme.dark')}
-                                    </span>
                                 </div>
                             </div>
                             <div 
