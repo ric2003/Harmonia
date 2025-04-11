@@ -4,6 +4,7 @@ import { usePageTitle } from "@/contexts/PageTitleContext";
 import { Menu } from "lucide-react";
 import { useContext } from "react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface SidebarHeaderContextType {
   sidebarOpen: boolean;
@@ -28,8 +29,10 @@ export function Header() {
                         </button>
                         <span className="text-darkGray text-3xl font-extrabold">{pageTitle}</span>
                     </div>
-                    <div className="mr-4 language-switcher">
+                    <div className="flex items-center gap-2 mr-4">
                         <LanguageSwitcher />
+                        <ThemeToggle />
+                        
                     </div>
                 </div>
                 <hr className="flex h-0.5 w-[calc(100%-38px)] bg-lightGray m-auto absolute bottom-0 left-0 right-0" />
