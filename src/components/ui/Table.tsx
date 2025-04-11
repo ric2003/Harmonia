@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Column<T> {
   key: keyof T;
@@ -34,14 +35,16 @@ export function Table<T>({
   emptyMessage = "No records found",
   onResetFilters
 }: TableProps<T>) {
+  const { t } = useTranslation();
+
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   const currentRecords = data.slice(startIndex, endIndex);
   const totalPages = Math.ceil(data.length / pageSize);
 
   return (
-    <div className="bg-background shadow-lg overflow-hidden">
-      <div className="overflow-x-auto">
+    <div className="bg-background shadow-lg">
+      <div>
         <table className="w-full">
           <thead>
             <tr className="bg-gray100 text-left text-darkGray">
@@ -50,8 +53,9 @@ export function Table<T>({
                 <th
                   key={String(column.key)}
                   className={`py-2 text-[10px] font-semibold uppercase tracking-wider ${
-                    column.sortable ? 'cursor-pointer hover:bg-gray200' : ''
-                  } ${column.align === 'right' ? 'text-right' : ''}`}
+                    column.sortable ? 'cursor-pointer hover:bg-gray200' : ''}
+                    ${column.align === 'right' ? 'text-right' : ''}`
+                  }
                   style={{ width: column.width }}
                   onClick={() => column.sortable && onSort?.(column.key)}
                 >
@@ -80,7 +84,7 @@ export function Table<T>({
                 {columns.map((column) => (
                   <td 
                     key={String(column.key)} 
-                    className="py-2 text-xs text-darkGray"
+                    className={`py-2 text-xs text-darkGray`}
                     style={{ width: column.width }}
                   >
                     <div className={`flex justify-${column.align || 'center'}`}>
@@ -131,7 +135,7 @@ export function Table<T>({
               disabled={currentPage === 1}
               className="px-3 py-1.5 border border-lightGray rounded-md text-xs font-medium text-darkGray bg-background hover:bg-gray50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Previous
+              {t('dam.table.previous')}
             </button>
 
             <div className="flex items-center">
@@ -154,7 +158,7 @@ export function Table<T>({
               disabled={currentPage >= totalPages}
               className="px-3 py-1.5 border border-lightGray rounded-md text-xs font-medium text-darkGray bg-background hover:bg-gray50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Next
+              {t('dam.table.next')}
             </button>
           </div>
         )}

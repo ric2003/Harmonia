@@ -134,6 +134,8 @@
       "enchimento": "Filled (%)",
       "volumeTotal": "Total Volume",
       "volumeUtil": "Useful Volume",
+      "next": "Next",
+      "previous": "Previous",
       "noRecords": "No records match your filter criteria."
     },
     "footer": {

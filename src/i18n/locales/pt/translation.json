@@ -131,9 +131,11 @@
       "dam": "Barragem",
       "date": "Data",
       "cotaLida": "Cota Lida",
-      "enchimento": "Enchimento",
+      "enchimento": "Enchimento (%)",
       "volumeTotal": "Volume Total",
       "volumeUtil": "Volume Útil",
+      "next": "Próximo",
+      "previous": "Anterior",
       "noRecords": "Nenhum registro corresponde aos seus critérios de filtro."
     }
   },
