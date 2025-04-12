@@ -8,10 +8,26 @@ import { AlertMessage } from "@/components/ui/AlertMessage";
 import { Feature, Geometry } from 'geojson';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
+import { getLocationName, GeoapifyLocation } from '@/services/geoapifyLocation';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Legend,
+  CartesianGrid
+} from 'recharts';
+
 
 interface GeoJsonFeatureCollection {
   type: "FeatureCollection";
   features: Array<Feature>;
+}
+
+interface TimeSeriesData {
+  timestamp: string;
+  [key: string]: number | string;
 }
 
 // Parameter descriptions are now handled through translations
@@ -50,6 +66,50 @@ const formatDate = (dateString: string): string => {
   }
 };
 
+const TimeSeriesChart: React.FC<{
+  data: TimeSeriesData[];
+  dataKey: string;
+  label: string;
+  color?: string;
+}> = ({ data, dataKey, label, color = "#8884d8" }) => {  
+  const yearTicks = Array.from(
+    new Map(
+      data
+        .slice() // clone para não mexer no original
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) // ordem crescente
+        .map((d) => [new Date(d.timestamp).getFullYear(), d.timestamp]) // [ano, timestamp]
+    ).values()
+  );
+
+  return (
+    <div className="h-[300px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
+          <XAxis
+            dataKey="timestamp"
+            ticks={yearTicks}
+            tickFormatter={(dateStr) => new Date(dateStr).getFullYear().toString()}
+            angle={-45}
+            textAnchor="end"
+            height={70}
+            tick={{ fontSize: 12 }}
+          />
+          <YAxis tick={{ fontSize: 12 }} />
+          <Line
+            type="monotone"
+            dataKey={dataKey}
+            stroke={color}
+            dot={false}
+            name={label}
+          />
+          <Legend />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
 const SimulationMap: React.FC = () => {
   const { t } = useTranslation();
   const today = new Date();
@@ -68,7 +128,14 @@ const SimulationMap: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth() + 1);
   const [selectedDay, setSelectedDay] = useState<number>(today.getDate());
   const [isPanelVisible, setIsPanelVisible] = useState(false);
+  const [locationName, setLocationName] = useState<GeoapifyLocation | null>(null);
   const lastClickedLayerRef = useRef<L.Path | null>(null);
+  const [selectedParameter, setSelectedParameter] = useState('flowout_m3_s');
+  const parameters = t('simulationMap.parameters', { returnObjects: true }) as {
+    [key: string]: { label: string; description: string };
+  };
+
+
 
   const mapCenter: L.LatLngExpression = [38.8, -8.5];
   const initialZoom: number = 9;
@@ -207,25 +274,45 @@ const SimulationMap: React.FC = () => {
     setIsPanelVisible(false);
     resetPointStyle();
     setSelectedLocationId(null);
+    setLocationName(null); // Add this line
   }, [resetPointStyle]);
+
+  // Function to fetch location name
+  const fetchLocationName = async (coordinates: number[]) => {
+    try {
+      // Geoapify expects coordinates as [latitude, longitude]
+      // But GeoJSON uses [longitude, latitude], so we need to reverse them
+      const location = await getLocationName(coordinates[1], coordinates[0]);
+      setLocationName(location);
+    } catch (error) {
+      console.error('Error fetching location name:', error);
+      setLocationName(null);
+    }
+  };
 
   // Handler for clicking on map points
   const onEachFeaturePoint = useCallback((feature: Feature<Geometry>, layer: Layer) => {
     if (feature.properties && feature.properties.id) {
       const locationId = feature.properties.id;
       layer.on({
-        click: (e: LeafletMouseEvent) => {
+        click: async (e: LeafletMouseEvent) => {
           // If clicking the same point that's already selected
           if (selectedLocationId === locationId) {
             handleClosePanel();
+            setLocationName(null);
             L.DomEvent.stopPropagation(e);
             return;
           }
 
           resetPointStyle();
-
           setSelectedLocationId(locationId);
           setIsPanelVisible(true);
+
+          // Get coordinates and fetch location name
+          if (feature.geometry.type === 'Point' && feature.geometry.coordinates) {
+            await fetchLocationName(feature.geometry.coordinates);
+          }
+
           if (layer instanceof L.Path) {
             layer.setStyle({ fillColor: 'orange', color: 'red', weight: 3, fillOpacity: 0.8 });
             lastClickedLayerRef.current = layer;
@@ -297,7 +384,21 @@ const SimulationMap: React.FC = () => {
 
       {/* Data Display Section */}
       {selectedLocationId !== null && isPanelVisible && (
-        <div className="w-full p-2 bg-background flex-shrink-0 relative">
+        <div className="w-full py-2 bg-background flex-shrink-0 relative max-h-[50vh] overflow-y-auto">
+          {/* Location Name Display - Add this section */}
+          {locationName && (
+            <div className="mb-4 pl-2">
+              <h2 className="text-lg font-semibold text-primary">
+                {locationName.city || locationName.county || locationName.formatted}
+              </h2>
+              <p className="text-sm text-gray600">
+                {[locationName.county, locationName.state, locationName.country]
+                  .filter(Boolean)
+                  .join(', ')}
+              </p>
+            </div>
+          )}
+
           {/* Close Button */}
           <button
             onClick={handleClosePanel}
@@ -308,7 +409,7 @@ const SimulationMap: React.FC = () => {
             </svg>
           </button>
 
-          <div className="space-y-2">
+          <div className="space-y-2 pl-2">
             {loadingRch && (
               <div className="space-y-3">
                 {/* Date Selection Controls Skeleton */}
@@ -328,10 +429,10 @@ const SimulationMap: React.FC = () => {
                 </div>
 
                 {/* Data Grid Skeleton */}
-                <div className="bg-backgroundColor rounded-lg p-2">
+                <div className="bg-backgroundColor rounded-lg py-2">
                   <div className="grid grid-cols-4 md:grid-cols-6 gap-2 text-sm">
                     {[...Array(11)].map((_, index) => (
-                      <div key={index} className="bg-background p-1.5 rounded shadow-sm">
+                      <div key={index} className="bg-background py-1.5 rounded shadow-sm">
                         <div className="h-3 w-12 bg-gray200 rounded mb-1 animate-pulse"></div>
                         <div className="h-5 w-10 bg-gray200 rounded animate-pulse"></div>
                       </div>
@@ -351,7 +452,7 @@ const SimulationMap: React.FC = () => {
                     <div className="w-32">
                         <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.day')}</label>
                         <select
-                            className="w-full p-1 border rounded-md bg-background text-sm text-darkGray"
+                            className="w-full py-1 border rounded-md bg-background text-sm text-darkGray"
                             value={selectedDay}
                             onChange={(e) => {
                             const newDay = Number(e.target.value);
@@ -409,76 +510,105 @@ const SimulationMap: React.FC = () => {
 
                     {/* Data Display */}
                     {selectedDate && getCurrentEntry() && (
-                      <div className="bg-background rounded-lg p-2">
-                        <div className="grid grid-cols-4 md:grid-cols-6 gap-2 text-sm">
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.flowout_m3_s.label')} description={t('simulationMap.parameters.flowout_m3_s.description')} />
+                      <>
+                        <div className="bg-background rounded-lg py-2">
+                          <div className="grid grid-cols-4 md:grid-cols-6 gap-2 text-sm">
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.flowout_m3_s.label')} description={t('simulationMap.parameters.flowout_m3_s.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.flowout_m3_s)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.flowout_m3_s)}</div>
-                          </div>
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.ammonia_mg_l.label')} description={t('simulationMap.parameters.ammonia_mg_l.description')} />
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.ammonia_mg_l.label')} description={t('simulationMap.parameters.ammonia_mg_l.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.ammonia_mg_l)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.ammonia_mg_l)}</div>
-                          </div>
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.dissolved_phosphorus_mg_l.label')} description={t('simulationMap.parameters.dissolved_phosphorus_mg_l.description')} />
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.dissolved_phosphorus_mg_l.label')} description={t('simulationMap.parameters.dissolved_phosphorus_mg_l.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.dissolved_phosphorus_mg_l)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.dissolved_phosphorus_mg_l)}</div>
-                          </div>
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.dissolved_oxygen_mg_l.label')} description={t('simulationMap.parameters.dissolved_oxygen_mg_l.description')} />
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.dissolved_oxygen_mg_l.label')} description={t('simulationMap.parameters.dissolved_oxygen_mg_l.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.dissolved_oxygen_mg_l)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.dissolved_oxygen_mg_l)}</div>
-                          </div>
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.nitrate_mg_l.label')} description={t('simulationMap.parameters.nitrate_mg_l.description')} />
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.nitrate_mg_l.label')} description={t('simulationMap.parameters.nitrate_mg_l.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.nitrate_mg_l)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.nitrate_mg_l)}</div>
-                          </div>
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.nitrite_mg_l.label')} description={t('simulationMap.parameters.nitrite_mg_l.description')} />
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.nitrite_mg_l.label')} description={t('simulationMap.parameters.nitrite_mg_l.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.nitrite_mg_l)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.nitrite_mg_l)}</div>
-                          </div>
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.organic_nitrogen_mg_l.label')} description={t('simulationMap.parameters.organic_nitrogen_mg_l.description')} />
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.organic_nitrogen_mg_l.label')} description={t('simulationMap.parameters.organic_nitrogen_mg_l.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.organic_nitrogen_mg_l)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.organic_nitrogen_mg_l)}</div>
-                          </div>
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.organic_phosphorus_mg_l.label')} description={t('simulationMap.parameters.organic_phosphorus_mg_l.description')} />
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.organic_phosphorus_mg_l.label')} description={t('simulationMap.parameters.organic_phosphorus_mg_l.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.organic_phosphorus_mg_l)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.organic_phosphorus_mg_l)}</div>
-                          </div>
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.saturation_oxygen_mg_l.label')} description={t('simulationMap.parameters.saturation_oxygen_mg_l.description')} />
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.saturation_oxygen_mg_l.label')} description={t('simulationMap.parameters.saturation_oxygen_mg_l.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.saturation_oxygen_mg_l)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.saturation_oxygen_mg_l)}</div>
-                          </div>
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.temperature_cc.label')} description={t('simulationMap.parameters.temperature_cc.description')} />
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.temperature_cc.label')} description={t('simulationMap.parameters.temperature_cc.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.temperature_cc)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.temperature_cc)}</div>
-                          </div>
-                          <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                            <div className="text-xs text-gray600">
-                              <Tooltip title={t('simulationMap.parameters.sediments_tons.label')} description={t('simulationMap.parameters.sediments_tons.description')} />
+                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
+                              <div className="text-xs text-gray600">
+                                <Tooltip title={t('simulationMap.parameters.sediments_tons.label')} description={t('simulationMap.parameters.sediments_tons.description')} />
+                              </div>
+                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.sediments_tons)}</div>
                             </div>
-                            <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.sediments_tons)}</div>
                           </div>
                         </div>
-                      </div>
+                        <select id="parameterSelector"
+                          className = "w-full p-1 border rounded-md bg-backgroundColor text-darkGray"
+                          value= {selectedParameter}
+                          onChange={(e) => setSelectedParameter(e.target.value)}
+                          >
+                            {Object.keys(parameters).map((key) => (
+                              <option key={key} value={key}>
+                                {parameters[key].label}
+                              </option>
+                            ))}
+                          
+                        </select>
+                        {/* Time Series Charts */}
+                        <div className="mt-4 space-y-4">
+                          <div className="bg-backgroundColor p-4 rounded-lg">
+                            <h3 className="text-sm font-medium mb-2">
+                              {parameters[selectedParameter]?.label}
+                            </h3>
+                            <TimeSeriesChart
+                              data={selectedRchData.timeseries}
+                              dataKey={selectedParameter}
+                              label={parameters[selectedParameter]?.label}
+                              color="#2B96F3"
+                            />
+                          </div>
+                        </div>
+
+                      </>
                     )}
                   </div>
                 ) : (

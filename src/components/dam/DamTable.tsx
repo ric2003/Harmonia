@@ -4,7 +4,7 @@ import { DamFilters } from './DamFilters';
 import { Table } from '@/components/ui/Table';
 import { useTranslation } from 'react-i18next';
 
-interface DamData {
+export interface DamData {
   barragem?: string;
   _time?: string;
   cota_lida?: number;
@@ -35,6 +35,9 @@ interface DamMonitoringTableProps {
   filters: FilterState;
   setFilters: (filters: FilterState) => void;
   currentPage: number;
+  startIndex: number;
+  endIndex: number;
+  totalPages: number;
   setCurrentPage: (page: number) => void;
   onSort: (field: string) => void;
   onResetFilters: () => void;
@@ -45,6 +48,9 @@ export function DamMonitoringTable({
   filters,
   setFilters,
   currentPage,
+  startIndex,
+  endIndex,
+  totalPages,
   setCurrentPage,
   onSort,
   onResetFilters
@@ -189,7 +195,9 @@ export function DamMonitoringTable({
         data={filteredData}
         columns={columns}
         currentPage={currentPage}
-        pageSize={15}
+        startIndex={startIndex}
+        endIndex={endIndex}
+        totalPages={totalPages}
         sortField={filters.sortField as keyof DamData || undefined}
         sortDirection={filters.sortDirection}
         onSort={onSort}

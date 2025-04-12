@@ -6,6 +6,8 @@ import { AlertMessage } from "@/components/ui/AlertMessage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import DataSourceFooter from "@/components/DataSourceFooter";
 import { useDamData } from "@/hooks/useDamData";
+import TableCard from "@/components/dam/TableCard";
+import PageController from "@/components/dam/PageController";
 
 interface FilterState {
   filterDam: string;
@@ -52,26 +54,64 @@ export default function DamMonitoringPage() {
   if (error) return <AlertMessage type="error" message={error instanceof Error ? error.message : "An error occurred"} />;
   if (!data || data.length === 0) return <AlertMessage type="warning" message="No dam data available. Please check your connection or try again later." />;
 
+  const pageSize1 = 5;
+  const pageSize2 = 15;
+
+  const startIndex1 = (currentPage - 1) * pageSize1;
+  const endIndex1 = startIndex1 + pageSize1;
+  const currentRecords1 = data.slice(startIndex1, endIndex1);
+  const totalPages1 = Math.ceil(data.length / pageSize1);
+
+  const startIndex2 = (currentPage - 1) * pageSize2;
+  const endIndex2 = startIndex2 + pageSize2;
+  const totalPages2 = Math.ceil(data.length / pageSize2);
+
   return (
     <div className="container mx-auto max-h-[100%]">
-      <DamMonitoringTable 
-        data={data}
-        filters={filters}
-        setFilters={setFilters}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        onSort={(field) => {
-          setFilters(prev => ({
-            ...prev,
-            sortField: field,
-            sortDirection: field === prev.sortField && prev.sortDirection === "highest" ? "lowest" : "highest"
-          }));
-        }}
-        onResetFilters={() => {
-          setFilters(initialFilterState);
-          setCurrentPage(1);
-        }}
-      />
+      <div className="block lg:hidden">
+        // teste 
+        {data && data.length > 0 && (
+          currentRecords1.map((barragem, index) => {
+            return (
+              <TableCard
+                key={`${barragem.barragem} + ${barragem._time}`}
+                id={startIndex1 + index + 1}
+                data={barragem}
+              />
+            );
+          })
+        )}
+
+        <PageController
+          currentPage={currentPage}
+          totalPages={totalPages1}
+          onPageChange={setCurrentPage}          
+        />
+      </div>
+
+      <div className="hidden lg:block">
+        <DamMonitoringTable 
+          data={data}
+          filters={filters}
+          setFilters={setFilters}
+          currentPage={currentPage}
+          startIndex={startIndex2}
+          endIndex={endIndex2}
+          totalPages={totalPages2}
+          setCurrentPage={setCurrentPage}
+          onSort={(field) => {
+            setFilters(prev => ({
+              ...prev,
+              sortField: field,
+              sortDirection: field === prev.sortField && prev.sortDirection === "highest" ? "lowest" : "highest"
+            }));
+          }}
+          onResetFilters={() => {
+            setFilters(initialFilterState);
+            setCurrentPage(1);
+          }}
+        />
+      </div>
       
       <DataSourceFooter 
         textKey="dam.dataSource"

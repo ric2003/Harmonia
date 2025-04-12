@@ -1,5 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import PageController from '../dam/PageController';
+import { DamData } from '../dam/DamTable';
 
 interface Column<T> {
   key: keyof T;
@@ -14,7 +16,9 @@ interface TableProps<T> {
   data: T[];
   columns: Column<T>[];
   currentPage: number;
-  pageSize: number;
+  startIndex: number;
+  endIndex: number;
+  totalPages: number;
   sortField?: keyof T;
   sortDirection?: 'lowest' | 'highest';
   onSort?: (field: keyof T) => void;
@@ -27,7 +31,9 @@ export function Table<T>({
   data,
   columns,
   currentPage,
-  pageSize,
+  startIndex,
+  endIndex,
+  totalPages,
   sortField,
   sortDirection,
   onSort,
@@ -35,12 +41,7 @@ export function Table<T>({
   emptyMessage = "No records found",
   onResetFilters
 }: TableProps<T>) {
-  const { t } = useTranslation();
-
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
   const currentRecords = data.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(data.length / pageSize);
 
   return (
     <div className="bg-background shadow-lg">
@@ -129,38 +130,11 @@ export function Table<T>({
         </div>
 
         {data.length > 0 && (
-          <div className="flex items-center space-x-1.5">
-            <button
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 border border-lightGray rounded-md text-xs font-medium text-darkGray bg-background hover:bg-gray50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t('dam.table.previous')}
-            </button>
-
-            <div className="flex items-center">
-              <input
-                type="number"
-                value={currentPage}
-                onChange={(e) => {
-                  const page = Math.max(1, Math.min(totalPages, Number(e.target.value)));
-                  onPageChange(page);
-                }}
-                className="w-14 text-center border border-lightGray rounded-md shadow-sm px-2 py-1.5 text-xs text-darkGray bg-background"
-                min={1}
-                max={totalPages}
-              />
-              <span className="ml-1.5 text-gray700 text-xs">of {totalPages}</span>
-            </div>
-
-            <button
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages}
-              className="px-3 py-1.5 border border-lightGray rounded-md text-xs font-medium text-darkGray bg-background hover:bg-gray50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t('dam.table.next')}
-            </button>
-          </div>
+          <PageController
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
         )}
       </div>
     </div>
