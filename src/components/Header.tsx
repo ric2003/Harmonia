@@ -16,10 +16,10 @@ export function Header() {
     const { sidebarOpen, handleChangeSidebar } = useContext(SidebarHeaderContext) as SidebarHeaderContextType;
 
     return (
-        <header className="flex items-center bg-background w-full min-h-[90px] px-6 relative">
+        <header className="flex items-center bg-background w-full min-h-[90px] px-2 sm:px-6 relative">
             <div className="flex flex-col w-full">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2 sm:gap-6">
                         <button onClick={handleChangeSidebar}>
                             { sidebarOpen ?
                                 <Menu className="text-primary bg-secondary rounded-lg p-1" size={27} />
@@ -27,9 +27,9 @@ export function Header() {
                                 <Menu className="text-primary bg-background rounded-lg p-1" size={27} />
                             }
                         </button>
-                        <span className="text-darkGray text-3xl font-extrabold">{pageTitle}</span>
+                        <span className="text-darkGray text-lg sm:text-3xl font-extrabold">{pageTitle}</span>
                     </div>
-                    <div className="flex items-center gap-2 mr-4">
+                    <div className="flex items-center gap-2">
                         <LanguageSwitcher />
                         <ThemeToggle />
                         

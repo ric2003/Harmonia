@@ -6,6 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import MapList from './MapList';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
@@ -22,10 +23,10 @@ interface MapComponentProps {
   selectedStationId: string | null;
   onMarkerHover: (stationId: string | null) => void;
   onStationSelect: (stationId: string | null) => void;
-  shoeMenu: boolean | null;
+  showMenu: boolean | null;
 }
 
-const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSelect, shoeMenu }: MapComponentProps) => {
+const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSelect, showMenu }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<Map | null>(null);
   const markers = useRef<Marker[]>([]);
@@ -113,43 +114,14 @@ const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSel
       <div ref={mapContainer} className="w-full h-full" />
       
       {/* Station list panel */}
-      {shoeMenu && (
-        <div className="absolute top-4 left-4 z-10 rounded-lg shadow-md overflow-hidden transition-all duration-300" 
-             style={{ maxHeight: showList ? '60vh' : '40px', width: '250px' }}>
-          <div className="p-2 bg-backgroundColor cursor-pointer flex justify-between items-center" 
-               onClick={() => setShowList(!showList)}>
-            <h3 className="text-sm font-bold text-primary">Lista de Barragens</h3>
-            <span className="text-xs text-darkGray">{showList ? '▲' : '▼'}</span>
-          </div>
-          
-          {showList && (
-            <div className="p-2 max-h-[calc(60vh-40px)] overflow-y-auto bg-gray100">
-              <div className="space-y-1 text-darkGray">
-                {stations.map((station) => (
-                  <Link 
-                    href={`/stations/${station.id}`} 
-                    key={station.id}
-                    className="block"
-                  >
-                    <div 
-                      className={`p-1.5 rounded-lg flex items-center text-xs ${
-                        selectedStationId === station.id 
-                          ? "bg-blue50 border-l-4 border-blue-500" 
-                          : "bg-gray50 hover:bg-blue50"
-                      }`}
-                      onMouseEnter={() => onMarkerHover(station.id)}
-                      onMouseLeave={() => onMarkerHover(null)}
-                    >
-                      <MapPin className="h-3 w-3 text-blue-500 mr-1.5" />
-                      <span className="truncate">{station.estacao.slice(7)}</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      <div className='hidden lg:block absolute top-4 left-4 z-10'>
+        <MapList
+          stations={stations}
+          selectedStationId={selectedStationId}
+          onMarkerHover={onMarkerHover}
+          showMenu={showMenu}
+        />
+      </div>
     </div>
   );
 };

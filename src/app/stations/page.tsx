@@ -36,7 +36,7 @@ export default function StationsPage() {
   return (
     <div className="text-darkGray">
       {loading ? (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {[...Array(6)].map((_, index) => (
             <div key={index} className="p-4 border border-gray200 rounded-lg shadow h-full w-full animate-pulse">
               <div className="mb-4 w-full">
@@ -51,7 +51,7 @@ export default function StationsPage() {
       ) : error ? (
         <p className="text-red-600">{error}</p>
       ) : (
-        <ul className="grid grid-cols-3 gap-4">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {stations.map((station) => {
             const imageUrl = `/images/${station.id}.png`;
             return (

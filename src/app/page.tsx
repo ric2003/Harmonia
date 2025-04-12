@@ -9,6 +9,7 @@ import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import { useTranslation } from 'react-i18next';
 import ScrollIndicator from "@/components/ScrollIndicator";
 import DataSourceFooter from "@/components/DataSourceFooter";
+import MapList from "@/components/MapList";
 
 // Definição do tipo para as props do MapComponent
 interface MapComponentProps {
@@ -16,7 +17,7 @@ interface MapComponentProps {
   selectedStationId: string | null;
   onMarkerHover: (stationId: string | null) => void;
   onStationSelect: (stationId: string | null) => void;
-  shoeMenu: boolean | null;
+  showMenu: boolean | null;
 }
 
 // Importação dinâmica do componente de mapa para evitar problemas de SSR
@@ -81,8 +82,25 @@ export default function HomePage() {
   return (
     <div>
       <div className="bg-backgroundColor h-[100%] p-4 rounded-xl shadow-md flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-primary">{t('home.title')}</h1>
+        <h1 className="text-2xl font-bold text-primary text-center sm:text-left">{t('home.title')}</h1>
 
+        <div className="lg:hidden text-md text-darkGray flex justify-center sm:justify-start">
+          <select
+            name="dams"
+            id="select-dams"
+            className="border border-primary rounded-md py-1 px-2"
+            onChange={(e) => {
+              setSelectedStation(e.target.value)
+            }}
+          >
+            <option key="default">Selecione uma barragem</option>
+            {stations.map((station) => {
+              return (
+                <option key={station.id} value={station.id}>{station.estacao.slice(7)}</option>
+              );
+            })}
+          </select>
+        </div>
         <div className="relative rounded-lg overflow-hidden w-full border border-gray200 shadow-sm map-container-fixed">
           <MapComponent
             key={sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}
@@ -90,7 +108,7 @@ export default function HomePage() {
             selectedStationId={selectedStation}
             onMarkerHover={setSelectedStation}
             onStationSelect={setSelectedStation}
-            shoeMenu={true}
+            showMenu={true}
           />
         </div>
       </div>

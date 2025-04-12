@@ -65,7 +65,7 @@ interface MapComponentProps {
   selectedStationId: string | null;
   onMarkerHover: (stationId: string | null) => void;
   onStationSelect: (stationId: string | null) => void;
-  shoeMenu: boolean | null;
+  showMenu: boolean | null;
 }
 
 interface DailyTemperatureData {
@@ -232,7 +232,7 @@ export default function StationDetailsPage() {
                     selectedStationId={stationID}
                     onMarkerHover={() => {}}
                     onStationSelect={() => {}}
-                    shoeMenu={false}
+                    showMenu={false}
                   />
                 ) : (
                   <div className="w-full h-full bg-gray200 flex items-center justify-center text-darkGray">

@@ -13,7 +13,7 @@ export function Sidebar() {
     const { t } = useTranslation();
 
     return (
-        <div className="z-[2]">
+        <div className="hidden sm:block z-[2]">
             <div className={`flex flex-col items-center h-full ${sidebarOpen ? 'w-[225px]' : ''} bg-background shadow-[rgba(0,0,0,0.25)_2px_0_20px_1px] z-[2]`}>
                 <div className="h-[88px] flex items-center justify-center">
                     <Image 
@@ -26,7 +26,7 @@ export function Sidebar() {
 
                 <hr className="h-0.5 bg-lightGray w-4/5 mt-[1px]" />
 
-                <nav className={`${sidebarOpen ? 'pt-12' : 'pt-6'} w-full ${sidebarOpen ? 'px-6' : 'px-2'}`}>
+                <nav className={`${sidebarOpen ? 'pt-12' : 'pt-6'} w-full ${sidebarOpen ? 'px-4' : 'px-2'}`}>
                     <ul className="flex flex-col items-center text-primary gap-2">
                         <LinkButton 
                             route="/" 
@@ -46,12 +46,12 @@ export function Sidebar() {
                             icon={<Droplets size={sidebarOpen ? 18 : 22} />} 
                             compact={!sidebarOpen}
                         />
-                        <LinkButton 
+                        {/*<LinkButton 
                             route="/sentinel" 
                             name={sidebarOpen ? t('navigation.sentinelMap') : t('navigation.sentinelMapShort')} 
                             icon={<Satellite size={sidebarOpen ? 18 : 22} />} 
                             compact={!sidebarOpen}
-                        />
+                        />*/}
                         <LinkButton 
                             route="/sorraia-map" 
                             name={sidebarOpen ? t('navigation.sorraiaMap') : t('navigation.sorraiaMapShort')} 
