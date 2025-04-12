@@ -5,11 +5,17 @@
   },
   "navigation": {
     "home": "Início",
+    "homeShort": "Início",
     "stations": "Estações Met.",
+    "stationsShort": "Estações",
     "damMonitoring": "Mon. Barragens",
+    "damMonitoringShort": "Barragens",
     "sentinelMap": "Imagens Satélite",
+    "sentinelMapShort": "Satélite",
     "sorraiaMap": "Modelo Preditivo",
-    "excelUpload": "Carregar Excel"
+    "sorraiaMapShort": "Modelo",
+    "excelUpload": "Carregar Excel",
+    "excelUploadShort": "Excel"
   },
   "title": {
     "home": "Início",

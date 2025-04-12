@@ -7,20 +7,20 @@ interface LinkButtonProps {
     route: string;
     name: string;
     icon: React.ReactNode;
+    compact?: boolean;
 }
 
-export function LinkButton({ route, name, icon }: LinkButtonProps) {
+export function LinkButton({ route, name, icon, compact = false }: LinkButtonProps) {
     const pathName = usePathname().split('/');
-    const backgroundColor =`/${pathName[1]}` === route ? "bg-secondary" : "bg-background"
-
+    const backgroundColor = `/${pathName[1]}` === route ? "bg-secondary" : "bg-background"
     
     return (
         <Link
-            className={"flex items-center justify-start w-full h-12 rounded-lg gap-3 p-3 border-2 border-background hover:border-primary " + (backgroundColor)}
+            className={`flex ${compact ? 'flex-col items-center justify-center gap-1 h-16 p-1' : 'flex-row items-center justify-start gap-3 h-12 p-3'} w-full rounded-lg border-2 border-background hover:border-primary ${backgroundColor}`}
             href={route}
         >
-            {icon}
-            <li className="text-[15px] font-semibold">{name}</li>
+            <div className={`${compact ? 'mb-1' : ''}`}>{icon}</div>
+            <span className={`${compact ? 'text-[11px] text-center' : 'text-[15px]'} font-semibold`}>{name}</span>
         </Link>
     );
 }

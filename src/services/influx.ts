@@ -7,82 +7,36 @@ const token = process.env.INFLUX_TOKEN || "";
 const org = process.env.INFLUX_ORG || "";
 const bucket = process.env.INFLUX_BUCKET || "";
 
-interface CacheData {
-  data: QueryResult[];
-  timestamp: number;
-}
-
-const cacheStore: Record<string, CacheData> = {};
-
 export interface QueryResult {
   _time?: string;
   barragem?: string;
   [key: string]: string | number | boolean | null | undefined;
 }
 
-function getCacheKey(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth(); // 0-11
-
-  if (month < 3) return `T1_${year}`;
-  if (month < 6) return `T2_${year}`;
-  if (month < 9) return `T3_${year}`;
-  return `T4_${year}`;
-}
-
 /**
- * Returns a set of unique dam names (barragens) from the cached data
- * @returns A set of unique dam names
+ * Returns a set of unique dam names (barragens) from the data
  */
 export async function getUniqueDamNames(): Promise<Set<string>> {
-  const cacheKey = getCacheKey();
   const damNames = new Set<string>();
-  
-  // If cache is empty, fetch data first
-  if (!cacheStore[cacheKey]) {
-    try {
-      const response = await getInfluxData();
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          cacheStore[cacheKey] = {
-            data: data.data,
-            timestamp: Date.now()
-          };
-        }
+  try {
+    const response = await getInfluxData();
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.data) {
+        data.data.forEach((item: QueryResult) => {
+          if (item.barragem) {
+            damNames.add(item.barragem);
+          }
+        });
       }
-    } catch (error) {
-      console.error("Error fetching data:", error);
     }
+  } catch (error) {
+    console.error("Error fetching data:", error);
   }
-  
-  // Extract dam names from cache
-  if (cacheStore[cacheKey]) {
-    cacheStore[cacheKey].data.forEach(item => {
-      if (item.barragem) {
-        damNames.add(item.barragem);
-      }
-    });
-  } else {
-    console.log("No cache data available after fetch attempt");
-  }
-  
   return damNames;
 }
 
 export async function getInfluxData(): Promise<NextResponse> {
-  const cacheKey = getCacheKey();
-
-  if (cacheStore[cacheKey]) {
-    const cacheSizeBytes = Buffer.byteLength(JSON.stringify(cacheStore[cacheKey]));
-    const cacheSizeMB = (cacheSizeBytes / 1024 / 1024).toFixed(2);
-    console.log(`Returning cached data for ${cacheKey}; total memory usage: :`,cacheSizeMB, "MB");
-    return NextResponse.json({ success: true, data: cacheStore[cacheKey].data });
-  }
-
-
-  console.log(`Fetching new data from InfluxDB for ${cacheKey}`);
   const influxDB = new InfluxDB({ url, token });
   const queryApi = influxDB.getQueryApi(org);
 
@@ -120,15 +74,6 @@ export async function getInfluxData(): Promise<NextResponse> {
     const formattedResults = results.map((row) => {
       if (row._time) row._time = new Date(row._time).toISOString().split("T")[0];
       return row;
-    });
-
-    cacheStore[cacheKey] = { data: formattedResults, timestamp: Date.now() };
-
-    Object.keys(cacheStore).forEach((key) => {
-      if (key !== cacheKey) {
-        console.log(`Deleting outdated cache: ${key}`);
-        delete cacheStore[key];
-      }
     });
 
     return NextResponse.json({ success: true, data: formattedResults });

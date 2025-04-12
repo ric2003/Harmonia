@@ -76,94 +76,21 @@ export interface Station10MinRecord {
 // The response is an object where each key is a timestamp.
 export type Station10MinData = Record<string, Station10MinRecord>;
 
-// ----------------------------------------------------------------
-// Global cache store and helper functions
-// ----------------------------------------------------------------
-
-interface CacheEntry<T> {
-  data: T;
-  expiresAt: number;
-}
-
-type CacheStore = {
-  [key: string]: CacheEntry<unknown>;
-}
-
-const cache: CacheStore = {};
-
-/**
- * Returns cached data if available and not expired.
- */
-function getCached<T>(key: string): T | null {
-  const entry = cache[key];
-  if (entry && entry.expiresAt > Date.now()) {
-    return entry.data as T;
-  } else {
-    delete cache[key];
-    return null;
-  }
-}
-
-/**
- * Sets a cache entry with the given TTL (in milliseconds).
- */
-function setCache<T>(key: string, data: T, ttl: number): void {
-  cache[key] = { data, expiresAt: Date.now() + ttl };
-}
-
-/**
- * Computes TTL until the beginning of the next hour.
- */
-function getTTLForHourlyUpdate(): number {
-  const now = new Date();
-  const nextHour = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    now.getHours() + 1,
-    0,
-    0
-  );
-  return nextHour.getTime() - now.getTime();
-}
-
-/**
- * Computes TTL until the beginning of the next 10-minute interval.
- */
-function getTTLFor10MinUpdate(): number {
-  const now = new Date();
-  const minutes = now.getMinutes();
-  const nextIntervalMinutes = Math.ceil((minutes + 1) / 10) * 10;
-  const nextInterval = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    now.getHours(),
-    nextIntervalMinutes,
-    0
-  );
-  return nextInterval.getTime() - now.getTime();
-}
-
-// TTL constants for endpoints that don't update as frequently.
-const STATIONS_TTL = 24 * 60 * 60 * 1000; // 1 day
-const DAILY_TTL = 12 * 60 * 60 * 1000; // 12 hours
 
 // ----------------------------------------------------------------
 // Helper function for POST requests
 // ----------------------------------------------------------------
 
-/**
- * Performs a POST request to the API with URL-encoded parameters.
- * @param params - The parameters to send with the request.
- * @returns The parsed JSON response.
- */
-async function postRequest<T>(params: Record<string, string>): Promise<T> {
+// Update the postRequest function to use Next.js caching
+async function postRequest<T>(params: Record<string, string>, options: { cache?: RequestCache } = {}): Promise<T> {
   const response = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams(params).toString(),
+    cache: options.cache || 'force-cache', // Use Next.js caching
+    next: { revalidate: 3600 }, // Revalidate every hour
   });
+  
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`);
   }
@@ -180,26 +107,12 @@ async function postRequest<T>(params: Record<string, string>): Promise<T> {
  * @returns An array of Station objects.
  */
 export async function getStations(): Promise<Station[]> {
-  const cacheKey = "stations";
-  const cached = getCached<Station[]>(cacheKey);
-  if (cached) {
-    const cacheSizeBytes = Buffer.byteLength(JSON.stringify(cached));
-    const cacheSizeMB = (cacheSizeBytes / 1024 / 1024).toFixed(2);
-    console.log(
-      `Returning cached stations data for ${cacheKey}; total memory usage: :`,
-      cacheSizeMB,
-      "MB"
-    );
-    return cached;
-  }
-
   const data = await postRequest<Record<string, Station>>({
     token,
     option: "1",
-  });
-  const stations = Object.values(data) as Station[];
-  setCache(cacheKey, stations, STATIONS_TTL);
-  return stations;
+  }, { cache: 'force-cache' });
+  
+  return Object.values(data) as Station[];
 }
 
 /**
@@ -215,19 +128,6 @@ export async function getStationDailyData(
   fromDate?: string,
   toDate?: string
 ): Promise<StationData> {
-  const cacheKey = `dailyData-${stationID}-${fromDate || "null"}-${toDate || "null"}`;
-  const cached = getCached<StationData>(cacheKey);
-  if (cached) {
-    const cacheSizeBytes = Buffer.byteLength(JSON.stringify(cached));
-    const cacheSizeMB = (cacheSizeBytes / 1024 / 1024).toFixed(2);
-    console.log(
-      `Returning cached daily data for ${cacheKey}; total memory usage: :`,
-      cacheSizeMB,
-      "MB"
-    );
-    return cached;
-  }
-
   const params: Record<string, string> = {
     token,
     option: "2",
@@ -241,9 +141,7 @@ export async function getStationDailyData(
     params.to_date = toDate;
   }
 
-  const data = await postRequest<StationData>(params);
-  setCache(cacheKey, data, DAILY_TTL);
-  return data;
+  return postRequest<StationData>(params, { cache: 'force-cache' });
 }
 
 /**
@@ -255,25 +153,11 @@ export async function getStationDailyData(
 export async function getStationHourlyData(
   stationID: string
 ): Promise<StationHourlyData> {
-  const cacheKey = `stationHourlyData-${stationID}`;
-  const cached = getCached<StationHourlyData>(cacheKey);
-  if (cached) {
-    const cacheSizeBytes = Buffer.byteLength(JSON.stringify(cached));
-    const cacheSizeMB = (cacheSizeBytes / 1024 / 1024).toFixed(2);
-    console.log(
-      `Returning cached hourly data for ${cacheKey}; total memory usage: :`,
-      cacheSizeMB,
-      "MB"
-    );
-    return cached;
-  }
-
   const data = await postRequest<StationHourlyData>({
     token,
     option: "3",
     id: stationID,
-  });
-  setCache(cacheKey, data, getTTLForHourlyUpdate());
+  }, { cache: 'force-cache' });
   return data;
 }
 
@@ -286,24 +170,10 @@ export async function getStationHourlyData(
 export async function getStation10MinData(
   stationID: string
 ): Promise<Station10MinData> {
-  const cacheKey = `station10MinData-${stationID}`;
-  const cached = getCached<Station10MinData>(cacheKey);
-  if (cached) {
-    const cacheSizeBytes = Buffer.byteLength(JSON.stringify(cached));
-    const cacheSizeMB = (cacheSizeBytes / 1024 / 1024).toFixed(2);
-    console.log(
-      `Returning cached 10-min data for ${cacheKey}; total memory usage: :`,
-      cacheSizeMB,
-      "MB"
-    );
-    return cached;
-  }
-
   const data = await postRequest<Station10MinData>({
     token,
     option: "4",
     id: stationID,
-  });
-  setCache(cacheKey, data, getTTLFor10MinUpdate());
+  }, { cache: 'force-cache' });
   return data;
 }

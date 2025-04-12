@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -113,7 +113,7 @@ export default function StationDetailsPage() {
   const [dailyData, setDailyData] = useState<DailyTemperatureData[]>([]);
   const { sidebarOpen } = useContext(SidebarHeaderContext);
 
-  async function fetchStationData() {
+  const fetchStationData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -133,9 +133,9 @@ export default function StationDetailsPage() {
       const dailyTransformed: DailyTemperatureData[] = Object.entries(dailyRaw).map(
         ([date, data]: [string, DailyRawData]) => ({
           date,
+          max: Number(data.air_temp_max ?? 0),
           avg: Number(data.air_temp_avg ?? 0),
           min: Number(data.air_temp_min ?? 0),
-          max: Number(data.air_temp_max ?? 0),
         })
       );
 
@@ -156,13 +156,13 @@ export default function StationDetailsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [stationID, fromDate, toDate, t]);
 
   useEffect(() => {
     if (stationID) {
       fetchStationData();
     }
-  }, [stationID]);
+  }, [stationID, fetchStationData]);
 
 
   useTranslatedPageTitle('title.station', { station: stationName });
@@ -194,19 +194,29 @@ export default function StationDetailsPage() {
             {/* Temperature trend graph */}
             <div className="lg:col-span-2 bg-background p-4 rounded-lg shadow-sm">
               <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-xl font-semibold mb-4">{t('station.dailyTemperatureTrend')}</h2>
-              <a className = "text-blue-500" href={`/stations/${stationID}/graphs`}>{t('station.viewMoreGraphs')}</a>
+                <h2 className="text-xl font-semibold mb-4">{t('station.dailyTemperatureTrend')}</h2>
+                <a className="text-blue-500" href={`/stations/${stationID}/graphs`}>{t('station.viewMoreGraphs')}</a>
               </div>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={dailyData}>
-                  <XAxis dataKey="date" />
-                  <YAxis />
+                <LineChart 
+                  data={dailyData}
+                  margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
+                >
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={(date) => {
+                      const [year, month, day] = date.split('-');
+                      return `${day}-${month}-${year.slice(2)}`;
+                    }}
+                    style={{ fontSize: '10px' }}
+                  />
+                  <YAxis style={{ fontSize: '10px' }} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend />
+                  <Legend style={{ fontSize: '12px' }} />
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
+                  <Line type="monotone" dataKey="max" stroke="#ff7300" name={t('station.chart.maximum')} />
                   <Line type="monotone" dataKey="avg" stroke="#8884d8" name={t('station.chart.average')} />
                   <Line type="monotone" dataKey="min" stroke="#82ca9d" name={t('station.chart.minimum')} />
-                  <Line type="monotone" dataKey="max" stroke="#ff7300" name={t('station.chart.maximum')} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -331,7 +341,7 @@ export default function StationDetailsPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-background divide-y divide-lightGray">
-                      {Object.entries(stationData).map(([date, data], index) => {
+                      {Object.entries(stationData).sort((a, b) => Number(b[0].slice(8)) - Number(a[0].slice(8))).map(([date, data], index) => {
                         const row: DailyDataRow = data;
                         return (
                           <tr key={index} className="hover:bg-gray50">
@@ -377,7 +387,7 @@ export default function StationDetailsPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-background divide-y divide-lightGray">
-                      {Object.entries(hourlyData).map(([, data], index) => {
+                      {Object.entries(hourlyData).sort((a, b) => Number(b[1].date.slice(8)) - Number(a[1].date.slice(8))).map(([, data], index) => {
                         const row: HourlyDataRow = data;
                         return (
                           <tr key={index} className="hover:bg-gray50">
@@ -423,7 +433,7 @@ export default function StationDetailsPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-background divide-y divide-lightGray">
-                      {Object.entries(min10Data).map(([, data], index) => {
+                      {Object.entries(min10Data).sort((a, b) => Number(b[1].date.slice(8)) - Number(a[1].date.slice(8))).map(([, data], index) => {
                         const row: Min10DataRow = data;
                         return (
                           <tr key={index} className="hover:bg-gray50">

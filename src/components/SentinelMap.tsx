@@ -111,38 +111,6 @@ function SentinelMap() {
     return grid;
   }, []);
 
-  // Handle map movement - this is called for both initial load and user navigation
-  const handleMapMove = useCallback((newBounds: [[number, number], [number, number]], zoom: number, isInitialRequest: boolean = false) => {
-    setViewBounds(newBounds);
-    setCurrentZoom(zoom);
-    
-    // If it's an initial request, we'll manually trigger the image fetch
-    if (isInitialRequest && zoom >= MIN_FETCH_ZOOM && !initialLoadDone.current) {
-      initialLoadDone.current = true;
-      // Use a larger grid and expanded bounds for initial load
-      fetchGridImages(newBounds, true);
-    }
-  }, [MIN_FETCH_ZOOM]);
-  
-  // Generate a cache key for a bbox
-  const getCacheKey = (bbox: number[]): string => {
-    // Round to 3 decimal places to allow for minor differences
-    return bbox.map(coord => Math.round(coord * 1000) / 1000).join(',');
-  };
-
-  // Handle filter change
-  const handleFilterChange = useCallback((newFilter: SentinelFilter) => {
-    setCurrentFilter(newFilter);
-    // Clear existing images and refetch with new filter
-    setGridImages([]);
-    // Clean up old URLs
-    gridImagesRef.current.forEach(image => {
-      URL.revokeObjectURL(image.url);
-    });
-    // Fetch new images with the current bounds
-    fetchGridImages(viewBounds, false, newFilter);
-  }, [viewBounds]);
-
   // Update fetchGridImages to accept filter parameter
   const fetchGridImages = useCallback(async (
     bounds: [[number, number], [number, number]], 
@@ -263,6 +231,38 @@ function SentinelMap() {
       setLoading(false);
     }
   }, [createGrid, currentZoom, MIN_FETCH_ZOOM, currentFilter]);
+
+  // Handle map movement - this is called for both initial load and user navigation
+  const handleMapMove = useCallback((newBounds: [[number, number], [number, number]], zoom: number, isInitialRequest: boolean = false) => {
+    setViewBounds(newBounds);
+    setCurrentZoom(zoom);
+    
+    // If it's an initial request, we'll manually trigger the image fetch
+    if (isInitialRequest && zoom >= MIN_FETCH_ZOOM && !initialLoadDone.current) {
+      initialLoadDone.current = true;
+      // Use a larger grid and expanded bounds for initial load
+      fetchGridImages(newBounds, true);
+    }
+  }, [MIN_FETCH_ZOOM, fetchGridImages]);
+
+  // Generate a cache key for a bbox
+  const getCacheKey = (bbox: number[]): string => {
+    // Round to 3 decimal places to allow for minor differences
+    return bbox.map(coord => Math.round(coord * 1000) / 1000).join(',');
+  };
+
+  // Handle filter change
+  const handleFilterChange = useCallback((newFilter: SentinelFilter) => {
+    setCurrentFilter(newFilter);
+    // Clear existing images and refetch with new filter
+    setGridImages([]);
+    // Clean up old URLs
+    gridImagesRef.current.forEach(image => {
+      URL.revokeObjectURL(image.url);
+    });
+    // Fetch new images with the current bounds
+    fetchGridImages(viewBounds, false, newFilter);
+  }, [viewBounds, fetchGridImages]);
 
   // Fetch images when the debounced view bounds change (for user navigation)
   useEffect(() => {

@@ -5,11 +5,17 @@
   },
   "navigation": {
     "home": "Home",
+    "homeShort": "Home",
     "stations": "Met. Stations",
+    "stationsShort": "Stations",
     "damMonitoring": "Dam Monitoring",
+    "damMonitoringShort": "Dams",
     "sentinelMap": "Satellite Images",
+    "sentinelMapShort": "Satellite",
     "sorraiaMap": "Predictive Model",
-    "excelUpload": "Excel Upload"
+    "sorraiaMapShort": "Model",
+    "excelUpload": "Excel Upload",
+    "excelUploadShort": "Excel"
   },
   "title": {
     "home": "Home",

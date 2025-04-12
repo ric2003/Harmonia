@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import L, { Layer, LeafletMouseEvent } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -59,7 +59,7 @@ const SimulationMap: React.FC = () => {
   const [riv1Data, setRiv1Data] = useState<GeoJsonFeatureCollection | null>(null);
   const [loadingGeoJson, setLoadingGeoJson] = useState<boolean>(true);
   const [errorGeoJson, setErrorGeoJson] = useState<string | null>(null);
-  const [selectedLocationId, setSelectedLocationId] = useState<number | string | null>(null);
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [selectedRchData, setSelectedRchData] = useState<RchParsedData | null>(null);
   const [loadingRch, setLoadingRch] = useState<boolean>(false);
   const [errorRch, setErrorRch] = useState<string | null>(null);
@@ -67,11 +67,21 @@ const SimulationMap: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<number>(today.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth() + 1);
   const [selectedDay, setSelectedDay] = useState<number>(today.getDate());
-  const [isPanelVisible, setIsPanelVisible] = useState<boolean>(true);
-  let lastClickedLayer: Layer | null = null;
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
+  const lastClickedLayerRef = useRef<L.Path | null>(null);
 
   const mapCenter: L.LatLngExpression = [38.8, -8.5];
   const initialZoom: number = 9;
+
+  // Base style for the points
+  const pointStyle = useMemo(() => ({
+    radius: 16,
+    fillColor: "#ff7800",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+  }), []);
 
   // Helper function to update selected date
   const updateSelectedDate = (year: number, month: number, day: number) => {
@@ -88,7 +98,7 @@ const SimulationMap: React.FC = () => {
     if (selectedRchData?.timeseries) {
       updateSelectedDate(selectedYear, selectedMonth, selectedDay);
     }
-  }, [selectedYear, selectedMonth, selectedRchData]);
+  }, [selectedYear, selectedMonth, selectedRchData, selectedDay]);
 
   // useEffect to load GeoJSON data
   useEffect(() => {
@@ -186,11 +196,11 @@ const SimulationMap: React.FC = () => {
 
   // Function to reset point style
   const resetPointStyle = useCallback(() => {
-    if (lastClickedLayer && lastClickedLayer instanceof L.Path) {
-      lastClickedLayer.setStyle(pointStyle);
-      lastClickedLayer = null;
+    if (lastClickedLayerRef.current) {
+      lastClickedLayerRef.current.setStyle(pointStyle);
+      lastClickedLayerRef.current = null;
     }
-  }, []);
+  }, [pointStyle]);
 
   // Handler for closing panel
   const handleClosePanel = useCallback(() => {
@@ -218,7 +228,7 @@ const SimulationMap: React.FC = () => {
           setIsPanelVisible(true);
           if (layer instanceof L.Path) {
             layer.setStyle({ fillColor: 'orange', color: 'red', weight: 3, fillOpacity: 0.8 });
-            lastClickedLayer = layer;
+            lastClickedLayerRef.current = layer;
           }
           L.DomEvent.stopPropagation(e);
         }
@@ -227,16 +237,6 @@ const SimulationMap: React.FC = () => {
       console.warn("Feature found without properties or id:", feature);
     }
   }, [selectedLocationId, handleClosePanel, resetPointStyle]);
-
-  // Base style for the points
-  const pointStyle = {
-    radius: 16,
-    fillColor: "#ff7800",
-    color: "#000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8
-  };
 
   const pointToLayer = (feature: Feature<Geometry>, latlng: L.LatLngExpression): L.Layer => {
     return L.circleMarker(latlng, pointStyle);

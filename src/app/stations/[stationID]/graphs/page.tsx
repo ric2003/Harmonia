@@ -89,22 +89,30 @@ export default function StationGraphsPage() {
         const dailyTransformed: DailyTemperatureData[] = Object.entries(dailyRaw).map(
           ([date, data]: [string, DailyRawData]) => ({
             date,
+            max: Number(data.air_temp_max ?? 0),
             avg: Number(data.air_temp_avg ?? 0),
             min: Number(data.air_temp_min ?? 0),
-            max: Number(data.air_temp_max ?? 0),
           })
         );
 
         // Fetch hourly data and transform it
         const hourlyRaw = await getStationHourlyData(stationID);
-        const hourlyTransformed: HourlyData[] = Object.entries(hourlyRaw).map(
-          ([timestamp, data]: [string, HourlyRawData]) => ({
+        const hourlyTransformed: HourlyData[] = Object.entries(hourlyRaw)
+          .sort(([dateA, dataA], [dateB, dataB]) => {
+            // First compare by date
+            const dateComparison = dateA.localeCompare(dateB);
+            if (dateComparison !== 0) {
+              return dateComparison;
+            }
+            // If dates are equal, compare by hour
+            return Number(dataA.hour.slice(0, 2)) - Number(dataB.hour.slice(0, 2));
+          })
+          .map(([timestamp, data]: [string, HourlyRawData]) => ({
             timestamp,
             temp: Number(data.air_temp_avg ?? 0),
             windSpeed: Number(data.wind_speed_avg ?? 0),
             humidity: Number(data.relative_humidity_avg ?? 0),
-          })
-        );
+          }));
 
         setDailyData(dailyTransformed);
         setHourlyData(hourlyTransformed);
@@ -120,7 +128,7 @@ export default function StationGraphsPage() {
     }
 
     fetchData();
-  }, [stationID, fromDate, toDate]);
+  }, [stationID, fromDate, toDate, t]);
   useTranslatedPageTitle('station.graphs.title', { station: stationName });
 
   if (loading) return <LoadingSpinner message={t('station.graphs.loading')}/>;
@@ -147,9 +155,9 @@ export default function StationGraphsPage() {
             <Tooltip content={<CustomTooltip />} />
             <Legend />
             <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
+            <Line type="monotone" dataKey="max" stroke="#ff7300" name={t('station.chart.maximum')} />
             <Line type="monotone" dataKey="avg" stroke="#8884d8" name={t('station.chart.average')} />
             <Line type="monotone" dataKey="min" stroke="#82ca9d" name={t('station.chart.minimum')} />
-            <Line type="monotone" dataKey="max" stroke="#ff7300" name={t('station.chart.maximum')} />
           </LineChart>
         </ResponsiveContainer>
       </div>

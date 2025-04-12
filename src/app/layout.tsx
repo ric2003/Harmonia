@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { PageTitleProvider } from "@/contexts/PageTitleContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import I18nClientProvider from "@/components/I18nClientProvider";
+import QueryProvider from "@/providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,17 +39,19 @@ export default function RootLayout({
           <PageTitleProvider>
             <I18nClientProvider>
               <LanguageProvider>
-                <SidebarHeaderProvider>
-                  <div className="flex h-screen">
-                    <Sidebar />
-                    <div className="flex flex-1 flex-col z-[1]">
-                      <Header />
-                      <main className="overflow-auto bg-background h-full p-8">
-                        {children}
-                      </main>
+                <QueryProvider>
+                  <SidebarHeaderProvider>
+                    <div className="flex h-screen">
+                      <Sidebar />
+                      <div className="flex flex-1 flex-col z-[1]">
+                        <Header />
+                        <main className="overflow-auto bg-background h-full p-8">
+                          {children}
+                        </main>
+                      </div>
                     </div>
-                  </div>
-                </SidebarHeaderProvider>
+                  </SidebarHeaderProvider>
+                </QueryProvider>
               </LanguageProvider>
             </I18nClientProvider>
           </PageTitleProvider>

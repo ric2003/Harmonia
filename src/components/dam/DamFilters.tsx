@@ -111,7 +111,10 @@ function DamNameFilter({ filters, setFilters }: { filters: FilterState; setFilte
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Load unique dam names once when component mounts
+  useEffect(() => {
+    setInputValue(filters.filterDam);
+  }, [filters.filterDam]);
+
   useEffect(() => {
     const loadDamNames = async () => {
       try {
@@ -135,7 +138,7 @@ function DamNameFilter({ filters, setFilters }: { filters: FilterState; setFilte
       }
     };
     loadDamNames();
-  }, []); // Only run once on mount
+  }); // Only run once on mount
 
   // Handle click outside to close suggestions
   useEffect(() => {
