@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image";
 import { LinkButton } from "./LinkButton";
-import { Building, Home, Sheet, Droplets, Map, Satellite } from "lucide-react";
+import { Building, Home, Sheet, Droplets, Map } from "lucide-react";
 import { useContext } from "react";
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import { ThemeContext } from "@/contexts/ThemeContext";

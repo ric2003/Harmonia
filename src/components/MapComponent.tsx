@@ -3,8 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import mapboxgl, { Map, GeolocateControl, Marker } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import Link from 'next/link';
-import { MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import MapList from './MapList';
 
@@ -31,7 +29,6 @@ const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSel
   const map = useRef<Map | null>(null);
   const markers = useRef<Marker[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [showList, setShowList] = useState(true);
   const router = useRouter();
 
   useEffect(() => {

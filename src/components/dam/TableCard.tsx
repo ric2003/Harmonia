@@ -12,17 +12,15 @@ export default function TableCard({ id, data, className = '' }: ReservoirCardPro
   const enchimentoToPercentage = data.enchimento ? Number((data.enchimento * 100).toFixed(0)) : 0;
 
   useEffect(() => {
-    if (fillBarRef.current) {
+    if (data.enchimento !== undefined) {
       const width = `${enchimentoToPercentage}%`;
-      fillBarRef.current.style.width = '0';
-      
       setTimeout(() => {
         if (fillBarRef.current) {
           fillBarRef.current.style.width = width;
         }
       }, 300);
     }
-  }, [data.enchimento]);
+  }, [data.enchimento, enchimentoToPercentage]);
 
   return (
     <div className={`bg-backgroundColor rounded-xl shadow-md p-4 mb-5 hover:translate-y-[-2px] hover:shadow-lg ${className}`}>

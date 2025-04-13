@@ -69,7 +69,6 @@ export default function DamMonitoringPage() {
   return (
     <div className="container mx-auto max-h-[100%]">
       <div className="block lg:hidden">
-        // teste 
         {data && data.length > 0 && (
           currentRecords1.map((barragem, index) => {
             return (

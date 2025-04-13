@@ -1,7 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import PageController from '../dam/PageController';
-import { DamData } from '../dam/DamTable';
 
 interface Column<T> {
   key: keyof T;

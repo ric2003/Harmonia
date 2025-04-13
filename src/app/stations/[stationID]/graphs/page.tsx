@@ -98,14 +98,14 @@ export default function StationGraphsPage() {
         // Fetch hourly data and transform it
         const hourlyRaw = await getStationHourlyData(stationID);
         const hourlyTransformed: HourlyData[] = Object.entries(hourlyRaw)
-          .sort(([dateA, dataA], [dateB, dataB]) => {
+          .sort(([dateA, hourA], [dateB, hourB]) => {
             // First compare by date
             const dateComparison = dateA.localeCompare(dateB);
             if (dateComparison !== 0) {
               return dateComparison;
             }
             // If dates are equal, compare by hour
-            return Number(dataA.hour.slice(0, 2)) - Number(dataB.hour.slice(0, 2));
+            return Number(hourA.hour.slice(0, 2)) - Number(hourB.hour.slice(0, 2));
           })
           .map(([timestamp, data]: [string, HourlyRawData]) => ({
             timestamp,

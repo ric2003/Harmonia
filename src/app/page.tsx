@@ -9,7 +9,6 @@ import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import { useTranslation } from 'react-i18next';
 import ScrollIndicator from "@/components/ScrollIndicator";
 import DataSourceFooter from "@/components/DataSourceFooter";
-import MapList from "@/components/MapList";
 
 // Definição do tipo para as props do MapComponent
 interface MapComponentProps {
