@@ -9,7 +9,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="theme-switcher flex items-center justify-center gap-1 px-2 py-2 rounded-md bg-secondary hover:bg-opacity-80"
+      className="theme-switcher flex items-center justify-center gap-1 p-2 rounded-md bg-secondary hover:bg-opacity-80"
     >
       {theme === 'light' ? (
           <Sun size={16} absoluteStrokeWidth className="text-primary" />

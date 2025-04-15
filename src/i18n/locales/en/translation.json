@@ -141,6 +141,7 @@
       "volumeTotal": "Total Volume",
       "volumeUtil": "Useful Volume",
       "next": "Next",
+      "ofPages": "of {{totalPages}}",
       "previous": "Previous",
       "noRecords": "No records match your filter criteria."
     },

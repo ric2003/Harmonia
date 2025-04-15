@@ -82,9 +82,9 @@ const TimeSeriesChart: React.FC<{
   );
 
   return (
-    <div className="h-[300px] w-full">
+    <div className="h-[300px] w-full -mx-4 sm:mx-0">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+        <LineChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
           <XAxis
             dataKey="timestamp"
@@ -361,7 +361,7 @@ const SimulationMap: React.FC = () => {
   return (
     <div className="flex flex-col h-full relative">
       {/* Map Container */}
-      <div className={`w-full transition-all duration-300 ease-in-out ${isPanelVisible ? 'h-[85vh]' : 'h-screen'}`}>
+      <div className={`w-full transition-all duration-300 ease-in-out ${isPanelVisible ? 'h-[85vh]' : 'h-screen'} relative z-0`}>
         <MapContainer
           center={mapCenter}
           zoom={initialZoom}
@@ -385,9 +385,9 @@ const SimulationMap: React.FC = () => {
       {/* Data Display Section */}
       {selectedLocationId !== null && isPanelVisible && (
         <div className="w-full py-2 bg-background flex-shrink-0 relative max-h-[50vh] overflow-y-auto">
-          {/* Location Name Display - Add this section */}
+          {/* Location Name Display */}
           {locationName && (
-            <div className="mb-4 pl-2">
+            <div className="mb-4 px-4">
               <h2 className="text-lg font-semibold text-primary">
                 {locationName.city || locationName.county || locationName.formatted}
               </h2>
@@ -409,7 +409,34 @@ const SimulationMap: React.FC = () => {
             </svg>
           </button>
 
-          <div className="space-y-2 pl-2">
+          <div className="px-4">
+            <select id="parameterSelector"
+                className="w-full p-1 border rounded-md bg-background text-darkGray"
+                value={selectedParameter}
+                onChange={(e) => setSelectedParameter(e.target.value)}
+              >
+                {Object.keys(parameters).map((key) => (
+                  <option key={key} value={key}>
+                    {parameters[key].label}
+                  </option>
+                ))}
+              </select>
+              {/* Time Series Charts */}
+              <div className="space-y-4">
+                <div className="bg-background p-4 rounded-lg">
+                  {selectedRchData && (
+                    <TimeSeriesChart
+                      data={selectedRchData.timeseries}
+                      dataKey={selectedParameter}
+                      label={parameters[selectedParameter]?.label}
+                      color="#2B96F3"
+                    />
+                  )}
+                </div>
+              </div>
+          </div>
+
+          <div className="space-y-2 px-4">
             {loadingRch && (
               <div className="space-y-3">
                 {/* Date Selection Controls Skeleton */}
@@ -449,7 +476,7 @@ const SimulationMap: React.FC = () => {
                   <div className="space-y-3">
                     {/* Date Selection Controls */}
                     <div className="flex flex-wrap gap-2 items-end">
-                    <div className="w-32">
+                    <div className="w-24 sm:w-32">
                         <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.day')}</label>
                         <select
                             className="w-full py-1 border rounded-md bg-background text-sm text-darkGray"
@@ -467,7 +494,7 @@ const SimulationMap: React.FC = () => {
                         </select>
                     </div>
 
-                    <div className="w-32">
+                    <div className="w-24 sm:w-32">
                         <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.month')}</label>
                         <select
                           className="w-full p-1 border rounded-md bg-background text-sm text-darkGray"
@@ -490,7 +517,7 @@ const SimulationMap: React.FC = () => {
                         </select>
                       </div>
 
-                      <div className="w-32">
+                      <div className="w-24 sm:w-32">
                         <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.year')}</label>
                         <select
                           className="w-full p-1 border rounded-md bg-background text-sm text-darkGray"
@@ -505,7 +532,6 @@ const SimulationMap: React.FC = () => {
                           ))}
                         </select>
                       </div>
-
                     </div>
 
                     {/* Data Display */}
@@ -581,32 +607,7 @@ const SimulationMap: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                        <select id="parameterSelector"
-                          className = "w-full p-1 border rounded-md bg-backgroundColor text-darkGray"
-                          value= {selectedParameter}
-                          onChange={(e) => setSelectedParameter(e.target.value)}
-                          >
-                            {Object.keys(parameters).map((key) => (
-                              <option key={key} value={key}>
-                                {parameters[key].label}
-                              </option>
-                            ))}
-                          
-                        </select>
-                        {/* Time Series Charts */}
-                        <div className="mt-4 space-y-4">
-                          <div className="bg-backgroundColor p-4 rounded-lg">
-                            <h3 className="text-sm font-medium mb-2">
-                              {parameters[selectedParameter]?.label}
-                            </h3>
-                            <TimeSeriesChart
-                              data={selectedRchData.timeseries}
-                              dataKey={selectedParameter}
-                              label={parameters[selectedParameter]?.label}
-                              color="#2B96F3"
-                            />
-                          </div>
-                        </div>
+                        
 
                       </>
                     )}

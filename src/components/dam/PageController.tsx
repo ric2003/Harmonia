@@ -10,7 +10,7 @@ export default function PageController({ currentPage, totalPages, onPageChange }
     const { t } = useTranslation();
     
     return (
-        <div className="flex items-center space-x-1.5">
+        <div className="flex items-center justify-center space-x-1.5">
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
@@ -31,7 +31,7 @@ export default function PageController({ currentPage, totalPages, onPageChange }
                 min={1}
                 max={totalPages}
               />
-              <span className="ml-1.5 text-gray700 text-xs">of {totalPages}</span>
+              <span className="ml-1.5 text-gray700 text-xs">{t('dam.table.ofPages', { totalPages })}</span>
             </div>
 
             <button

@@ -15,17 +15,16 @@ export function Sidebar() {
     return (
         <div className="hidden sm:block z-[2]">
             <div className={`flex flex-col items-center h-full ${sidebarOpen ? 'w-[225px]' : ''} bg-background shadow-[rgba(0,0,0,0.25)_2px_0_20px_1px] z-[2]`}>
-                <div className="h-[88px] flex items-center justify-center">
+                <div className="h-[87px] flex items-center justify-center">
                     <Image 
-                        src={theme === "light" ? "/logo.svg" : "/logoDarkMode.svg"} 
-                        width={sidebarOpen ? 104 : 40} 
-                        height={sidebarOpen ? 88 : 34} 
-                        alt="" 
+                        src={sidebarOpen ? theme === "light" ? "/logo.svg" : "/logoDarkMode.svg" : theme === "light" ? "/logoNoText.svg" : "/logoDarkModeNoText.svg"} 
+                        width={sidebarOpen ? 80 : 55} 
+                        height={sidebarOpen ? 80 : 55} 
+                        alt="Water Wise Logo"
+                        style={{ transition: 'height 0.05s ease-in-out, height 0.05s ease-in-out' }}
                     />
                 </div>
-
                 <hr className="h-0.5 bg-lightGray w-4/5 mt-[1px]" />
-
                 <nav className={`${sidebarOpen ? 'pt-12' : 'pt-6'} w-full ${sidebarOpen ? 'px-4' : 'px-2'}`}>
                     <ul className="flex flex-col items-center text-primary gap-2">
                         <LinkButton 

@@ -83,11 +83,12 @@ export default function HomePage() {
       <div className="bg-backgroundColor h-[100%] p-4 rounded-xl shadow-md flex flex-col gap-2">
         <h1 className="text-2xl font-bold text-primary text-center sm:text-left">{t('home.title')}</h1>
 
-        <div className="lg:hidden text-md text-darkGray flex justify-center sm:justify-start">
+        <div className="lg:hidden text-darkGray flex justify-center sm:justify-start ">
           <select
             name="dams"
             id="select-dams"
-            className="border border-primary rounded-md py-1 px-2"
+            className="bg-background border border-darkGray rounded-md py-1 px-2"
+            
             onChange={(e) => {
               setSelectedStation(e.target.value)
             }}

@@ -141,6 +141,7 @@
       "volumeTotal": "Volume Total",
       "volumeUtil": "Volume Útil",
       "next": "Próximo",
+      "ofPages": "de {{totalPages}}",
       "previous": "Anterior",
       "noRecords": "Nenhum registro corresponde aos seus critérios de filtro."
     }
