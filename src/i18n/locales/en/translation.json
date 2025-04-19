@@ -110,7 +110,9 @@
   "dam": {
     "title": "Reservoir Monitoring",
     "dataSource": "Data source:",
+    "fetchingError": "Error fetching data from InfluxDB. You are viewing backup data which may not be up-to-date.",
     "sir": "SIR - Irrigation Information System",
+    "noFilteredResults": "No results match your filter criteria.",
     "monitoring": {
       "title": "Dam Monitoring Table",
       "showFilters": "Show Filters",
@@ -148,6 +150,35 @@
     "footer": {
       "data": "Data source:",
       "source": "SIR - Sistema de Informação de Regadio"
+    }
+  },
+  "mobile": {
+    "filters": {
+      "title": "Filter Options",
+      "filterBtn": "Filters",
+      "reset": "Reset Filters",
+      "dam": "Dam",
+      "date": "Date",
+      "enchimento": "Fill Level",
+      "volume": "Volume",
+      "cota": "Read Level",
+      "volumeUtil": "Useful Volume",
+      "damName": "Dam Name",
+      "searchDam": "Search dams...",
+      "selectDates": "Select Date Range",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "fillLevel": "Fill Level (%)",
+      "min": "Min",
+      "max": "Max",
+      "critical": "Critical",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "veryHigh": "Very High",
+      "currentRange": "Current Range",
+      "applyRange": "Apply Range",
+      "scrollToCards": "Scroll to results"
     }
   },
   "filterControls": {

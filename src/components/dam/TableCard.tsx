@@ -77,7 +77,15 @@ export default function TableCard({ id, data, className = '' }: ReservoirCardPro
             </div>
             <div 
               ref={fillBarRef}
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-blue100 rounded-full"
+              className={`absolute top-0 left-0 h-full rounded-full ${
+                enchimentoToPercentage < 20 
+                  ? 'bg-gradient-to-r from-red-500 to-red-400'
+                  : enchimentoToPercentage < 40
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-400'
+                  : enchimentoToPercentage < 70
+                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
+                  : 'bg-gradient-to-r from-green-500 to-green-400'
+              }`}
               style={{ width: `${enchimentoToPercentage}%` }}
             />
           </div>

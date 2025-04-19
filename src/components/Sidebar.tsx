@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image";
 import { LinkButton } from "./LinkButton";
-import { Building, Home, Sheet, Droplets, Map } from "lucide-react";
+import { Building, Home, Sheet, Droplets, Map, Satellite} from "lucide-react";
 import { useContext } from "react";
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import { ThemeContext } from "@/contexts/ThemeContext";
@@ -45,12 +45,12 @@ export function Sidebar() {
                             icon={<Droplets size={sidebarOpen ? 18 : 22} />} 
                             compact={!sidebarOpen}
                         />
-                        {/*<LinkButton 
+                        <LinkButton 
                             route="/sentinel" 
                             name={sidebarOpen ? t('navigation.sentinelMap') : t('navigation.sentinelMapShort')} 
                             icon={<Satellite size={sidebarOpen ? 18 : 22} />} 
                             compact={!sidebarOpen}
-                        />*/}
+                        />
                         <LinkButton 
                             route="/sorraia-map" 
                             name={sidebarOpen ? t('navigation.sorraiaMap') : t('navigation.sorraiaMapShort')} 

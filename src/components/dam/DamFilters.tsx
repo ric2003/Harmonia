@@ -138,7 +138,7 @@ function DamNameFilter({ filters, setFilters }: { filters: FilterState; setFilte
       }
     };
     loadDamNames();
-  }); // Only run once on mount
+  }, [filters.filterDam]);
 
   // Handle click outside to close suggestions
   useEffect(() => {

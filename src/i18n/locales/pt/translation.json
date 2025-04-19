@@ -108,11 +108,13 @@
     }
   },
   "dam": {
-    "title": "Monitorização de Albufeiras",
+    "title": "Monitorização de Reservatórios",
     "dataSource": "Fonte de dados:",
+    "fetchingError": "Erro ao obter dados do InfluxDB. Estás a ver dados de backup que podem não estar atualizados.",
     "sir": "SIR - Sistema de Informação de Regadio",
+    "noFilteredResults": "Nenhum resultado corresponde aos seus critérios de filtro.",
     "monitoring": {
-      "title": "Tabela de Monitorização das Barragens",
+      "title": "Tabela de Monitorização de Barragens",
       "showFilters": "Mostrar Filtros",
       "hideFilters": "Ocultar Filtros",
       "resetFilters": "Redefinir Todos os Filtros",
@@ -125,9 +127,9 @@
       "volumeTotal": "Intervalo de Volume Total",
       "minVolume": "Volume Mínimo",
       "maxVolume": "Volume Máximo",
-      "cotaLida": "Intervalo de Cota Lida",
-      "minCota": "Cota Mínima",
-      "maxCota": "Cota Máxima",
+      "cotaLida": "Intervalo de Nível Lido",
+      "minCota": "Nível Mínimo",
+      "maxCota": "Nível Máximo",
       "enchimento": "Intervalo de Enchimento (%)",
       "min": "Mín",
       "max": "Máx",
@@ -136,14 +138,47 @@
     "table": {
       "dam": "Barragem",
       "date": "Data",
-      "cotaLida": "Cota Lida",
+      "cotaLida": "Nível Lido",
       "enchimento": "Enchimento (%)",
       "volumeTotal": "Volume Total",
       "volumeUtil": "Volume Útil",
-      "next": "Próximo",
+      "next": "Seguinte",
       "ofPages": "de {{totalPages}}",
       "previous": "Anterior",
-      "noRecords": "Nenhum registro corresponde aos seus critérios de filtro."
+      "noRecords": "Nenhum registo corresponde aos seus critérios de filtro."
+    },
+    "footer": {
+      "data": "Fonte de dados:",
+      "source": "SIR - Sistema de Informação de Regadio"
+    }
+  },
+  "mobile": {
+    "filters": {
+      "title": "Opções de Filtro",
+      "filterBtn": "Filtros",
+      "reset": "Limpar Filtros",
+      "dam": "Barragem",
+      "date": "Data",
+      "enchimento": "Enchimento",
+      "volume": "Volume",
+      "cota": "Nível Lido",
+      "volumeUtil": "Volume Útil",
+      "damName": "Nome da Barragem",
+      "searchDam": "Procurar barragens...",
+      "selectDates": "Selecionar Período",
+      "startDate": "Data Inicial",
+      "endDate": "Data Final",
+      "fillLevel": "Nível de Enchimento (%)",
+      "min": "Mín",
+      "max": "Máx",
+      "critical": "Crítico",
+      "low": "Baixo",
+      "medium": "Médio",
+      "high": "Alto",
+      "veryHigh": "Muito Alto",
+      "currentRange": "Intervalo Atual",
+      "applyRange": "Aplicar Intervalo",
+      "scrollToCards": "Ver resultados"
     }
   },
   "filterControls": {
@@ -151,26 +186,26 @@
     "filters": {
       "natural": {
         "label": "Cor Natural",
-        "description": "Representação em cores reais da superfície da Terra"
+        "description": "Representação em cores verdadeiras da superfície da Terra"
       },
       "ndvi": {
         "label": "Vegetação (NDVI)",
-        "description": "Índice de Vegetação por Diferença Normalizada - Mostra saúde e densidade das plantas"
+        "description": "Índice de Vegetação por Diferença Normalizada - Mostra a saúde e densidade das plantas"
       },
       "moisture": {
-        "label": "Índice de Umidade",
+        "label": "Índice de Humidade",
         "description": "Mostra o conteúdo de água na vegetação e no solo"
       },
       "urban": {
         "label": "Áreas Urbanas",
-        "description": "Destaca áreas construídas e desenvolvimento urbano"
+        "description": "Destaca áreas edificadas e desenvolvimento urbano"
       }
     }
   },
   "simulationMap": {
     "loading": "A carregar dados base do mapa...",
     "error": "Erro: {{message}}",
-    "noData": "Nenhuma série temporal encontrada neste arquivo.",
+    "noData": "Nenhuns dados de série temporal encontrados neste ficheiro.",
     "dateControls": {
       "day": "Dia",
       "month": "Mês",
@@ -178,12 +213,12 @@
     },
     "parameters": {
       "flowout_m3_s": {
-        "label": "Fluxo (m³/s)",
+        "label": "Caudal (m³/s)",
         "description": "Taxa de Fluxo de Água"
       },
       "ammonia_mg_l": {
         "label": "NH₄ (mg/l)",
-        "description": "Concentração de Amônia"
+        "description": "Concentração de Amónia"
       },
       "dissolved_phosphorus_mg_l": {
         "label": "PO₄ (mg/l)",
@@ -191,7 +226,7 @@
       },
       "dissolved_oxygen_mg_l": {
         "label": "OD (mg/l)",
-        "description": "Oxigênio Dissolvido"
+        "description": "Oxigénio Dissolvido"
       },
       "nitrate_mg_l": {
         "label": "NO₃ (mg/l)",
@@ -203,7 +238,7 @@
       },
       "organic_nitrogen_mg_l": {
         "label": "N-Org (mg/l)",
-        "description": "Nitrogênio Orgânico"
+        "description": "Nitrogénio Orgânico"
       },
       "organic_phosphorus_mg_l": {
         "label": "P-Org (mg/l)",
@@ -211,7 +246,7 @@
       },
       "saturation_oxygen_mg_l": {
         "label": "OD-Sat (mg/l)",
-        "description": "Nível de Saturação de Oxigênio"
+        "description": "Nível de Saturação de Oxigénio"
       },
       "temperature_cc": {
         "label": "Temp (°C)",

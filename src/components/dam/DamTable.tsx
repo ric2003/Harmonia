@@ -95,10 +95,10 @@ export function DamMonitoringTable({
         const enchimentoPercentage = Math.min(value * 100, 100);
 
         const getBarColor = (percentage: number) => {
-          if (percentage > 70) return "bg-green-500";
-          if (percentage > 40) return "bg-yellow-500";
-          if (percentage > 20) return "bg-orange-500";
-          return "bg-red-500";
+          if (percentage > 70) return 'bg-gradient-to-r from-green-500 to-green-400';
+          if (percentage > 40) return 'bg-gradient-to-r from-yellow-500 to-yellow-400';
+          if (percentage > 20) return 'bg-gradient-to-r from-orange-500 to-orange-400';
+          return 'bg-gradient-to-r from-red-500 to-red-400';
         };
 
         return (
@@ -134,55 +134,8 @@ export function DamMonitoringTable({
     }
   ];
 
-  // Apply filters to the data
-  const filteredData = data.filter(item => {
-    // Filter by dam name
-    if (filters.filterDam && item.barragem?.toLowerCase().indexOf(filters.filterDam.toLowerCase()) === -1) {
-      return false;
-    }
-
-    // Filter by date range
-    if (filters.filterStartDate && item._time && new Date(item._time) < new Date(filters.filterStartDate)) {
-      return false;
-    }
-    if (filters.filterEndDate && item._time && new Date(item._time) > new Date(filters.filterEndDate)) {
-      return false;
-    }
-
-    // Filter by volume total
-    if (filters.filterMinVolume && item.volume_total !== undefined && item.volume_total < Number(filters.filterMinVolume)) {
-      return false;
-    }
-    if (filters.filterMaxVolume && item.volume_total !== undefined && item.volume_total > Number(filters.filterMaxVolume)) {
-      return false;
-    }
-
-    // Filter by cota lida
-    if (filters.filterMinCotaLida && item.cota_lida !== undefined && item.cota_lida < Number(filters.filterMinCotaLida)) {
-      return false;
-    }
-    if (filters.filterMaxCotaLida && item.cota_lida !== undefined && item.cota_lida > Number(filters.filterMaxCotaLida)) {
-      return false;
-    }
-
-    // Filter by enchimento
-    if (filters.filterMinEnchimento && item.enchimento !== undefined && item.enchimento < Number(filters.filterMinEnchimento)) {
-      return false;
-    }
-    if (filters.filterMaxEnchimento && item.enchimento !== undefined && item.enchimento > Number(filters.filterMaxEnchimento)) {
-      return false;
-    }
-
-    // Filter by volume util
-    if (filters.filterMinVolumeUtil && item.volume_util !== undefined && item.volume_util < Number(filters.filterMinVolumeUtil)) {
-      return false;
-    }
-    if (filters.filterMaxVolumeUtil && item.volume_util !== undefined && item.volume_util > Number(filters.filterMaxVolumeUtil)) {
-      return false;
-    }
-
-    return true;
-  });
+  // Note: Filtering is now handled in the parent page component
+  // The data prop already contains filtered data
 
   return (
     <div className="bg-background rounded-lg max-h-[100%] shadow-lg overflow-hidden">
@@ -192,7 +145,7 @@ export function DamMonitoringTable({
         onReset={onResetFilters}
       />
       <Table
-        data={filteredData}
+        data={data}
         columns={columns}
         currentPage={currentPage}
         startIndex={startIndex}

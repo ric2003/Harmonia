@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  /* Animations for mobile filters */
+  .animate-slideDown {
+    animation: slideDown 0.3s ease-out forwards;
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
 :root {
   --white: #FFFFFF;
   --background: #FFFFFF;

@@ -12,12 +12,24 @@ export default function ScrollIndicator({ targetId, text }: ScrollIndicatorProps
   const [isVisible, setIsVisible] = useState(true);
   const { sidebarOpen } = useContext(SidebarHeaderContext);
   const indicatorRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const hideIndicator = (): void => {
       setIsVisible(false);
     };
 
+    // Check if device is mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    // Run on initial load
+    checkMobile();
+
+    // Add resize event listener to detect mobile/desktop changes
+    window.addEventListener('resize', checkMobile, { passive: true });
+    
     // Add scroll event listener to window
     window.addEventListener('scroll', hideIndicator, { passive: true });
     
@@ -34,6 +46,7 @@ export default function ScrollIndicator({ targetId, text }: ScrollIndicatorProps
 
     // Clean up
     return () => {
+      window.removeEventListener('resize', checkMobile);
       window.removeEventListener('scroll', hideIndicator);
       window.removeEventListener('touchstart', hideIndicator);
       window.removeEventListener('wheel', hideIndicator);
@@ -48,14 +61,15 @@ export default function ScrollIndicator({ targetId, text }: ScrollIndicatorProps
 
   // Sidebar width is 225px when open
   const sidebarWidth = sidebarOpen ? 225 : 0;
+  // Mobile should always use 100% width
+  const position = isMobile ? { left: 0, width: '100%' } : { left: `${sidebarWidth}px`, width: `calc(100% - ${sidebarWidth}px)` };
 
   return (
     <div
       ref={indicatorRef}
       className="fixed bottom-4 z-50"
       style={{ 
-        left: `${sidebarWidth}px`,
-        width: `calc(100% - ${sidebarWidth}px)`,
+        ...position,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
