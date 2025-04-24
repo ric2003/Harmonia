@@ -25,7 +25,15 @@ async function fetchDamData(): Promise<DamDataResponse> {
 
   if (!response.ok) {
     console.error("Fetch response not OK:", response.status, response.statusText);
-    throw new Error('Failed to fetch dam data');
+    
+    // Try to extract more detailed error information if possible
+    try {
+      const errorData = await response.json();
+      throw new Error(`Failed to fetch dam data: ${response.status} ${response.statusText}${errorData.error ? ' - ' + errorData.error : ''}`);
+    } catch (e) {
+      // If unable to parse JSON, throw generic error with status
+      throw new Error(`Failed to fetch dam data: ${response.status} ${response.statusText}`);
+    }
   }
 
   const data = await response.json();
@@ -54,4 +62,4 @@ export function useDamData() {
     refetchOnReconnect: true, // Still refetch when reconnecting after being offline
     retry: 1, // Only retry once to avoid excessive retries when InfluxDB is down
   });
-} 
+}

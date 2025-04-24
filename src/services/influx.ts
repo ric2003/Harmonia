@@ -9,7 +9,10 @@ const url = process.env.INFLUX_URL || "";
 const token = process.env.INFLUX_TOKEN || "";
 const org = process.env.INFLUX_ORG || "";
 const bucket = process.env.INFLUX_BUCKET || "";
-const fallbackExcelPath = path.join(process.cwd(), 'public', 'fallback.xlsx');
+const baseUrl = process.env.VERCEL_URL 
+  ? `https://${process.env.VERCEL_URL}`
+  : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const fallbackExcelUrl = `${baseUrl}/fallback.xlsx`;
 
 export interface QueryResult {
   _time?: string;
@@ -97,55 +100,62 @@ export async function getInfluxData(): Promise<NextResponse> {
  */
 async function getFallbackExcelData(): Promise<NextResponse> {
   try {   
-    if (!fs.existsSync(fallbackExcelPath)) {
-      return NextResponse.json(
-        { success: false, error: "InfluxDB is down and fallback Excel file not found" },
-        { status: 500 }
-      );
+    console.log("Attempting to fetch fallback Excel file from:", fallbackExcelUrl);
+    
+    try {
+      // First try to fetch the file via HTTP
+      const response = await fetch(fallbackExcelUrl, { cache: 'no-store' });
+      
+      if (response.ok) {
+        const arrayBuffer = await response.arrayBuffer();
+        const { rowData } = await processExcelData(arrayBuffer);
+        
+        const formattedResults = formatExcelData(rowData);
+        
+        return NextResponse.json({ 
+          success: true, 
+          data: formattedResults,
+          source: "excel_fallback_http"
+        });
+      } else {
+        console.log("HTTP fetch failed, trying direct file access if available");
+      }
+    } catch (fetchError) {
+      console.error("Error fetching Excel via HTTP:", fetchError);
     }
     
-    // Read the Excel file
-    const fileBuffer = fs.readFileSync(fallbackExcelPath);
-    const uint8Array = new Uint8Array(fileBuffer);
-    const arrayBuffer = uint8Array.buffer as ArrayBuffer;
-    
-    // Process the Excel data
-    const { rowData } = await processExcelData(arrayBuffer);
-    
-    
-    // Format the data to match InfluxDB structure
-    const formattedResults = rowData.map(row => {
-      // Add one day to the date (Excel dates are one day early)
-      let adjustedDate: string;
-      if (row.data instanceof Date) {
-        const date = new Date(row.data);
-        date.setDate(date.getDate() + 1); // Add one day
-        adjustedDate = date.toISOString().split("T")[0];
-      } else {
-        adjustedDate = String(row.data);
+    // If fetch failed and we're in a Node.js environment, try direct file access
+    // This serves as a backup approach for local development
+    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+      try {
+        const fallbackExcelPath = path.join(process.cwd(), 'public', 'fallback.xlsx');
+        console.log("Trying direct file access at:", fallbackExcelPath);
+        
+        if (fs.existsSync(fallbackExcelPath)) {
+          const fileBuffer = fs.readFileSync(fallbackExcelPath);
+          const uint8Array = new Uint8Array(fileBuffer);
+          const arrayBuffer = uint8Array.buffer;
+          
+          const { rowData } = await processExcelData(arrayBuffer);
+          
+          const formattedResults = formatExcelData(rowData);
+          
+          return NextResponse.json({ 
+            success: true, 
+            data: formattedResults,
+            source: "excel_fallback_fs"
+          });
+        }
+      } catch (fsError) {
+        console.error("Error accessing Excel via filesystem:", fsError);
       }
-      
-      // Make sure numeric fields are properly converted to numbers
-      const cotaLida = typeof row.cotaLida === 'string' ? parseFloat(row.cotaLida) : row.cotaLida;
-      const volumeTotal = typeof row.volumeTotal === 'string' ? parseFloat(row.volumeTotal) : row.volumeTotal;
-      const enchimento = typeof row.enchimento === 'string' ? parseFloat(row.enchimento) : row.enchimento;
-      const volumeUtil = typeof row.volumeUtil === 'string' ? parseFloat(row.volumeUtil) : row.volumeUtil;
-      
-      return {
-        _time: adjustedDate,
-        barragem: row.barragem,
-        cota_lida: cotaLida,
-        volume_total: volumeTotal,
-        enchimento: enchimento,
-        volume_util: volumeUtil
-      };
-    });
+    }
     
-    return NextResponse.json({ 
-      success: true, 
-      data: formattedResults,
-      source: "excel_fallback"
-    });
+    // If both approaches failed
+    return NextResponse.json(
+      { success: false, error: "InfluxDB is down and fallback Excel file could not be fetched" },
+      { status: 500 }
+    );
   } catch (error) {
     console.error("Error processing fallback Excel file:", error);
     return NextResponse.json(
@@ -153,4 +163,32 @@ async function getFallbackExcelData(): Promise<NextResponse> {
       { status: 500 }
     );
   }
+}
+
+// Extract the data formatting logic to a separate function
+function formatExcelData(rowData: any[]) {
+  return rowData.map(row => {
+    let adjustedDate: string;
+    if (row.data instanceof Date) {
+      const date = new Date(row.data);
+      date.setDate(date.getDate() + 1);
+      adjustedDate = date.toISOString().split("T")[0];
+    } else {
+      adjustedDate = String(row.data);
+    }
+    
+    const cotaLida = typeof row.cotaLida === 'string' ? parseFloat(row.cotaLida) : row.cotaLida;
+    const volumeTotal = typeof row.volumeTotal === 'string' ? parseFloat(row.volumeTotal) : row.volumeTotal;
+    const enchimento = typeof row.enchimento === 'string' ? parseFloat(row.enchimento) : row.enchimento;
+    const volumeUtil = typeof row.volumeUtil === 'string' ? parseFloat(row.volumeUtil) : row.volumeUtil;
+    
+    return {
+      _time: adjustedDate,
+      barragem: row.barragem,
+      cota_lida: cotaLida,
+      volume_total: volumeTotal,
+      enchimento: enchimento,
+      volume_util: volumeUtil
+    };
+  });
 }
