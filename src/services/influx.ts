@@ -5,6 +5,15 @@ import { processExcelData } from "./excel-processor";
 import * as fs from 'fs';
 import path from 'path';
 
+interface ProcessedData {
+  barragem: string;
+  data: string | number | Date;
+  cotaLida: number;
+  volumeTotal: number;
+  enchimento: number;
+  volumeUtil: number;
+}
+
 const url = process.env.INFLUX_URL || "";
 const token = process.env.INFLUX_TOKEN || "";
 const org = process.env.INFLUX_ORG || "";
@@ -166,7 +175,7 @@ async function getFallbackExcelData(): Promise<NextResponse> {
 }
 
 // Extract the data formatting logic to a separate function
-function formatExcelData(rowData: any[]) {
+function formatExcelData(rowData: ProcessedData[]) {
   return rowData.map(row => {
     let adjustedDate: string;
     if (row.data instanceof Date) {
@@ -177,18 +186,13 @@ function formatExcelData(rowData: any[]) {
       adjustedDate = String(row.data);
     }
     
-    const cotaLida = typeof row.cotaLida === 'string' ? parseFloat(row.cotaLida) : row.cotaLida;
-    const volumeTotal = typeof row.volumeTotal === 'string' ? parseFloat(row.volumeTotal) : row.volumeTotal;
-    const enchimento = typeof row.enchimento === 'string' ? parseFloat(row.enchimento) : row.enchimento;
-    const volumeUtil = typeof row.volumeUtil === 'string' ? parseFloat(row.volumeUtil) : row.volumeUtil;
-    
     return {
       _time: adjustedDate,
       barragem: row.barragem,
-      cota_lida: cotaLida,
-      volume_total: volumeTotal,
-      enchimento: enchimento,
-      volume_util: volumeUtil
+      cota_lida: row.cotaLida,
+      volume_total: row.volumeTotal,
+      enchimento: row.enchimento,
+      volume_util: row.volumeUtil
     };
   });
 }

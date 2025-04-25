@@ -30,7 +30,7 @@ async function fetchDamData(): Promise<DamDataResponse> {
     try {
       const errorData = await response.json();
       throw new Error(`Failed to fetch dam data: ${response.status} ${response.statusText}${errorData.error ? ' - ' + errorData.error : ''}`);
-    } catch (e) {
+    } catch {
       // If unable to parse JSON, throw generic error with status
       throw new Error(`Failed to fetch dam data: ${response.status} ${response.statusText}`);
     }
