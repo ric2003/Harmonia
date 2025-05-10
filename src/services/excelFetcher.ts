@@ -29,11 +29,13 @@ function getExcelFileUrl(): string {
   if (currentMonth < 3) { // Jan-Mar, use previous year's December
     trimesterEndDay = 31;
     trimesterEndMonthName = 'DEZ';
-    // Use previous year for both the filename year and trimester date
+    // Use previous year for both the path and filename
     return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/${currentYear-1}/Ficheiro_Trimestral_res_agua/Historico_2005_${currentYear-1}_V31DEZ${currentYear-1}.xlsx`;
   } else if (currentMonth < 6) { // Apr-Jun, use March
     trimesterEndDay = 31;
     trimesterEndMonthName = 'MAR';
+    // For March 2025 data, use 2024 in the path (special case)
+    return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/2024/Ficheiro_Trimestral_res_agua/Historico_2005_${currentYear}_V31MAR${currentYear}.xlsx`;
   } else if (currentMonth < 9) { // Jul-Sep, use June
     trimesterEndDay = 30;
     trimesterEndMonthName = 'JUN';
@@ -42,7 +44,7 @@ function getExcelFileUrl(): string {
     trimesterEndMonthName = 'SET';
   }
   
-  // Format the URL
+  // Format the URL for other cases
   return `https://sir.dgadr.gov.pt/images/conteudos/imagens/Reservas_agua/${currentYear}/Ficheiro_Trimestral_res_agua/Historico_2005_${currentYear}_V${trimesterEndDay}${trimesterEndMonthName}${currentYear}.xlsx`;
 }
 

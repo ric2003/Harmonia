@@ -43,10 +43,10 @@ function SentinelMap() {
   const [isDragging, setIsDragging] = useState(false);
   const [currentFilter, setCurrentFilter] = useState<SentinelFilter>('natural');
   const [viewBounds, setViewBounds] = useState<[[number, number], [number, number]]>([
-    [45.5, 13.5], // Default southwest
-    [46.5, 15.0]  // Default northeast
+    [38.6523, -9.2093], // Default southwest - changed to match API defaults
+    [38.7923, -9.0493]  // Default northeast - changed to match API defaults
   ]);
-  const [currentZoom, setCurrentZoom] = useState(9);
+  const [currentZoom, setCurrentZoom] = useState(12); // Increased default zoom level
   
   // Cache to store already fetched images
   const imageCache = useRef<Map<string, GridImage>>(new Map());
@@ -273,7 +273,9 @@ function SentinelMap() {
   }, [debouncedBounds, fetchGridImages, currentZoom, MIN_FETCH_ZOOM]);
 
   // Calculate the center for the map based on the view bounds
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const centerLat = (viewBounds[0][0] + viewBounds[1][0]) / 2;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const centerLng = (viewBounds[0][1] + viewBounds[1][1]) / 2;
 
   // Utility function to check if map has moved significantly
@@ -415,8 +417,8 @@ function SentinelMap() {
       
       
       <MapContainer
-        center={[centerLat, centerLng]} 
-        zoom={9}
+        center={[38.7223, -9.1293]} 
+        zoom={12}
         style={{ height: "100%", width: "100%" }}
       >
         <WhenReady />

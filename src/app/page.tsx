@@ -9,6 +9,7 @@ import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import { useTranslation } from 'react-i18next';
 import ScrollIndicator from "@/components/ScrollIndicator";
 import DataSourceFooter from "@/components/DataSourceFooter";
+import Image from "next/image";
 
 // Definição do tipo para as props do MapComponent
 interface MapComponentProps {
@@ -126,6 +127,39 @@ export default function HomePage() {
               <li key={index}>{item}</li>
             ))}
           </ul>
+        </div>
+      </div>
+
+      <div id="project-info-section" className="bg-backgroundColor flex items-center rounded-lg p-6 mt-6 shadow-md border border-gray200">
+        <div className="flex items-center md:flex-row justify-between w-full">
+          <div className="mb-6 md:mb-0 md:mr-6 flex-1">
+            <p className="text-darkGray mb-4 leading-relaxed">
+              {t('home.projectInfo.description')}
+            </p>
+            <p className="text-darkGray">
+              {t('home.projectInfo.contact')}{' '}
+              <a 
+                href="mailto:ricgon20035@gmail.com" 
+                className="text-primary hover:text-primary/80 underline transition-colors"
+              >
+                ricgon20035@gmail.com
+              </a>
+              {' '}{t('home.projectInfo.or')}{' '}
+              <a 
+                href="mailto:ricardokao2004@gmail.com" 
+                className="text-primary hover:text-primary/80 underline transition-colors"
+              >
+                ricardokao2004@gmail.com
+              </a>
+            </p>
+          </div>
+          
+          <div className="flex flex-col items-center md:border-l md:border-gray200 md:pl-6">
+            <div className="w-28 h-28 bg-white rounded-lg flex items-center justify-center mb-2">
+              <Image src="/ul.png" alt="Universidade Lusófona" className="w-24 h-24 object-contain" width={96} height={96} />
+            </div>
+            <p className="text-center text-sm text-gray600">{t('home.projectInfo.department')}</p>
+          </div>
         </div>
       </div>
       
