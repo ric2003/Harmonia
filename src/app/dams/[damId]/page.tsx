@@ -8,9 +8,9 @@ import { AlertMessage } from "@/components/ui/AlertMessage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import DataSourceFooter from "@/components/DataSourceFooter";
 import { useTranslation } from 'react-i18next';
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { getCoordinates, GeoapifyCoordinates } from "@/services/geoapifyLocation";
+import WaterWave from "@/components/WaterWave";
 import {
   XAxis,
   YAxis,
@@ -31,6 +31,17 @@ const MapComponent = dynamic(() => import("@/components/MapComponent"), {
     </div>
   ),
 });
+
+const getBadgeGradient = (percent: number): string => {
+  if (percent > 70)
+    return "bg-gradient-to-r from-green-500 to-green-400";
+  if (percent > 40)
+    return "bg-gradient-to-r from-yellow-500 to-yellow-400";
+  if (percent > 20)
+    return "bg-gradient-to-r from-orange-500 to-orange-400";
+  return "bg-gradient-to-r from-red-500 to-red-400";
+};
+
 
 // Define station interface for MapComponent
 interface Station {
@@ -77,7 +88,7 @@ export default function DamDetailsPage() {
       .reverse()
       .map(item => ({
         date: item._time ? new Date(item._time).toLocaleDateString('en-GB') : '',
-        enchimento: item.enchimento ? item.enchimento * 100 : 0,
+        enchimento: item.enchimento ? Math.round(item.enchimento * 100) : 0,
         cota_lida: item.cota_lida || 0,
         volume_total: item.volume_total || 0,
         volume_util: item.volume_util || 0,
@@ -182,40 +193,42 @@ export default function DamDetailsPage() {
     return <AlertMessage type="warning" message={`No data available for dam "${damId}". Please check connection or try again later.`} />;
 
   const fillPercentage = latestDamData?.enchimento ? Math.min(latestDamData.enchimento * 100, 100) : 0;
-  const fillColorClass = getFillColorClass(fillPercentage);
 
   return (
     <div className="text-darkGray min-h-screen">
-      {/* Back link */}
-      <div className="mb-4">
-        <Link href="/dams" className="text-primary hover:underline flex items-center text-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          {t('dam.backToDams')}
-        </Link>
-      </div>
-
-      {/* Hero section with water level visualization */}
-      <div className="relative w-full h-48 sm:h-72 md:h-96 bg-gray100 rounded-xl overflow-hidden mb-8">
-        {/* Water level visualization */}
-        <div 
-          className={`absolute bottom-0 left-0 right-0 ${fillColorClass} transition-all`} 
-          style={{ height: `${fillPercentage}%` }}
-        ></div>
+      {/* Hero section with water wave visualization */}
+      <div className="relative w-full h-48 sm:h-72 md:h-96 rounded-xl overflow-hidden mb-8">
+        {/* Using WaterWave component */}
+        <WaterWave 
+          fillPercentage={fillPercentage} 
+          showBadge={false}
+          className="h-full"
+        />
         
         {/* Dam name and fill percentage overlay */}
-        <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8 bg-gradient-to-t from-black/70 to-transparent">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">{damId}</h1>
+        <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8 bg-gradient-to-t from-black/10 to-transparent">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
+            {damId}
+          </h1>
           <div className="flex items-center">
-            <div className="bg-black bg-opacity-60 text-white px-3 py-1.5 rounded-lg text-lg font-medium">
-              {fillPercentage.toFixed(1)}% {t('dam.filled')}
+            <div
+              className={`
+                ${getBadgeGradient(fillPercentage)}
+                text-white px-3 py-1.5 rounded-lg
+                text-lg font-medium
+              `}
+            >
+              {fillPercentage.toFixed(0)}%
             </div>
             <div className="ml-4 text-white text-opacity-90 text-sm">
-              {t('dam.lastUpdated')}: {latestDamData?._time ? new Date(latestDamData._time).toLocaleDateString('en-GB') : 'N/A'}
+              {t("dam.lastUpdated")}:{" "}
+              {latestDamData?._time
+                ? new Date(latestDamData._time).toLocaleDateString("en-GB")
+                : "N/A"}
             </div>
           </div>
         </div>
+
       </div>
 
       {/* Main content container */}
@@ -304,7 +317,7 @@ export default function DamDetailsPage() {
               <div className="grid grid-cols-1 gap-4">
                 {/* Current values */}
                 <div className="bg-backgroundColor p-4 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray600 mb-2">{t('dam.currentValues')}</h3>
+                  <h3 className="text-sm font-bold text-gray600 mb-2">{t('dam.currentValues')}</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray600">{t('dam.table.cotaLida')}:</span>
@@ -318,16 +331,13 @@ export default function DamDetailsPage() {
                       <span className="text-sm text-gray600">{t('dam.table.volumeUtil')}:</span>
                       <span className="font-medium">{latestDamData?.volume_util?.toFixed(2) || 'N/A'}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray600">{t('dam.table.enchimento')}:</span>
-                      <span className="font-medium">{latestDamData?.enchimento ? (latestDamData.enchimento * 100).toFixed(2) + '%' : 'N/A'}</span>
-                    </div>
+                  
                   </div>
                 </div>
                 
                 {/* Statistics */}
                 <div className="bg-backgroundColor p-4 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray600 mb-2">{t('dam.fillStatistics')}</h3>
+                  <h3 className="text-sm font-bold text-gray600 mb-2">{t('dam.fillStatistics')}</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray600">{t('dam.minFill')}:</span>
@@ -347,14 +357,14 @@ export default function DamDetailsPage() {
                 
                 {/* Important levels */}
                 <div className="bg-backgroundColor p-4 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray600 mb-2">{t('dam.importantLevels')}</h3>
+                  <h3 className="text-sm font-medium text-gray600 mb-2">{t('dam.table.enchimento')}</h3>
                   
-                  <div className="relative h-60 mt-2 bg-gray100 rounded overflow-hidden">
+                  <div className="relative h-72 mt-2 bg-gray100 rounded overflow-hidden">
                     {/* Current level indicator */}
                     <div className="absolute inset-x-0 bottom-0 h-[1px] bg-black z-10" 
                       style={{ bottom: `${latestDamData?.enchimento ? latestDamData.enchimento * 100 : 0}%` }}>
                       <div className="absolute -top-0 -left-0 bg-black px-1 text-white text-xs">
-                        {latestDamData?.enchimento ? (latestDamData.enchimento * 100).toFixed(1) + '%' : '0%'}
+                        {latestDamData?.enchimento ? (latestDamData.enchimento * 100).toFixed(0) + '%' : '0%'}
                       </div>
                     </div>
                     
@@ -431,7 +441,7 @@ export default function DamDetailsPage() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm">{item.cota_lida?.toFixed(2) || 'N/A'}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             <div className="flex items-center">
-                              <span className="mr-2">{item.enchimento ? (item.enchimento * 100).toFixed(1) + '%' : 'N/A'}</span>
+                              <span className="mr-2">{item.enchimento ? (item.enchimento * 100).toFixed(0) + '%' : 'N/A'}</span>
                               <div className="w-16 bg-gray200 rounded-full h-1.5">
                                 <div 
                                   className={`h-1.5 rounded-full ${item.enchimento ? getFillColorClass(item.enchimento * 100) : 'bg-gray400'}`} 
