@@ -1,10 +1,47 @@
-import axios from "axios";
+// services/sentinelService.ts
+export const INSTANCE_ID = "d9c2453d-b6d8-45da-bc65-3c9bddd9555a";
+
+export type FilterKey = 
+  | "1_TRUE_COLOR"
+  | "3_NDVI"
+  | "5-MOISTURE-INDEX1"
+  | "4-FALSE-COLOR-URBAN";
+
+export function buildSentinelWMS(filter: FilterKey) {
+  const to   = new Date().toISOString();
+  const from = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+  const TIME = `${from}/${to}`;
+
+  return {
+    url: `https://services.sentinel-hub.com/ogc/wms/${INSTANCE_ID}`,
+    params: {
+      service:    "WMS",
+      version:    "1.3.0",
+      layers:     filter,
+      styles:     "",
+      format:     "image/png",
+      transparent:true,
+      time:       TIME,
+      maxcc:      100,
+      mosaickingOrder: "leastCC",
+      showlogo:   false,
+    },
+  };
+}
+
+
+/*import axios from "axios";
 import qs from "qs";
 
 const TOKEN_URL = "https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token";
 const PROCESS_URL = "https://services.sentinel-hub.com/api/v1/process";
 
 export type SentinelFilter = 'natural' | 'ndvi' | 'moisture' | 'urban';
+
+const now = new Date();
+const to = now.toISOString();
+const from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
 
 const evalScripts: Record<SentinelFilter, string> = {
   natural: `//VERSION=3
@@ -117,10 +154,7 @@ export async function getSentinelImage(bbox?: number[], filter: SentinelFilter =
         {
           type: "sentinel-2-l2a",
           dataFilter: {
-            timeRange: {
-              from: "2022-10-01T00:00:00Z",
-              to: "2022-10-31T00:00:00Z",
-            },
+            timeRange: { from, to },
           },
         },
       ],
@@ -151,4 +185,4 @@ export async function getSentinelImage(bbox?: number[], filter: SentinelFilter =
   });
 
   return processResponse.data;
-}
+}*/

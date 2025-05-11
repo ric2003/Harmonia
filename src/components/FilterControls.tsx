@@ -1,117 +1,34 @@
 import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { SentinelFilter } from '@/services/sentinelService'; // Adjust path if needed
 import { useTranslation } from 'react-i18next';
-import { TFunction } from 'i18next';
+import { FilterKey } from '@/services/sentinelService';
 
 interface FilterControlsProps {
-  currentFilter: SentinelFilter;
-  onFilterChange: (filter: SentinelFilter) => void;
+  currentFilter: FilterKey;
+  onFilterChange: (filter: FilterKey) => void;
 }
 
-// Define filter options with translations
-const getFilterOptions = (t: TFunction): { value: SentinelFilter; label: string; description: string }[] => [
-  {
-    value: 'natural',
-    label: t('filterControls.filters.natural.label'),
-    description: t('filterControls.filters.natural.description')
-  },
-  {
-    value: 'ndvi',
-    label: t('filterControls.filters.ndvi.label'),
-    description: t('filterControls.filters.ndvi.description')
-  },
-  {
-    value: 'moisture',
-    label: t('filterControls.filters.moisture.label'),
-    description: t('filterControls.filters.moisture.description')
-  },
-  {
-    value: 'urban',
-    label: t('filterControls.filters.urban.label'),
-    description: t('filterControls.filters.urban.description')
-  }
+// Define filter options (keys only, labels/descriptions come from translations)
+const FILTERS: { value: FilterKey; key: string }[] = [
+  { value: "1_TRUE_COLOR", key: "natural" },
+  { value: "3_NDVI", key: "ndvi" },
+  { value: "5-MOISTURE-INDEX1", key: "moisture" },
+  { value: "4-FALSE-COLOR-URBAN", key: "urban" },
 ];
 
-// Define the CSS styles as a template literal string
-// Use the CSS variables provided for theme support
+// CSS styles
 const controlStyles = `
-  .custom-filter-control-container {
-    margin: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    border-radius: 8px;
-    border: none; /* Override Leaflet defaults */
-    background: none; /* Override Leaflet defaults */
-  }
-
-  .filter-controls-content {
-    background-color: var(--backgroundColor);
-    color: var(--gray-700);
-    padding: 16px;
-    border-radius: 8px;
-    width: 200px;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; /* Smooth theme transition */
-  }
-
-  .filter-title {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--gray-700);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: color 0.2s ease-in-out;
-  }
-
-  .filter-options {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .filter-button {
-    width: 100%;
-    background-color: var(--gray-100);
-    border: 2px solid transparent;
-    border-radius: 6px;
-    padding: 10px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--gray-700);
-    text-align: left;
-    position: relative;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-  }
-
-  .filter-button:hover {
-    background-color: var(--gray-200);
-  }
-
-  .filter-button.active {
-    background-color: var(--primary);
-    color: var(--white);
-    border-color: var(--blue-200);
-  }
-
-  .filter-button:focus { /* Remove default outline */
-      outline: none;
-  }
-  .filter-button:focus-visible { /* Style keyboard focus */
-      outline: 2px solid var(--primary);
-      outline-offset: 2px;
-  }
-
-  @media (max-width: 600px) {
-    .filter-controls-content {
-      width: 180px;
-    }
-    .filter-button {
-      padding: 8px 12px;
-      font-size: 13px;
-    }
-  }
+  .custom-filter-control-container { margin: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius:8px; border:none; background:none; }
+  .filter-controls-content { background-color: var(--backgroundColor, white); color: var(--gray-700, #4a5568); padding: 16px; border-radius:8px; width:200px; transition: background-color 0.2s ease, color 0.2s ease; }
+  .filter-title { margin:0 0 12px; font-size:14px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+  .filter-options { display:flex; flex-direction:column; gap:8px; }
+  .filter-button { width:100%; background:var(--gray-100,#f7fafc); border:2px solid transparent; border-radius:6px; padding:10px 16px; cursor:pointer; font-size:14px; font-weight:500; text-align:left; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+  .filter-button:hover { background-color: var(--gray-200, #edf2f7); }
+  .filter-button.active { background-color: var(--primary, #4299e1); color: var(--white, white); border-color: var(--blue-200, #bee3f8); }
+  .filter-button:focus { outline:none; }
+  .filter-button:focus-visible { outline:2px solid var(--primary,#4299e1); outline-offset:2px; }
+  @media (max-width:600px) { .filter-controls-content { width:180px; } .filter-button { padding:8px 12px; font-size:13px; } }
 `;
 
 const STYLE_ELEMENT_ID = 'leaflet-custom-filter-styles';
@@ -120,100 +37,71 @@ export function FilterControls({ currentFilter, onFilterChange }: FilterControls
   const map = useMap();
   const { t } = useTranslation();
 
+  // Inject styles & add control
   useEffect(() => {
     if (!map) return;
 
-    // --- 1. Inject Styles ---
-    // Check if style element already exists, create if not
-    let styleElement = document.getElementById(STYLE_ELEMENT_ID);
-    if (!styleElement) {
-      styleElement = document.createElement('style');
-      styleElement.id = STYLE_ELEMENT_ID;
-      styleElement.textContent = controlStyles;
-      document.head.appendChild(styleElement);
+    // inject stylesheet
+    if (!document.getElementById(STYLE_ELEMENT_ID)) {
+      const styleEl = document.createElement('style');
+      styleEl.id = STYLE_ELEMENT_ID;
+      styleEl.textContent = controlStyles;
+      document.head.appendChild(styleEl);
     }
 
-    // --- 2. Create Leaflet Control ---
+    // create Leaflet control
     const CustomControl = L.Control.extend({
-      options: {
-        position: 'topright',
-      },
-
-      onAdd: function () {
-        // Create container without 'leaflet-bar' to avoid default border/bg
+      options: { position: 'topright' },
+      onAdd() {
         const container = L.DomUtil.create('div', 'leaflet-control custom-filter-control-container');
+        const content = document.createElement('div');
+        content.className = 'filter-controls-content';
 
-        // Build the control's content dynamically
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'filter-controls-content'; // Class for styling inner box
+        // title
+        const titleEl = document.createElement('h3');
+        titleEl.className = 'filter-title';
+        titleEl.textContent = t('filterControls.title');
+        content.appendChild(titleEl);
 
-        const title = document.createElement('h3');
-        title.className = 'filter-title';
-        title.textContent = t('filterControls.title');
-        contentDiv.appendChild(title);
+        // options
+        const optionsEl = document.createElement('div');
+        optionsEl.className = 'filter-options';
 
-        const optionsDiv = document.createElement('div');
-        optionsDiv.className = 'filter-options';
+        FILTERS.forEach(({ value, key }) => {
+          const label = t(`filterControls.filters.${key}.label`);
+          const description = t(`filterControls.filters.${key}.description`);
 
-        const options = getFilterOptions(t);
-        options.forEach(option => {
-          const button = document.createElement('button');
-          // Set base class + 'active' class conditionally based on the CURRENT prop value
-          button.className = `filter-button ${currentFilter === option.value ? 'active' : ''}`;
-          button.title = option.description;
-          button.textContent = option.label;
-          button.setAttribute('aria-pressed', String(currentFilter === option.value));
+          const btn = document.createElement('button');
+          btn.className = `filter-button ${currentFilter === value ? 'active' : ''}`;
+          btn.title = description;
+          btn.textContent = label;
+          btn.setAttribute('aria-pressed', String(currentFilter === value));
+          btn.onclick = (e) => { e.stopPropagation(); onFilterChange(value); };
 
-          // Use the passed onFilterChange prop directly
-          button.onclick = (e) => {
-            e.stopPropagation(); // Prevent map click
-            onFilterChange(option.value);
-            // NOTE: The button's visual state (active class) will update
-            // automatically when the component re-renders due to
-            // the 'currentFilter' prop changing, triggering this useEffect again.
-          };
-
-          optionsDiv.appendChild(button);
+          optionsEl.appendChild(btn);
         });
 
-        contentDiv.appendChild(optionsDiv);
-        container.appendChild(contentDiv);
+        content.appendChild(optionsEl);
+        container.appendChild(content);
 
-        // Prevent map interactions
         L.DomEvent.disableClickPropagation(container);
         L.DomEvent.disableScrollPropagation(container);
 
         return container;
-      },
-
-      onRemove: function () {
-        // Clean up if needed, though React usually handles component unmount
-      },
+      }
     });
 
     const control = new CustomControl();
     control.addTo(map);
 
-    // --- 3. Cleanup ---
+    // cleanup
     return () => {
-      // Remove the Leaflet control from the map
-      if (map && control) {
-        map.removeControl(control);
-      }
-
-      // Attempt to remove the style element - check existence first
+      control.remove();
       const styleToRemove = document.getElementById(STYLE_ELEMENT_ID);
-      if (styleToRemove) {
-        // Check if another instance of this control might still need the styles
-        // A simple check might be if there are other '.custom-filter-control-container' elements
-        // For simplicity here, we'll remove it. If you have multiple maps/controls,
-        // you might need a more robust style management approach.
-         document.head.removeChild(styleToRemove);
+      if (styleToRemove && document.querySelectorAll('.custom-filter-control-container').length <= 1) {
+        styleToRemove.remove();
       }
     };
-    // Re-run the effect if the map instance changes, or if the filter changes
-    // (to rebuild the control with the correct 'active' button),
-    // or if the callback changes (less likely, but good practice).
   }, [map, currentFilter, onFilterChange, t]);
 
   return null;

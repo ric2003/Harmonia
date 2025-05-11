@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext } from "react";
+import React, { useContext } from "react";
 import SentinelMap from "@/components/SentinelMap";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
@@ -11,7 +11,7 @@ export default function Home() {
   const { sidebarOpen } = useContext(SidebarHeaderContext);
   return (
     <div className="flex flex-col h-screen">
-      <div className="h-full mb-20 rounded-lg overflow-hidden">
+      <div className="flex-1 mb-10 rounded-lg overflow-hidden">
         <SentinelMap
           key={sidebarOpen ? 'sidebar-open' : 'sidebar-closed'} 
         />

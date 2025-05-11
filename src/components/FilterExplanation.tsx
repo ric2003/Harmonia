@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { SentinelFilter } from '@/services/sentinelService';
 import { useTranslation } from 'react-i18next';
+import { FilterKey } from '@/services/sentinelService';
 
 interface FilterExplanationProps {
-  currentFilter: SentinelFilter;
+  currentFilter: FilterKey;
 }
 
 // Define the CSS styles
@@ -19,19 +19,21 @@ const explanationStyles = `
   }
 
   .filter-explanation-content {
-    background-color: var(--backgroundColor);
-    color: var(--gray-700);
+    background-color: var(--backgroundColor, white);
+    color: var(--gray-700, #4a5568);
     padding: 16px;
     border-radius: 8px;
     width: 250px;
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    max-height: 50vh;
+    overflow-y: auto;
   }
 
   .filter-explanation-title {
     margin: 0 0 8px 0;
     font-size: 14px;
     font-weight: 600;
-    color: var(--gray-700);
+    color: var(--gray-700, #4a5568);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     transition: color 0.2s ease-in-out;
@@ -41,7 +43,7 @@ const explanationStyles = `
     font-size: 12px;
     line-height: 1.3;
     margin: 0 0 8px 0;
-    color: var(--gray-600);
+    color: var(--gray-600, #718096);
   }
 
   .color-legend {
@@ -67,15 +69,6 @@ const explanationStyles = `
     font-size: 10px;
   }
 
-  .ndvi-scale {
-    position: relative;
-    display: block;    /* or inline-block */
-    width: 100%;
-    height: 20px;      /* adjust as needed */
-    border-radius: 4px;
-    overflow: hidden;  /* clip any overflow */
-  }
-
   .ndvi-scale::after {
     content: '';
     position: absolute;
@@ -83,39 +76,31 @@ const explanationStyles = `
     width: 100%; height: 100%;
     pointer-events: none;
     background: linear-gradient(to right,
-      /* bin 1: NDVI < -0.5 (–1 → –0.5 = 0% → 25%) */
       #0c0c0c  0%,  #0c0c0c  25%,
-      /* bin 2: –0.5 → 0 = 25% → 50% */
       #eaeaea  25%, #eaeaea  50%,
-      /* bin 3: 0 → 0.1 = 50% → 55% */
       #ccc682  50%, #ccc682  55%,
-      /* bin 4: 0.1 → 0.2 = 55% → 60% */
       #91bf51  55%, #91bf51  60%,
-      /* bin 5: 0.2 → 0.3 = 60% → 65% */
       #70a33f  60%, #70a33f  65%,
-      /* bin 6: 0.3 → 0.4 = 65% → 70% */
       #4f892d  65%, #4f892d  70%,
-      /* bin 7: 0.4 → 0.5 = 70% → 75% */
       #306d1c  70%, #306d1c  75%,
-      /* bin 8: 0.5 → 0.6 = 75% → 80% */
       #0f540a  75%, #0f540a  80%,
-      /* bin 9: 0.6 → 1.0 = 80% → 100% */
       #004400  80%, #004400 100%
     );
   }
-  .ndmi-scale::after {
+
+  .moisture-scale::after {
     content: '';
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
     pointer-events: none;
     background: linear-gradient(to right,
-      #800000 0%,     /* very dry */
-      #ff0000 25%,    /* dry */
-      #ffff00 50%,    /* neutral */
-      #00ffff 70%,    /* moist */
-      #0000ff 85%,    /* wet */
-      #000080 100%    /* saturated */
+      #800000 0%,
+      #ff0000 25%,
+      #ffff00 50%,
+      #00ffff 70%,
+      #0000ff 85%,
+      #000080 100%
     );
   }
 
@@ -126,24 +111,26 @@ const explanationStyles = `
   }
 `;
 
-// Translation keys for filter details
-const filterTranslationKeys: Record<SentinelFilter, { titleKey: string, descriptionKey: string, hasScale: boolean }> = {
-  natural: {
+// Translation keys and configuration for filter details
+const filterTranslationKeys: Record<FilterKey, { titleKey: string; descriptionKey: string; hasScale: boolean; scaleType?: string }> = {
+  "1_TRUE_COLOR": {
     titleKey: "filterExplanation.natural.title",
     descriptionKey: "filterExplanation.natural.description",
     hasScale: false
   },
-  ndvi: {
+  "3_NDVI": {
     titleKey: "filterExplanation.ndvi.title",
     descriptionKey: "filterExplanation.ndvi.description",
-    hasScale: true
+    hasScale: true,
+    scaleType: "ndvi"
   },
-  moisture: {
+  "5-MOISTURE-INDEX1": {
     titleKey: "filterExplanation.moisture.title",
     descriptionKey: "filterExplanation.moisture.description",
-    hasScale: true
+    hasScale: true,
+    scaleType: "moisture"
   },
-  urban: {
+  "4-FALSE-COLOR-URBAN": {
     titleKey: "filterExplanation.urban.title",
     descriptionKey: "filterExplanation.urban.description",
     hasScale: false
@@ -159,84 +146,56 @@ export function FilterExplanation({ currentFilter }: FilterExplanationProps) {
   useEffect(() => {
     if (!map) return;
 
-    // Inject styles
-    let styleElement = document.getElementById(STYLE_ELEMENT_ID);
-    if (!styleElement) {
-      styleElement = document.createElement('style');
-      styleElement.id = STYLE_ELEMENT_ID;
-      styleElement.textContent = explanationStyles;
-      document.head.appendChild(styleElement);
+    // Inject styles once
+    if (!document.getElementById(STYLE_ELEMENT_ID)) {
+      const style = document.createElement('style');
+      style.id = STYLE_ELEMENT_ID;
+      style.textContent = explanationStyles;
+      document.head.appendChild(style);
     }
 
-    // Create Leaflet control
+    // Create the control
     const ExplanationControl = L.Control.extend({
-      options: {
-        position: 'bottomright',
-      },
-
-      onAdd: function () {
+      options: { position: 'bottomright' },
+      onAdd() {
         const container = L.DomUtil.create('div', 'leaflet-control filter-explanation-container');
-        
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'filter-explanation-content';
-        
-        const title = document.createElement('h3');
-        title.className = 'filter-explanation-title';
-        
-        // Use translation keys
-        const filterKey = filterTranslationKeys[currentFilter];
-        title.textContent = t(filterKey.titleKey);
-        contentDiv.appendChild(title);
-        
-        const explanationText = document.createElement('p');
-        explanationText.className = 'filter-explanation-text';
-        explanationText.textContent = t(filterKey.descriptionKey);
-        contentDiv.appendChild(explanationText);
-        
-        // Add color scale if available
-        if (filterKey.hasScale) {
-          const scaleContainer = document.createElement('div');
-          scaleContainer.className = 'color-legend';
-          
+        const content = document.createElement('div');
+        content.className = 'filter-explanation-content';
+
+        const { titleKey, descriptionKey, hasScale, scaleType } = filterTranslationKeys[currentFilter];
+        const titleEl = document.createElement('h3');
+        titleEl.className = 'filter-explanation-title';
+        titleEl.textContent = t(titleKey);
+        content.appendChild(titleEl);
+
+        const textEl = document.createElement('p');
+        textEl.className = 'filter-explanation-text';
+        textEl.textContent = t(descriptionKey);
+        content.appendChild(textEl);
+
+        if (hasScale) {
+          const legend = document.createElement('div');
+          legend.className = 'color-legend';
+
           const scale = document.createElement('div');
-          scale.className = `color-scale ${currentFilter === 'ndvi' ? 'ndvi-scale' : 'ndmi-scale'}`;
-          scaleContainer.appendChild(scale);
-          
+          scale.className = `color-scale ${scaleType === 'ndvi' ? 'ndvi-scale' : 'moisture-scale'}`;
+          legend.appendChild(scale);
+
           const values = document.createElement('div');
           values.className = 'scale-value';
-          
-          // Different scale values for NDVI vs NDMI
-          if (currentFilter === 'ndvi') {
-            values.innerHTML = `
-              <span>-1</span>
-              <span>-0.5</span>
-              <span>-0.2</span>
-              <span>-0.1</span>
-              <span>0</span>
-              <span>0.2</span>
-              <span>0.6</span>
-              <span>1</span>
-            `;
+          if (scaleType === 'ndvi') {
+            values.innerHTML = '<span>-1</span><span>-0.5</span><span>-0.2</span><span>-0.1</span><span>0</span><span>0.2</span><span>0.6</span><span>1</span>';
           } else {
-            values.innerHTML = `
-              <span>&lt; -0.8</span>
-              <span>-0.24</span>
-              <span>0</span>
-              <span>0.24</span>
-              <span>&gt; 0.8</span>
-            `;
+            values.innerHTML = '<span>&lt; -0.8</span><span>-0.24</span><span>0</span><span>0.24</span><span>&gt; 0.8</span>';
           }
-          
-          scaleContainer.appendChild(values);
-          contentDiv.appendChild(scaleContainer);
+          legend.appendChild(values);
+          content.appendChild(legend);
         }
-        
-        container.appendChild(contentDiv);
-        
-        // Prevent map interactions
+
+        container.appendChild(content);
         L.DomEvent.disableClickPropagation(container);
         L.DomEvent.disableScrollPropagation(container);
-        
+
         return container;
       }
     });
@@ -244,16 +203,11 @@ export function FilterExplanation({ currentFilter }: FilterExplanationProps) {
     const control = new ExplanationControl();
     control.addTo(map);
 
-    // Cleanup
     return () => {
-      if (map && control) {
-        map.removeControl(control);
-      }
-
-      // Only remove style if no other instances need it
-      const styleToRemove = document.getElementById(STYLE_ELEMENT_ID);
-      if (styleToRemove && document.querySelectorAll('.filter-explanation-container').length <= 1) {
-        document.head.removeChild(styleToRemove);
+      control.remove();
+      const styleEl = document.getElementById(STYLE_ELEMENT_ID);
+      if (styleEl && document.querySelectorAll('.filter-explanation-container').length <= 1) {
+        styleEl.remove();
       }
     };
   }, [map, currentFilter, t]);
