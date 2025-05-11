@@ -158,7 +158,7 @@ export function FilterExplanation({ currentFilter }: FilterExplanationProps) {
     const ExplanationControl = L.Control.extend({
       options: { position: 'bottomright' },
       onAdd() {
-        const container = L.DomUtil.create('div', 'leaflet-control filter-explanation-container');
+        const container = L.DomUtil.create('div','leaflet-control filter-explanation-container hidden lg:block');
         const content = document.createElement('div');
         content.className = 'filter-explanation-content';
 

@@ -22,10 +22,10 @@ export default function SentinelMap() {
   return (
     <div style={{ position: "relative", height: "95%", width: "100%" }}>
       <MapContainer className="rounded-lg overflow-hidden" center={[38.7223, -9.1293]} zoom={12} style={{ height: "100%", width: "100%" }}>
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OSM contributors"/>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
         <WMSTileLayer key={filter} url={url} params={params} opacity={0.7}/>
         <FilterControls currentFilter={filter} onFilterChange={setFilter} />
-        <FilterExplanation currentFilter={filter} />
+        <FilterExplanation currentFilter={filter}/>
       </MapContainer>
     </div>
   );
