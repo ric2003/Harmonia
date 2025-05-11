@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { MapContainer, TileLayer, ImageOverlay, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { FilterControls } from "./FilterControls";
+import { FilterExplanation } from "./FilterExplanation";
 import { SentinelFilter } from "@/services/sentinelService";
 
 // Define types for our grid images
@@ -519,6 +520,11 @@ function SentinelMap() {
         <FilterControls 
           currentFilter={currentFilter}
           onFilterChange={handleFilterChange}
+        />
+
+        {/* Filter Explanation */}
+        <FilterExplanation
+          currentFilter={currentFilter}
         />
       </MapContainer>
       

@@ -1,5 +1,7 @@
 import React from 'react';
 import PageController from '../dam/PageController';
+import { useTranslation } from 'react-i18next';
+
 
 interface Column<T> {
   key: keyof T;
@@ -40,6 +42,8 @@ export function Table<T>({
   onResetFilters
 }: TableProps<T>) {
   const currentRecords = data.slice(startIndex, endIndex);
+
+  const { t } = useTranslation();
 
   return (
     <div className="bg-background shadow-lg">
@@ -118,12 +122,12 @@ export function Table<T>({
         <div className="text-xs text-gray600">
           {data.length > 0 ? (
             <>
-              Showing (<span className="font-medium">{startIndex + 1}</span> to{' '}
-              <span className="font-medium">{Math.min(endIndex, data.length)}</span>) of{' '}
-              <span className="font-medium">{data.length}</span> results
+              {t('dam.table.Showing')}(<span className="font-medium">{startIndex + 1}</span> {t('dam.table.to')}{' '}
+              <span className="font-medium">{Math.min(endIndex, data.length)}</span>) {t('dam.table.of')}{' '}
+              <span className="font-medium">{data.length}</span> {t('dam.table.results')}
             </>
           ) : (
-            <span>No results to display</span>
+            <span>{t('dam.table.noResults')}</span>
           )}
         </div>
 

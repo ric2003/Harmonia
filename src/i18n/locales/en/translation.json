@@ -162,8 +162,14 @@
     "volumeTotal": "Total Volume",
     "volumeUtil": "Useful Volume",
     "previous": "Previous",
-      "next": "Next",
-      "ofPages": "of {{totalPages}}"
+    "next": "Next",
+    "ofPages": "of {{totalPages}}",
+    "Showing": "Showing ",
+    "to": "to",
+    "of": "of",
+    "results": "results",
+    "noResults": "No Results"
+
   },
   "monitoring": {
     "title": "Dam Monitoring Table",
@@ -240,6 +246,24 @@
         "label": "Urban Areas",
         "description": "Highlights built-up areas and urban development"
       }
+    }
+  },
+  "filterExplanation": {
+    "natural": {
+      "title": "True Color Composite",
+      "description": "Uses visible light bands in red, green, and blue channels, showing Earth as humans would naturally see it. Great for distinguishing clouds, land, vegetation, and water bodies."
+    },
+    "ndvi": {
+      "title": "Vegetation Index (NDVI)",
+      "description": "The Normalized Difference Vegetation Index (NDVI) measures vegetation greenness by comparing how plants reflect visible and near-infrared light. Values range from –1 to +1, where values below –0.5 indicate water, –0.5 to 0 represent barren areas like rock or sand, 0 to 0.2 indicate very sparse vegetation, 0.2 to 0.6 represent shrubs and grassland, and values above 0.6 indicate dense, healthy vegetation."
+    },
+    "moisture": {
+      "title": "Moisture Index (NDMI)",
+      "description": "The Normalized Difference Moisture Index (NDMI) measures vegetation water content using reflected near-infrared and shortwave infrared light. Values range from –1 to +1, where values below –0.2 indicate dry or barren soil, 0 to 0.4 suggests vegetation under water stress, and values above 0.4 represent healthy vegetation with higher moisture content."
+    },
+    "urban": {
+      "title": "Urban Areas",
+      "description": "False color urban composite highlights built-up areas in white/grey/purple. Vegetation appears in green, soils in various colors. Water shown as black/blue, and burned areas or active fires in red/yellow."
     }
   },
   "simulationMap": {

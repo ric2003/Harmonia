@@ -161,7 +161,15 @@
       "cotaLida": "Altura Medida",
       "enchimento": "Nível de Enchimento",
       "volumeTotal": "Volume Total",
-      "volumeUtil": "Volume Útil"
+      "volumeUtil": "Volume Útil",
+      "previous": "Anterior",
+      "next": "Próximo",
+      "ofPages": "de {{totalPages}}",
+      "Showing": "A mostrar ",
+      "to": "a",
+      "of": "de",
+      "results": "resultados",
+      "noResults": "Sem resultados"
     },
     "monitoring": {
       "title": "Tabela de Monitorização de Barragens",
@@ -220,20 +228,38 @@
     "filters": {
       "natural": {
         "label": "Cor Natural",
-        "description": "Representação em cores verdadeiras da superfície da Terra"
+        "description": "Representação em cores reais da superfície da Terra"
       },
       "ndvi": {
         "label": "Vegetação (NDVI)",
-        "description": "Índice de Vegetação por Diferença Normalizada - Mostra a saúde e densidade das plantas"
+        "description": "Índice de Vegetação por Diferença Normalizada - Mostra saúde e densidade da vegetação"
       },
       "moisture": {
-        "label": "Índice de Humidade",
-        "description": "Mostra o conteúdo de água na vegetação e no solo"
+        "label": "Índice de Umidade",
+        "description": "Mostra o teor de água na vegetação e no solo"
       },
       "urban": {
         "label": "Áreas Urbanas",
-        "description": "Destaca áreas edificadas e desenvolvimento urbano"
+        "description": "Destaca áreas construídas e desenvolvimento urbano"
       }
+    }
+  },
+  "filterExplanation": {
+    "natural": {
+      "title": "Composição em Cor Natural",
+      "description": "Utiliza bandas de luz visível em canais vermelho, verde e azul, mostrando a Terra como os humanos a veriam naturalmente. Ótimo para distinguir nuvens, terra, vegetação e corpos de água."
+    },
+    "ndvi": {
+      "title": "Índice de Vegetação",
+      "description": "O Índice de Vegetação por Diferença Normalizada (NDVI) mede o verdor da vegetação com base na reflexão da luz visível e infravermelha próxima. Os valores vão de –1 a +1: abaixo de –0,5 indicam água; de –0,5 a 0, áreas estéreis; de 0 a 0,2, vegetação muito esparsa; de 0,2 a 0,6, arbustos e pastagens; e acima de 0,6, vegetação densa e saudável."
+    },
+    "moisture": {
+      "title": "Índice de Umidade (NDMI)",
+      "description": "O Índice de Umidade por Diferença Normalizada (NDMI) mede o teor de água na vegetação usando luz infravermelha próxima e infravermelha de ondas curtas refletida. Os valores variam de –1 a +1, onde valores abaixo de –0,2 indicam solo seco ou estéril, 0 a 0,4 sugere vegetação sob estresse hídrico, e valores acima de 0,4 representam vegetação saudável com maior teor de umidade."
+    },
+    "urban": {
+      "title": "Áreas Urbanas",
+      "description": "A composição em falsa cor urbana destaca áreas urbanizadas em branco, cinza ou roxo. A vegetação aparece em tons de verde, enquanto solos em várias cores. Água é mostrada em preto ou azul, e áreas inundadas em azul muito escuro. Incêndios e caldeiras de vulcões são exibidos em tons de vermelho e amarelo."
     }
   },
   "simulationMap": {
