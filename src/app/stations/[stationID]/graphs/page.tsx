@@ -3,12 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
-  getStationDailyData,
-  getStationHourlyData,
-  Station,
-  getStations,
-} from "@/services/api";
-import {
   LineChart,
   Line,
   XAxis,
@@ -24,6 +18,15 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { useTranslation } from 'react-i18next';
 import DataSourceFooter from "@/components/DataSourceFooter";
+
+// Define interfaces for type safety (no longer importing from service file)
+interface Station {
+  id: string;
+  estacao: string;
+  loc: string;
+  lat: number;
+  lon: number;
+}
 
 interface DailyTemperatureData {
   date: string;
@@ -73,8 +76,11 @@ export default function StationGraphsPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Get the station name
-        const stationsData = await getStations();
+        // Get the station name using the API route
+        const stationsRes = await fetch('/api/stations');
+        if (!stationsRes.ok) throw new Error(`Status ${stationsRes.status}`);
+        const stationsData: Station[] = await stationsRes.json();
+        
         const stationFound: Station | undefined = stationsData.find(
           (station: Station) => station.id === stationID
         );
@@ -84,19 +90,25 @@ export default function StationGraphsPage() {
           setStationName(t('common.unknown'));
         }
 
-        // Fetch daily data and transform it
-        const dailyRaw = await getStationDailyData(stationID, fromDate, toDate);
+        // Fetch daily data using the API route
+        const dailyRes = await fetch(`/api/stations/${stationID}/daily?from=${fromDate}&to=${toDate}`);
+        if (!dailyRes.ok) throw new Error(`Status ${dailyRes.status}`);
+        const dailyRaw = await dailyRes.json();
+        
         const dailyTransformed: DailyTemperatureData[] = Object.entries(dailyRaw).map(
-          ([date, data]: [string, DailyRawData]) => ({
-            date,
-            max: Number(data.air_temp_max ?? 0),
-            avg: Number(data.air_temp_avg ?? 0),
-            min: Number(data.air_temp_min ?? 0),
-          })
-        );
+                  ([date, data]) => ({
+                    date,
+                    max: Number((data as DailyRawData).air_temp_max ?? 0),
+                    avg: Number((data as DailyRawData).air_temp_avg ?? 0),
+                    min: Number((data as DailyRawData).air_temp_min ?? 0),
+                  })
+                );
 
-        // Fetch hourly data and transform it
-        const hourlyRaw = await getStationHourlyData(stationID);
+        // Fetch hourly data using the API route
+        const hourlyRes = await fetch(`/api/stations/${stationID}/hourly`);
+        if (!hourlyRes.ok) throw new Error(`Status ${hourlyRes.status}`);
+        const hourlyRaw = await hourlyRes.json();
+        
         const hourlyTransformed: HourlyData[] = Object.entries(hourlyRaw)
           .sort(([dateA, hourA], [dateB, hourB]) => {
             // First compare by date
@@ -105,13 +117,13 @@ export default function StationGraphsPage() {
               return dateComparison;
             }
             // If dates are equal, compare by hour
-            return Number(hourA.hour.slice(0, 2)) - Number(hourB.hour.slice(0, 2));
+            return Number((hourA as { hour: string }).hour.slice(0, 2)) - Number((hourB as { hour: string }).hour.slice(0, 2));
           })
-          .map(([timestamp, data]: [string, HourlyRawData]) => ({
+          .map(([timestamp, data]) => ({
             timestamp,
-            temp: Number(data.air_temp_avg ?? 0),
-            windSpeed: Number(data.wind_speed_avg ?? 0),
-            humidity: Number(data.relative_humidity_avg ?? 0),
+            temp: Number((data as HourlyRawData).air_temp_avg ?? 0),
+            windSpeed: Number((data as HourlyRawData).wind_speed_avg ?? 0),
+            humidity: Number((data as HourlyRawData).relative_humidity_avg ?? 0),
           }));
 
         setDailyData(dailyTransformed);
@@ -129,6 +141,7 @@ export default function StationGraphsPage() {
 
     fetchData();
   }, [stationID, fromDate, toDate, t]);
+  
   useTranslatedPageTitle('station.graphs.title', { station: stationName });
 
   if (loading) return <LoadingSpinner message={t('station.graphs.loading')}/>;

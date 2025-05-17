@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useContext } from "react";
-import { getStations, Station } from "@/services/api";
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import dynamic from "next/dynamic";
 import {AlertMessage} from "@/components/ui/AlertMessage";
@@ -10,6 +9,15 @@ import { useTranslation } from 'react-i18next';
 import ScrollIndicator from "@/components/ScrollIndicator";
 import DataSourceFooter from "@/components/DataSourceFooter";
 import Image from "next/image";
+
+
+interface Station {
+  id: string;
+  estacao: string;
+  loc: string;
+  lat: number;
+  lon: number;
+}
 
 // Definição do tipo para as props do MapComponent
 interface MapComponentProps {
@@ -22,7 +30,8 @@ interface MapComponentProps {
 
 // Importação dinâmica do componente de mapa para evitar problemas de SSR
 const MapComponent = dynamic<MapComponentProps>(
-  () => import("@/components/MapComponent")
+  () => import("@/components/MapComponent"),
+  { ssr: false }
 );
 
 export default function HomePage() {
@@ -34,23 +43,26 @@ export default function HomePage() {
   const { t } = useTranslation();
   useTranslatedPageTitle('navigation.home');
 
-  useEffect(() => {
-    async function fetchStations() {
+
+  async function fetchStations() {
       try {
-        const stationsData = await getStations();
-        setStations(stationsData);
+        const res = await fetch('/api/stations')
+        if (!res.ok) throw new Error(`Status ${res.status}`)
+        const data: Station[] = await res.json()
+        setStations(data)
       } catch (err: unknown) {
         if (err instanceof Error) {
-          setError(err.message);
+          setError(err.message)
         } else {
-          setError("An unknown error occurred");
+          setError("An unknown error occurred")
         }
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    fetchStations();
+  useEffect(() => {
+    fetchStations()
   }, []);
 
   if (loading) {
@@ -130,8 +142,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div id="project-info-section" className="bg-backgroundColor flex items-center rounded-lg p-6 mt-6 shadow-md border border-gray200">
-        <div className="flex items-center md:flex-row justify-between w-full">
+      <div id="project-info-section" className="bg-backgroundColor rounded-lg p-6 mt-6 shadow-md border border-gray200">
+        <div className="flex flex-col justify-center md:flex-row w-full">
           <div className="mb-6 md:mb-0 md:mr-6 flex-1">
             <p className="text-darkGray mb-4 leading-relaxed">
               {t('home.projectInfo.description')}
@@ -154,7 +166,8 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="flex flex-col items-center md:border-l md:border-gray200 md:pl-6">
+          {/* University logo section */}
+          <div className="flex flex-col items-center pt-4 border-t md:border-t-0 md:border-l md:border-gray200 md:pl-6 md:pt-0">
             <div className="w-28 h-28 bg-white rounded-lg flex items-center justify-center mb-2">
               <Image src="/ul.png" alt="Universidade Lusófona" className="w-24 h-24 object-contain" width={96} height={96} />
             </div>

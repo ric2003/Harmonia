@@ -321,15 +321,15 @@ export default function DamDetailsPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray600">{t('dam.table.cotaLida')}:</span>
-                      <span className="font-medium">{latestDamData?.cota_lida?.toFixed(2) || 'N/A'}</span>
+                      <span className="font-medium">{latestDamData?.cota_lida?.toFixed(2) + "m"|| 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray600">{t('dam.table.volumeTotal')}:</span>
-                      <span className="font-medium">{latestDamData?.volume_total?.toFixed(2) || 'N/A'}</span>
+                      <span className="font-medium">{latestDamData?.volume_total?.toFixed(2) + "hm³" || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray600">{t('dam.table.volumeUtil')}:</span>
-                      <span className="font-medium">{latestDamData?.volume_util?.toFixed(2) || 'N/A'}</span>
+                      <span className="font-medium">{latestDamData?.volume_util?.toFixed(2) + "hm³"|| 'N/A'}</span>
                     </div>
                   
                   </div>
@@ -344,12 +344,12 @@ export default function DamDetailsPage() {
                       <span className="font-medium">{stats.min.toFixed(2)}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray600">{t('dam.maxFill')}:</span>
-                      <span className="font-medium">{stats.max.toFixed(2)}%</span>
-                    </div>
-                    <div className="flex justify-between">
                       <span className="text-sm text-gray600">{t('dam.avgFill')}:</span>
                       <span className="font-medium">{stats.avg.toFixed(2)}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray600">{t('dam.maxFill')}:</span>
+                      <span className="font-medium">{stats.max.toFixed(2)}%</span>
                     </div>
                   </div>
                 </div>
@@ -401,7 +401,7 @@ export default function DamDetailsPage() {
                       <div className="grid grid-cols-2 gap-3 text-[12px]">
                         <div className="flex flex-col">
                           <span className="text-gray600 mb-1">{t('dam.table.cotaLida')}</span>
-                          <span className="font-medium text-darkGray">{item.cota_lida?.toFixed(2) || 'N/A'}</span>
+                          <span className="font-medium text-darkGray">{item.cota_lida?.toFixed(2) + ' m'|| 'N/A'}</span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-gray600 mb-1">{t('dam.table.enchimento')}</span>
@@ -409,11 +409,11 @@ export default function DamDetailsPage() {
                         </div>
                         <div className="flex flex-col">
                           <span className="text-gray600 mb-1">{t('dam.table.volumeTotal')}</span>
-                          <span className="font-medium text-darkGray">{item.volume_total?.toFixed(2) || 'N/A'}</span>
+                          <span className="font-medium text-darkGray">{item.volume_total?.toFixed(2) + ' hm³' || 'N/A'}</span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-gray600 mb-1">{t('dam.table.volumeUtil')}</span>
-                          <span className="font-medium text-darkGray">{item.volume_util?.toFixed(2) || 'N/A'}</span>
+                          <span className="font-medium text-darkGray">{item.volume_util?.toFixed(2) + ' hm³' || 'N/A'}</span>
                         </div>
                       </div>
                     </div>
@@ -438,7 +438,7 @@ export default function DamDetailsPage() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             {item._time ? new Date(item._time).toLocaleDateString('en-GB') : 'N/A'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">{item.cota_lida?.toFixed(2) || 'N/A'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">{item.cota_lida?.toFixed(2) + ' m'|| 'N/A'}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             <div className="flex items-center">
                               <span className="mr-2">{item.enchimento ? (item.enchimento * 100).toFixed(0) + '%' : 'N/A'}</span>
@@ -450,8 +450,8 @@ export default function DamDetailsPage() {
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">{item.volume_total?.toFixed(2) || 'N/A'}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">{item.volume_util?.toFixed(2) || 'N/A'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">{item.volume_total?.toFixed(2) + ' hm³' || 'N/A'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">{item.volume_util?.toFixed(2) + ' hm³' || 'N/A'}</td>
                         </tr>
                       ))}
                     </tbody>

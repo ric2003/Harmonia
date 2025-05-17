@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getStations, Station } from "@/services/api";
 import StationImage from "@/components/StationImage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import DataSourceFooter from "@/components/DataSourceFooter";
@@ -12,22 +11,32 @@ export default function StationsPage() {
   const [error, setError] = useState<string | null>(null);
   useTranslatedPageTitle('title.stations');
 
-  async function fetchStations() {
-    setLoading(true);
-    setError(null);
-    try {
-      const stationsData = await getStations();
-      setStations(stationsData);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Unknown error");
-      }
-    } finally {
-      setLoading(false);
-    }
+  interface Station {
+    id: string;
+    estacao: string;
+    loc: string;
+    lat: number;
+    lon: number;
   }
+
+  async function fetchStations() {
+      try {
+        const res = await fetch('/api/stations')
+        if (!res.ok) throw new Error(`Status ${res.status}`)
+        const data: Station[] = await res.json()
+        setStations(data)
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message)
+        } else {
+          setError("An unknown error occurred")
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+  
 
   useEffect(() => {
     fetchStations();

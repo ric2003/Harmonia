@@ -1,6 +1,3 @@
-// src/utils/rchParser.ts
-
-// --- Interfaces --- (Keep your existing interfaces)
 export interface RchMetadata {
   name?: string;
   localization_i?: number | string;

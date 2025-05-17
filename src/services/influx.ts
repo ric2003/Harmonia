@@ -18,10 +18,6 @@ const url = process.env.INFLUX_URL || "";
 const token = process.env.INFLUX_TOKEN || "";
 const org = process.env.INFLUX_ORG || "";
 const bucket = process.env.INFLUX_BUCKET || "";
-const baseUrl = process.env.VERCEL_URL 
-  ? `https://${process.env.VERCEL_URL}`
-  : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-const fallbackExcelUrl = `${baseUrl}/fallback.xlsx`;
 
 export interface QueryResult {
   _time?: string;
@@ -109,11 +105,11 @@ export async function getInfluxData(): Promise<NextResponse> {
  */
 async function getFallbackExcelData(): Promise<NextResponse> {
   try {   
-    console.log("Attempting to fetch fallback Excel file from:", fallbackExcelUrl);
+    const fallbackExcelPath = path.join(process.cwd(), 'public', 'fallback.xlsx');
     
     try {
       // First try to fetch the file via HTTP
-      const response = await fetch(fallbackExcelUrl, { cache: 'no-store' });
+      const response = await fetch(fallbackExcelPath, { cache: 'no-store' });
       
       if (response.ok) {
         const arrayBuffer = await response.arrayBuffer();

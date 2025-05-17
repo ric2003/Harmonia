@@ -3,13 +3,6 @@
 import { useState, useEffect, useContext, useCallback } from "react";
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import {
-  getStations,
-  getStationDailyData,
-  getStationHourlyData,
-  getStation10MinData,
-  Station,
-} from "@/services/api";
 import StationImage from "@/components/StationImage";
 import {
   LineChart,
@@ -27,7 +20,13 @@ import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import { useTranslation } from 'react-i18next';
 import DataSourceFooter from "@/components/DataSourceFooter";
 
-
+interface Station {
+  id: string;
+  estacao: string;
+  loc: string;
+  lat: number;
+  lon: number;
+}
 // Define interfaces for the API response data
 interface DailyDataRow {
   air_temp_avg?: string;
@@ -82,7 +81,10 @@ interface DailyRawData {
 }
 
 // Dynamic import of map component to avoid SSR issues
-const MapComponent = dynamic<MapComponentProps>(() => import("@/components/MapComponent"));
+const MapComponent = dynamic<MapComponentProps>(
+  () => import("@/components/MapComponent"),
+  { ssr: false }
+);
 
 export default function StationDetailsPage() {
   const params = useParams() as { stationID: string };
@@ -115,50 +117,65 @@ export default function StationDetailsPage() {
   const { sidebarOpen } = useContext(SidebarHeaderContext);
 
   const fetchStationData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const stationsData = await getStations();
-      setStations(stationsData);
+  setLoading(true);
+  setError(null);
+  try {
+    // Fetch stations list from API route
+    const stationsRes = await fetch('/api/stations');
+    if (!stationsRes.ok) throw new Error(`Status ${stationsRes.status}`);
+    const stationsData: Station[] = await stationsRes.json();
+    setStations(stationsData);
 
-      const stationFound: Station | undefined = stationsData.find(
-        (station: Station) => station.id === stationID
-      );
+    const stationFound: Station | undefined = stationsData.find(
+      (station: Station) => station.id === stationID
+    );
 
-      if (stationFound) {
-        setStationName(stationFound.estacao.slice(7));
-      } else {
-        setStationName(t('common.unknown'));
-      }
-      const dailyRaw = await getStationDailyData(stationID, fromDate, toDate);
-      const dailyTransformed: DailyTemperatureData[] = Object.entries(dailyRaw).map(
-        ([date, data]: [string, DailyRawData]) => ({
-          date,
-          max: Number(data.air_temp_max ?? 0),
-          avg: Number(data.air_temp_avg ?? 0),
-          min: Number(data.air_temp_min ?? 0),
-        })
-      );
-
-      setDailyData(dailyTransformed);
-      setStationData(dailyRaw);
-
-      const hourly = await getStationHourlyData(stationID);
-      setHourlyData(hourly);
-
-      const min10 = await getStation10MinData(stationID);
-      setMin10Data(min10);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(t('common.error'));
-      }
-    } finally {
-      setLoading(false);
-      setShowLoading(false);
+    if (stationFound) {
+      setStationName(stationFound.estacao.slice(7));
+    } else {
+      setStationName(t('common.unknown'));
     }
-  }, [stationID, fromDate, toDate, t]);
+
+    // Fetch daily data from API route
+    const dailyRes = await fetch(`/api/stations/${stationID}/daily?from=${fromDate}&to=${toDate}`);
+    if (!dailyRes.ok) throw new Error(`Status ${dailyRes.status}`);
+    const dailyRaw = await dailyRes.json();
+    
+    const dailyTransformed: DailyTemperatureData[] = Object.entries(dailyRaw).map(
+          ([date, data]) => ({
+            date,
+            max: Number((data as DailyRawData).air_temp_max ?? 0),
+            avg: Number((data as DailyRawData).air_temp_avg ?? 0),
+            min: Number((data as DailyRawData).air_temp_min ?? 0),
+          })
+        );
+
+    setDailyData(dailyTransformed);
+    setStationData(dailyRaw);
+
+    // Fetch hourly data from API route
+    const hourlyRes = await fetch(`/api/stations/${stationID}/hourly`);
+    if (!hourlyRes.ok) throw new Error(`Status ${hourlyRes.status}`);
+    const hourly = await hourlyRes.json();
+    setHourlyData(hourly);
+
+    // Fetch 10min data from API route
+    const min10Res = await fetch(`/api/stations/${stationID}/min10`);
+    if (!min10Res.ok) throw new Error(`Status ${min10Res.status}`);
+    const min10 = await min10Res.json();
+    setMin10Data(min10);
+  } catch (err) {
+    if (err instanceof Error) {
+      setError(err.message);
+    } else {
+      setError(t('common.error'));
+    }
+  } finally {
+    setLoading(false);
+    setShowLoading(false);
+  }
+}, [stationID, fromDate, toDate, t]);
+
 
   useEffect(() => {
     if (stationID) {

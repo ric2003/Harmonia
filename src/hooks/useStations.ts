@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getStations, getStationDailyData, getStationHourlyData, getStation10MinData } from '@/services/api';
+import { getStations, getStationDailyData, getStationHourlyData, getStation10MinData } from '@/services/irristratService';
 
 export function useStations() {
   return useQuery({

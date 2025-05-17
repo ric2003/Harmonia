@@ -1,4 +1,4 @@
-import { Station } from "@/services/api";
+import { Station } from "@/services/irristratService";
 import { MapPin } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
