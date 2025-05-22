@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import ScrollIndicator from "@/components/ScrollIndicator";
 import DataSourceFooter from "@/components/DataSourceFooter";
 import Image from "next/image";
-
+import { useStations, usePrefetchStationData } from "@/hooks/useStations";
 
 interface Station {
   id: string;
@@ -35,37 +35,57 @@ const MapComponent = dynamic<MapComponentProps>(
 );
 
 export default function HomePage() {
-  const [stations, setStations] = useState<Station[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: stations = [], isLoading, error: fetchError } = useStations();
   const [selectedStation, setSelectedStation] = useState<string | null>(null);
   const { sidebarOpen } = useContext(SidebarHeaderContext);
   const { t } = useTranslation();
+  const { prefetchAllStationData } = usePrefetchStationData();
+  
   useTranslatedPageTitle('navigation.home');
 
-
-  async function fetchStations() {
-      try {
-        const res = await fetch('/api/stations')
-        if (!res.ok) throw new Error(`Status ${res.status}`)
-        const data: Station[] = await res.json()
-        setStations(data)
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message)
-        } else {
-          setError("An unknown error occurred")
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
-
+  // Prefetch station data when stations are loaded, with navigation-friendly timing
   useEffect(() => {
-    fetchStations()
-  }, []);
+    if (stations.length > 0) {
+      // Use requestIdleCallback if available to run when the browser is idle
+      // This ensures we don't block navigation or other important work
+      const prefetchWithIdleCallback = () => {
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(
+            () => {
+              // Process stations in very small batches with high delays in between
+              prefetchAllStationData(stations);
+            },
+            { timeout: 10000 } // 10-second timeout ensures it eventually runs even on busy browsers
+          );
+        } else {
+          // Fallback for browsers without requestIdleCallback - use a longer delay
+          const timeoutId = setTimeout(() => {
+            prefetchAllStationData(stations);
+          }, 5000); // 5 seconds delay instead of 2
+          return () => clearTimeout(timeoutId);
+        }
+      };
+      
+      // Add event listener for before unload to cancel prefetching
+      const cancelPrefetch = () => {
+        // This isn't perfect but helps signal we're about to navigate away
+        console.log('Navigation detected, aborting prefetch');
+        // We can't actually abort the prefetch directly, but we can clean up
+      };
+      
+      window.addEventListener('beforeunload', cancelPrefetch);
+      
+      // Delay starting the prefetch to ensure it doesn't interfere with initial navigation
+      const initialDelayId = setTimeout(prefetchWithIdleCallback, 5000);
+      
+      return () => {
+        clearTimeout(initialDelayId);
+        window.removeEventListener('beforeunload', cancelPrefetch);
+      };
+    }
+  }, [stations, prefetchAllStationData]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div>
         {/* First container - Map and title */}
@@ -89,7 +109,7 @@ export default function HomePage() {
       </div>
     );
   }
-  if (error) return <AlertMessage type="error" message={error} />;
+  if (fetchError) return <AlertMessage type="error" message={(fetchError as Error).message} />;
 
   return (
     <div>
@@ -181,6 +201,6 @@ export default function HomePage() {
         linkKey="home.irristrat"
         linkUrl="https://irristrat.com/new/index.php"
       />
-      </div>
+    </div>
   );
 }

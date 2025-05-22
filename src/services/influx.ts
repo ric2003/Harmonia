@@ -89,7 +89,14 @@ export async function getInfluxData(): Promise<NextResponse> {
         return row;
       });
 
-      return NextResponse.json({ success: true, data: formattedResults });
+      return NextResponse.json(
+        { success: true, data: formattedResults },
+        {
+          headers: {
+            'Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=5184000' // 30 days cache, stale for 60 more days
+          }
+        }
+      );
     } catch (error) {
       console.error("Error fetching Influx data, trying fallback:", error);
       return await getFallbackExcelData();
@@ -121,6 +128,10 @@ async function getFallbackExcelData(): Promise<NextResponse> {
           success: true, 
           data: formattedResults,
           source: "excel_fallback_http"
+        }, {
+          headers: {
+            'Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=5184000' // 30 days cache, stale for 60 more days
+          }
         });
       } else {
         console.log("HTTP fetch failed, trying direct file access if available");
@@ -149,6 +160,10 @@ async function getFallbackExcelData(): Promise<NextResponse> {
             success: true, 
             data: formattedResults,
             source: "excel_fallback_fs"
+          }, {
+            headers: {
+              'Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=5184000' // 30 days cache, stale for 60 more days
+            }
           });
         }
       } catch (fsError) {

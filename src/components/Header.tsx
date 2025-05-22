@@ -1,7 +1,7 @@
 "use client"
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import { usePageTitle } from "@/contexts/PageTitleContext";
-import { Menu, Home, Building, Droplets, Map, Sheet, Satellite } from "lucide-react";
+import { Menu, Home, Building, Droplets, Map, Sheet, Satellite, Dam } from "lucide-react";
 import { useContext, useState, useEffect, useRef } from "react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
@@ -43,6 +43,7 @@ export function Header() {
     const navigationItems = [
         { route: "/", name: t('navigation.home'), icon: <Home size={20} /> },
         { route: "/stations", name: t('navigation.stations'), icon: <Building size={20} /> },
+        { route: "/dams", name: t('navigation.dams'), icon: <Dam size={20} /> },
         { route: "/dam-monitoring", name: t('navigation.damMonitoring'), icon: <Droplets size={20} /> },
         { route:"/sentinel", name:t('navigation.sentinelMap'), icon: <Satellite size={20}/> },
         { route: "/sorraia-map", name: t('navigation.sorraiaMap'), icon: <Map size={20} /> },

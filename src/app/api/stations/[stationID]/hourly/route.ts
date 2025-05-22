@@ -11,7 +11,11 @@ export async function GET(
     const { stationID } = await params
 
     const data = await getStationHourlyData(stationID)
-    return NextResponse.json(data)
+    return NextResponse.json(data, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=1800' // 1 hour cache, stale for 30 more minutes
+      }
+    })
   } catch (err: unknown) {
     console.error(err)
     return NextResponse.json(

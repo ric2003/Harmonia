@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import mapboxgl, { Map, GeolocateControl, Marker } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useRouter } from 'next/navigation';
 import MapList from './MapList';
+import { usePrefetchStationData } from '@/hooks/useStations';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
@@ -29,7 +29,8 @@ const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSel
   const map = useRef<Map | null>(null);
   const markers = useRef<Marker[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const router = useRouter();
+  const prefetchHook = usePrefetchStationData();
+  const prefetchStationData = prefetchHook?.prefetchStationData;
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -79,16 +80,29 @@ const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSel
 
       // Add hover interactions
       const element = marker.getElement();
-      element.addEventListener('mouseenter', () => onMarkerHover && onMarkerHover(station.id));
-      element.addEventListener('mouseleave', () => onMarkerHover && onMarkerHover(null));
-      
-      // Replace popup with direct navigation on click
-      element.addEventListener('click', () => {
-        if(onStationSelect){
-          onStationSelect(station.id);
+      element.addEventListener('mouseenter', () => {
+        // Call the original hover callback
+        if (onMarkerHover) {
+          onMarkerHover(station.id);
         }
         
-        router.push(`/stations/${station.id}`);
+        // Prefetch data for this station when hovered
+        if (typeof prefetchStationData === 'function') {
+          prefetchStationData(station.id);
+        }
+      });
+      
+      element.addEventListener('mouseleave', () => {
+        if (onMarkerHover) {
+          onMarkerHover(null);
+        }
+      });
+      
+      // Use the provided callback for navigation instead of hardcoding the route
+      element.addEventListener('click', () => {
+        if (onStationSelect) {
+          onStationSelect(station.id);
+        }
       });
 
       markers.current.push(marker);
@@ -104,21 +118,30 @@ const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSel
         });
       }
     }
-  }, [stations, selectedStationId, mapLoaded, onMarkerHover, onStationSelect, router]);
+  }, [stations, selectedStationId, mapLoaded, onMarkerHover, onStationSelect, prefetchStationData]);
 
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       
-      {/* Station list panel */}
-      <div className='hidden lg:block absolute top-4 left-4 z-10'>
-        <MapList
-          stations={stations}
-          selectedStationId={selectedStationId}
-          onMarkerHover={onMarkerHover}
-          showMenu={showMenu}
-        />
-      </div>
+      {/* Station list panel - only show when explicitly requested (for station pages) */}
+      {showMenu && (
+        <div className='hidden lg:block absolute top-4 left-4 z-10'>
+          <MapList
+            stations={stations}
+            selectedStationId={selectedStationId}
+            onMarkerHover={(stationId) => {
+              onMarkerHover(stationId);
+              
+              // Also prefetch data when hovering over station in the list
+              if (stationId && prefetchStationData) {
+                prefetchStationData(stationId);
+              }
+            }}
+            showMenu={showMenu}
+          />
+        </div>
+      )}
     </div>
   );
 };

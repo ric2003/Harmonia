@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   LineChart,
@@ -18,16 +17,9 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { useTranslation } from 'react-i18next';
 import DataSourceFooter from "@/components/DataSourceFooter";
+import { useStations, useStationDailyData, useStationHourlyData } from "@/hooks/useStations";
 
-// Define interfaces for type safety (no longer importing from service file)
-interface Station {
-  id: string;
-  estacao: string;
-  loc: string;
-  lat: number;
-  lon: number;
-}
-
+// Define interfaces for type safety
 interface DailyTemperatureData {
   date: string;
   avg: number;
@@ -42,7 +34,7 @@ interface HourlyData {
   humidity: number;
 }
 
-// Update the raw data interfaces to have optional properties.
+// Update the raw data interfaces to have optional properties
 interface DailyRawData {
   air_temp_avg?: string | number;
   air_temp_min?: string | number;
@@ -50,6 +42,8 @@ interface DailyRawData {
 }
 
 interface HourlyRawData {
+  date: string;
+  hour: string;
   air_temp_avg?: string | number;
   wind_speed_avg?: string | number;
   relative_humidity_avg?: string | number;
@@ -60,12 +54,7 @@ export default function StationGraphsPage() {
   const stationID = params.stationID;
   const { t } = useTranslation();
 
-  const [stationName, setStationName] = useState<string>("");
-  const [dailyData, setDailyData] = useState<DailyTemperatureData[]>([]);
-  const [hourlyData, setHourlyData] = useState<HourlyData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+  // Get current date and 7 days ago for date range
   const today = new Date();
   const toDate = today.toISOString().split("T")[0];
 
@@ -73,81 +62,74 @@ export default function StationGraphsPage() {
   sevenDaysAgo.setDate(today.getDate() - 7);
   const fromDate = sevenDaysAgo.toISOString().split("T")[0];
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        // Get the station name using the API route
-        const stationsRes = await fetch('/api/stations');
-        if (!stationsRes.ok) throw new Error(`Status ${stationsRes.status}`);
-        const stationsData: Station[] = await stationsRes.json();
-        
-        const stationFound: Station | undefined = stationsData.find(
-          (station: Station) => station.id === stationID
-        );
-        if (stationFound) {
-          setStationName(stationFound.estacao.slice(7));
-        } else {
-          setStationName(t('common.unknown'));
-        }
+  // Use React Query hooks to fetch data
+  const { data: stations = [], isLoading: stationsLoading, error: stationsError } = useStations();
+  const { data: dailyDataRaw, isLoading: dailyLoading, error: dailyError } = useStationDailyData(stationID, fromDate, toDate);
+  const { data: hourlyDataRaw = {}, isLoading: hourlyLoading, error: hourlyError } = useStationHourlyData(stationID);
 
-        // Fetch daily data using the API route
-        const dailyRes = await fetch(`/api/stations/${stationID}/daily?from=${fromDate}&to=${toDate}`);
-        if (!dailyRes.ok) throw new Error(`Status ${dailyRes.status}`);
-        const dailyRaw = await dailyRes.json();
-        
-        const dailyTransformed: DailyTemperatureData[] = Object.entries(dailyRaw).map(
-                  ([date, data]) => ({
-                    date,
-                    max: Number((data as DailyRawData).air_temp_max ?? 0),
-                    avg: Number((data as DailyRawData).air_temp_avg ?? 0),
-                    min: Number((data as DailyRawData).air_temp_min ?? 0),
-                  })
-                );
+  // Get station name
+  const stationName = stations.find(station => station.id === stationID)?.estacao.slice(7) || t('common.unknown');
 
-        // Fetch hourly data using the API route
-        const hourlyRes = await fetch(`/api/stations/${stationID}/hourly`);
-        if (!hourlyRes.ok) throw new Error(`Status ${hourlyRes.status}`);
-        const hourlyRaw = await hourlyRes.json();
-        
-        const hourlyTransformed: HourlyData[] = Object.entries(hourlyRaw)
-          .sort(([dateA, hourA], [dateB, hourB]) => {
-            // First compare by date
-            const dateComparison = dateA.localeCompare(dateB);
-            if (dateComparison !== 0) {
-              return dateComparison;
-            }
-            // If dates are equal, compare by hour
-            return Number((hourA as { hour: string }).hour.slice(0, 2)) - Number((hourB as { hour: string }).hour.slice(0, 2));
-          })
-          .map(([timestamp, data]) => ({
-            timestamp,
-            temp: Number((data as HourlyRawData).air_temp_avg ?? 0),
-            windSpeed: Number((data as HourlyRawData).wind_speed_avg ?? 0),
-            humidity: Number((data as HourlyRawData).relative_humidity_avg ?? 0),
-          }));
+  // Transform daily data for charts
+  const dailyData: DailyTemperatureData[] = dailyDataRaw
+    ? Object.entries(dailyDataRaw)
+        .filter(([, data]) => {
+          // Make sure we have valid data entries
+          const rawData = data as DailyRawData;
+          return rawData && (
+            rawData.air_temp_avg !== undefined || 
+            rawData.air_temp_min !== undefined || 
+            rawData.air_temp_max !== undefined
+          );
+        })
+        .map(([date, data]) => ({
+          date,
+          max: Number((data as DailyRawData).air_temp_max ?? 0),
+          avg: Number((data as DailyRawData).air_temp_avg ?? 0),
+          min: Number((data as DailyRawData).air_temp_min ?? 0),
+        }))
+    : [];
 
-        setDailyData(dailyTransformed);
-        setHourlyData(hourlyTransformed);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError(t('common.error'));
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
+  // Transform hourly data for charts
+  const hourlyData: HourlyData[] = hourlyDataRaw
+    ? Object.entries(hourlyDataRaw)
+        .filter(([, data]) => {
+          // Ensure the data entry has the required properties
+          const hourlyData = data as HourlyRawData;
+          return hourlyData && hourlyData.date && hourlyData.hour;
+        })
+        .sort(([, dataA], [, dataB]) => {
+          const timestampA = `${(dataA as HourlyRawData).date} ${(dataA as HourlyRawData).hour}`;
+          const timestampB = `${(dataB as HourlyRawData).date} ${(dataB as HourlyRawData).hour}`;
+          return timestampA.localeCompare(timestampB);
+        })
+        .map(([, data]) => {
+          const hourlyData = data as HourlyRawData;
+          return {
+            timestamp: `${hourlyData.date}T${hourlyData.hour}`,
+            temp: Number(hourlyData.air_temp_avg ?? 0),
+            windSpeed: Number(hourlyData.wind_speed_avg ?? 0),
+            humidity: Number(hourlyData.relative_humidity_avg ?? 0),
+          };
+        })
+    : [];
 
-    fetchData();
-  }, [stationID, fromDate, toDate, t]);
+  // Combined loading and error states
+  const isLoading = stationsLoading || dailyLoading || hourlyLoading;
+  const error = stationsError || dailyError || hourlyError;
   
   useTranslatedPageTitle('station.graphs.title', { station: stationName });
 
-  if (loading) return <LoadingSpinner message={t('station.graphs.loading')}/>;
-  if (error) return <AlertMessage type="error" message={error} />;
+  if (isLoading) return <LoadingSpinner message={t('station.graphs.loading')}/>;
+  if (error) return <AlertMessage type="error" message={error instanceof Error ? error.message : t('common.error')} />;
   if (stationName === t('common.unknown')){
     return <AlertMessage type="error" message={t('station.graphs.stationIdError')} />;
+  }
+
+  // Check if we have any data to display
+  const hasData = dailyData.length > 0 || hourlyData.length > 0;
+  if (!hasData) {
+    return <AlertMessage type="warning" message={t('station.graphs.noData')} />;
   }
 
   return (

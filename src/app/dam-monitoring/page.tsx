@@ -48,11 +48,18 @@ const initialFilterState: FilterState = {
 export default function DamMonitoringPage() {
   const [filters, setFilters] = useState<FilterState>(initialFilterState);
   const [currentPage, setCurrentPage] = useState(1);
-  const { data: damDataResponse, isLoading, error } = useDamData();
+  const { 
+    data: damDataResponse, 
+    isLoading, 
+    error
+  } = useDamData();
   const { t } = useTranslation();
   
   useTranslatedPageTitle('title.damMonitoring');
 
+  // Show a distinct loading state for initial load vs. background refresh
+  const isInitialLoading = isLoading;
+  
   const handleSort = useCallback((field: string) => {
     setFilters(prev => ({
       ...prev,
@@ -173,7 +180,12 @@ export default function DamMonitoringPage() {
     return result;
   }, [damDataResponse, filters]);
 
-  if (isLoading) return <LoadingSpinner />;
+  if (isInitialLoading) return (
+    <div className="flex flex-col items-center justify-center min-h-[70vh] py-12">
+      <LoadingSpinner />
+    </div>
+  );
+  
   if (error) return <AlertMessage type="error" message={error instanceof Error ? error.message : "An error occurred"} />;
   if (!damDataResponse || !damDataResponse.data || damDataResponse.data.length === 0) 
     return <AlertMessage type="warning" message="No dam data available. Please check your connection or try again later." />;
@@ -194,6 +206,7 @@ export default function DamMonitoringPage() {
 
   return (
     <div className="container mx-auto max-h-[100%]">
+      
       {isFallbackSource && (
         <AlertMessage type="warning" message={t('dam.fetchingError')} /> 
       )}

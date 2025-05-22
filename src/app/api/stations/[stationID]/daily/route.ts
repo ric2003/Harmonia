@@ -14,7 +14,11 @@ export async function GET(
     const to = request.nextUrl.searchParams.get('to') ?? ''
 
     const data = await getStationDailyData(stationID, from, to)
-    return NextResponse.json(data)
+    return NextResponse.json(data, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=43200, stale-while-revalidate=21600' // 12 hours cache, stale for 6 more hours
+      }
+    })
   } catch (err: unknown) {
     console.error(err)
     return NextResponse.json(

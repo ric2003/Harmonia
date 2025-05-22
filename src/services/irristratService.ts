@@ -82,13 +82,14 @@ export type Station10MinData = Record<string, Station10MinRecord>;
 // ----------------------------------------------------------------
 
 // Update the postRequest function to use Next.js caching
-async function postRequest<T>(params: Record<string, string>, options: { cache?: RequestCache } = {}): Promise<T> {
+async function postRequest<T>(params: Record<string, string>): Promise<T> {
   const response = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams(params).toString(),
-    cache: options.cache || 'force-cache', // Use Next.js caching
-    next: { revalidate: 3600 }, // Revalidate every hour
+    next: { 
+      revalidate: 3600 // Revalidate every hour
+    },
   });
   
   if (!response.ok) {
@@ -110,7 +111,7 @@ export async function getStations(): Promise<Station[]> {
   const data = await postRequest<Record<string, Station>>({
     token,
     option: "1",
-  }, { cache: 'force-cache' });
+  });
   
   return Object.values(data) as Station[];
 }
@@ -141,7 +142,7 @@ export async function getStationDailyData(
     params.to_date = toDate;
   }
 
-  return postRequest<StationData>(params, { cache: 'force-cache' });
+  return postRequest<StationData>(params);
 }
 
 /**
@@ -157,7 +158,7 @@ export async function getStationHourlyData(
     token,
     option: "3",
     id: stationID,
-  }, { cache: 'force-cache' });
+  });
   return data;
 }
 
@@ -174,6 +175,6 @@ export async function getStation10MinData(
     token,
     option: "4",
     id: stationID,
-  }, { cache: 'force-cache' });
+  });
   return data;
 }

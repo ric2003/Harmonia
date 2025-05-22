@@ -114,6 +114,7 @@
       "title": "Graphs of {{station}}",
       "loading": "Loading graph data",
       "stationIdError": "Station ID error",
+      "noData": "No weather data available for this station.",
       "hourlyTemperature": "Hourly Temperature Variation",
       "hourlyWindSpeed": "Hourly Wind Speed Variation",
       "hourlyHumidity": "Hourly Humidity Variation"
@@ -146,31 +147,32 @@
     "locationInfo": "Geographic Location",
     "approximateLocation": "This is an approximate location based on the dam name",
     "locationNotFound": "Location information could not be found for this dam",
+    "clickMapToNavigate": "Click on a dam marker to view its details",
     "dataSource": "Data source:",
     "sir": "SIR - Irrigation Information System",
     "noFilteredResults": "No results match your filter criteria.",
+    "loading": "Loading data...",
     "tabs": {
       "overview": "Overview",
       "historical": "Historical Data",
       "location": "Location Map"
     },
     "table": {
-    "date": "Date",
-    "dam": "Dam",
-    "cotaLida": "Measured Height",
-    "enchimento": "Fill Level",
-    "volumeTotal": "Total Volume",
-    "volumeUtil": "Useful Volume",
-    "previous": "Previous",
-    "next": "Next",
-    "ofPages": "of {{totalPages}}",
-    "Showing": "Showing ",
-    "to": "to",
-    "of": "of",
-    "results": "results",
-    "noResults": "No Results"
-
-  },
+      "date": "Date",
+      "dam": "Dam",
+      "cotaLida": "Measured Height (m)",
+      "enchimento": "Fill Level (%)",
+      "volumeTotal": "Total Volume (hm³)",
+      "volumeUtil": "Useful Volume (hm³)",
+      "previous": "Previous",
+      "next": "Next",
+      "ofPages": "of {{totalPages}}",
+      "Showing": "Showing ",
+      "to": "to",
+      "of": "of",
+      "results": "results",
+      "noResults": "No Results"
+    },
   "monitoring": {
     "title": "Dam Monitoring Table",
     "showFilters": "Show Filters",
@@ -193,11 +195,11 @@
     "max": "Max",
     "volumeUtil": "Useful Volume Range"
   },
-    "footer": {
-      "data": "Data source:",
-      "source": "SIR - Sistema de Informação de Regadio"
-    }
-  },
+  "footer": {
+    "data": "Data source:",
+    "source": "SIR - Sistema de Informação de Regadio"
+  }
+},
   "mobile": {
     "filters": {
       "title": "Filter Options",

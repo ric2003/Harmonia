@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { DamData } from './DamTable';
+import { useTranslation } from "react-i18next";
 
 interface ReservoirCardProps {
     id: number;
@@ -10,6 +11,7 @@ interface ReservoirCardProps {
 export default function TableCard({ id, data, className = '' }: ReservoirCardProps) {
   const fillBarRef = useRef<HTMLDivElement>(null);
   const enchimentoToPercentage = data.enchimento ? Number((data.enchimento * 100).toFixed(0)) : 0;
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (data.enchimento !== undefined) {
@@ -41,7 +43,7 @@ export default function TableCard({ id, data, className = '' }: ReservoirCardPro
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="bg-gray50 p-3 rounded-lg">
           <div className="text-gray500 text-sm font-medium mb-1">
-            Cota Lida
+            {t('dam.table.cotaLida')}
           </div>
           <div className="font-semibold text-lg text-darkGray">
             {data.cota_lida?.toFixed(2)}
@@ -50,7 +52,7 @@ export default function TableCard({ id, data, className = '' }: ReservoirCardPro
         
         <div className="bg-gray50 p-3 rounded-lg">
           <div className="text-gray500 text-sm font-medium mb-1">
-            Volume Total
+            {t('dam.table.volumeTotal')}
           </div>
           <div className="font-semibold text-lg text-darkGray">
             {data.volume_total?.toFixed(2)}
@@ -59,7 +61,7 @@ export default function TableCard({ id, data, className = '' }: ReservoirCardPro
         
         <div className="bg-gray50 p-3 rounded-lg">
           <div className="text-gray500 text-sm font-medium mb-1">
-            Volume Útil
+            {t('dam.table.volumeUtil')}
           </div>
           <div className="font-semibold text-lg text-darkGray">
             {data.volume_util?.toFixed(2)}

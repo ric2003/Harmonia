@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useState, useMemo, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useDamData } from "@/hooks/useDamData";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { AlertMessage } from "@/components/ui/AlertMessage";
@@ -9,7 +9,7 @@ import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import DataSourceFooter from "@/components/DataSourceFooter";
 import { useTranslation } from 'react-i18next';
 import dynamic from "next/dynamic";
-import { getCoordinates, GeoapifyCoordinates } from "@/services/geoapifyLocation";
+import { useDamLocation, useMultipleDamLocations } from "@/hooks/useDamLocations";
 import WaterWave from "@/components/WaterWave";
 import {
   XAxis,
@@ -21,6 +21,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import { DataTable } from "@/components/ui/DataTable";
 
 // Import the map component dynamically to avoid SSR issues
 const MapComponent = dynamic(() => import("@/components/MapComponent"), {
@@ -54,10 +55,9 @@ interface Station {
 
 export default function DamDetailsPage() {
   const params = useParams() as { damId: string };
+  const router = useRouter();
   const { t } = useTranslation();
-  const { data: damDataResponse, isLoading, error } = useDamData();
-  const [damLocation, setDamLocation] = useState<GeoapifyCoordinates | null>(null);
-  const [locationLoading, setLocationLoading] = useState(true);
+  const { data: damDataResponse, isLoading: dataLoading, error: dataError } = useDamData();
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
   
@@ -75,6 +75,21 @@ export default function DamDetailsPage() {
         return new Date(b._time).getTime() - new Date(a._time).getTime();
       });
   }, [damDataResponse, damId]);
+
+  // Get all unique dam IDs
+  const allDamIds = useMemo(() => {
+    if (!damDataResponse?.data) return [];
+    
+    // Extract unique dam IDs
+    const uniqueDams = new Set<string>();
+    damDataResponse.data.forEach(item => {
+      if (item.barragem) {
+        uniqueDams.add(item.barragem);
+      }
+    });
+    
+    return Array.from(uniqueDams);
+  }, [damDataResponse]);
 
   // Get the latest dam data for display
   const latestDamData = useMemo(() => {
@@ -115,38 +130,44 @@ export default function DamDetailsPage() {
     };
   }, [damData]);
 
-  // Get dam location coordinates using geoapify
-  useEffect(() => {
-    async function fetchDamLocation() {
-      setLocationLoading(true);
-      try {
-        const coordinates = await getCoordinates(damId);
-        setDamLocation(coordinates);
-      } catch (error) {
-        console.error("Error fetching dam location:", error);
-      } finally {
-        setLocationLoading(false);
-      }
+  // Use the new location hooks
+  const { location: damLocation, isLoading: singleLocationLoading } = useDamLocation(damId);
+  
+  // Limit to 20 dams for all locations
+  const damsToFetch = useMemo(() => allDamIds.slice(0, 20), [allDamIds]);
+  const { locations: allLocations, isLoading: allLocationsLoading } = useMultipleDamLocations(damsToFetch);
+
+  // Convert all dam locations to stations format for MapComponent
+  const allDamStations = useMemo(() => {
+    const stations: Station[] = [];
+    
+    // First add the current dam if we have its location
+    if (damLocation) {
+      stations.push({
+        id: damId,
+        estacao: damId,
+        loc: damLocation.formatted,
+        lat: damLocation.lat,
+        lon: damLocation.lon
+      });
     }
-
-    fetchDamLocation();
-  }, [damId]);
-
-  // Convert dam location to stations format for MapComponent
-  const damStations = useMemo(() => {
-    if (!damLocation) return [];
     
-    // Create a single station object from the dam location
-    const station: Station = {
-      id: damId,
-      estacao: damId,
-      loc: damLocation.formatted,
-      lat: damLocation.lat,
-      lon: damLocation.lon
-    };
+    // Then add other dams with valid locations
+    Object.entries(allLocations).forEach(([id, location]) => {
+      // Avoid duplicating the current dam
+      if (id !== damId) {
+        stations.push({
+          id,
+          estacao: id,
+          loc: location.formatted,
+          lat: location.lat,
+          lon: location.lon
+        });
+      }
+    });
     
-    return [station];
-  }, [damLocation, damId]);
+    return stations;
+  }, [allLocations, damLocation, damId]);
 
   // Update page title
   useTranslatedPageTitle('title.dam', { dam: damId });
@@ -159,26 +180,17 @@ export default function DamDetailsPage() {
     return 'bg-red-500';
   }, []);
 
-  // Dummy handlers for MapComponent
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleMarkerHover = useCallback((_stationId: string | null) => {
-    // No action needed for hover in this context
+  // Empty marker hover handler
+  const handleMarkerHover = useCallback(() => {
+    // No-op function
   }, []);
   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleStationSelect = useCallback((_stationId: string | null) => {
-    // No-op, we don't need to navigate anywhere
-  }, []);
-
-  // Calculate pagination values
-  const totalPages = useMemo(() => {
-    return Math.ceil(damData.length / rowsPerPage);
-  }, [damData.length]);
-
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * rowsPerPage;
-    return damData.slice(startIndex, startIndex + rowsPerPage);
-  }, [damData, currentPage]);
+  // Navigate to the selected dam's details page
+  const handleDamSelect = useCallback((selectedDamId: string | null) => {
+    if (selectedDamId) {
+      router.push(`/dams/${encodeURIComponent(selectedDamId)}`);
+    }
+  }, [router]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -187,8 +199,11 @@ export default function DamDetailsPage() {
   }, []);
 
   // Loading and error states
+  const isLoading = dataLoading || (singleLocationLoading && allLocationsLoading);
+  const locationLoading = singleLocationLoading || allLocationsLoading;
+
   if (isLoading) return <LoadingSpinner />;
-  if (error) return <AlertMessage type="error" message={error instanceof Error ? error.message : "An error occurred"} />;
+  if (dataError) return <AlertMessage type="error" message={dataError instanceof Error ? dataError.message : "An error occurred"} />;
   if (!damData || damData.length === 0) 
     return <AlertMessage type="warning" message={`No data available for dam "${damId}". Please check connection or try again later.`} />;
 
@@ -286,21 +301,28 @@ export default function DamDetailsPage() {
               {/* Map */}
               <div className="bg-background p-4 rounded-lg shadow-sm">
                 <h2 className="text-lg sm:text-xl font-semibold mb-4">{t('dam.location')}</h2>
-                {locationLoading ? (
-                  <div className="flex justify-center py-12 h-[250px]">
-                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                ) : damLocation ? (
+                {allDamStations.length > 0 ? (
                   <div>
                     <div className="h-[250px] sm:h-[300px] relative rounded-lg overflow-hidden">
                       <MapComponent
-                        stations={damStations}
+                        stations={allDamStations}
                         selectedStationId={damId}
                         onMarkerHover={handleMarkerHover}
-                        onStationSelect={handleStationSelect}
+                        onStationSelect={handleDamSelect}
                         showMenu={false}
                       />
                     </div>
+                    <p className="text-xs text-gray600 mt-2">{t('dam.clickMapToNavigate')}</p>
+                    {locationLoading && (
+                      <p className="text-xs text-gray600 mt-1">
+                        <span className="inline-block w-2 h-2 rounded-full bg-blue-600 animate-pulse mr-1"></span>
+                        {t('common.loading')}
+                      </p>
+                    )}
+                  </div>
+                ) : locationLoading ? (
+                  <div className="flex justify-center py-12 h-[250px]">
+                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 ) : (
                   <p className="text-gray600 text-sm py-12 text-center">
@@ -390,142 +412,74 @@ export default function DamDetailsPage() {
             <h3 className="text-lg font-medium mb-4">{t('dam.historicalData')}</h3>
             
             {damData.length > 0 ? (
-              <>
-                {/* Mobile view: Cards */}
-                <div className="block sm:hidden space-y-3 -mx-4 px-4">
-                  {paginatedData.map((item, index) => (
-                    <div key={index} className="bg-background rounded-xl shadow-sm p-4 border border-gray200">
-                      <h4 className="font-semibold text-sm text-darkGray mb-3">
-                        {item._time ? new Date(item._time).toLocaleDateString('en-GB') : 'N/A'}
-                      </h4>
-                      <div className="grid grid-cols-2 gap-3 text-[12px]">
-                        <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('dam.table.cotaLida')}</span>
-                          <span className="font-medium text-darkGray">{item.cota_lida?.toFixed(2) + ' m'|| 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('dam.table.enchimento')}</span>
-                          <span className="font-medium text-darkGray">{item.enchimento ? (item.enchimento * 100).toFixed(2) + '%' : 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('dam.table.volumeTotal')}</span>
-                          <span className="font-medium text-darkGray">{item.volume_total?.toFixed(2) + ' hm³' || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('dam.table.volumeUtil')}</span>
-                          <span className="font-medium text-darkGray">{item.volume_util?.toFixed(2) + ' hm³' || 'N/A'}</span>
+              <DataTable
+                data={damData}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                rowsPerPage={rowsPerPage}
+                columns={[
+                  {
+                    key: '_time',
+                    header: t('dam.table.date'),
+                    render: (value: unknown) => value ? new Date(value as string | number | Date).toLocaleDateString('en-GB') : 'N/A'
+                  },
+                  {
+                    key: 'cota_lida',
+                    header: t('dam.table.cotaLida'),
+                    render: (value: unknown) => (value as number)?.toFixed(2) + ' m' || 'N/A'
+                  },
+                  {
+                    key: 'enchimento',
+                    header: t('dam.table.enchimento'),
+                    render: (value: unknown) => (
+                      <div className="flex items-center">
+                        <span className="mr-2">{value ? ((value as number) * 100).toFixed(0) + '%' : 'N/A'}</span>
+                        <div className="w-16 bg-gray200 rounded-full h-1.5">
+                          <div 
+                            className={`h-1.5 rounded-full ${value ? getFillColorClass((value as number) * 100) : 'bg-gray400'}`} 
+                            style={{ width: `${value ? (value as number) * 100 : 0}%` }}
+                          />
                         </div>
                       </div>
+                    )
+                  },
+                  {
+                    key: 'volume_total',
+                    header: t('dam.table.volumeTotal'),
+                    render: (value: unknown) => (value as number)?.toFixed(2) + ' hm³' || 'N/A'
+                  },
+                  {
+                    key: 'volume_util',
+                    header: t('dam.table.volumeUtil'),
+                    render: (value: unknown) => (value as number)?.toFixed(2) + ' hm³' || 'N/A'
+                  }
+                ]}
+                mobileCardRenderer={(item) => (
+                  <div key={item._time} className="bg-background rounded-xl shadow-sm p-4 border border-gray200">
+                    <h4 className="font-semibold text-sm text-darkGray mb-3">
+                      {item._time ? new Date(item._time).toLocaleDateString('en-GB') : 'N/A'}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3 text-[12px]">
+                      <div className="flex flex-col">
+                        <span className="text-gray600 mb-1">{t('dam.table.cotaLida')}</span>
+                        <span className="font-medium text-darkGray">{item.cota_lida?.toFixed(2) + ' m'|| 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-gray600 mb-1">{t('dam.table.enchimento')}</span>
+                        <span className="font-medium text-darkGray">{item.enchimento ? (item.enchimento * 100).toFixed(2) + '%' : 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-gray600 mb-1">{t('dam.table.volumeTotal')}</span>
+                        <span className="font-medium text-darkGray">{item.volume_total?.toFixed(2) + ' hm³' || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-gray600 mb-1">{t('dam.table.volumeUtil')}</span>
+                        <span className="font-medium text-darkGray">{item.volume_util?.toFixed(2) + ' hm³' || 'N/A'}</span>
+                      </div>
                     </div>
-                  ))}
-                </div>
-                
-                {/* Desktop view: Table */}
-                <div className="hidden sm:block overflow-x-auto bg-background rounded-lg shadow">
-                  <table className="min-w-full divide-y divide-lightGray">
-                    <thead className="bg-gray50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">{t('dam.table.date')}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">{t('dam.table.cotaLida')}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">{t('dam.table.enchimento')}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">{t('dam.table.volumeTotal')}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider">{t('dam.table.volumeUtil')}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-background divide-y divide-lightGray">
-                      {paginatedData.map((item, index) => (
-                        <tr key={index} className="hover:bg-gray50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            {item._time ? new Date(item._time).toLocaleDateString('en-GB') : 'N/A'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">{item.cota_lida?.toFixed(2) + ' m'|| 'N/A'}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <div className="flex items-center">
-                              <span className="mr-2">{item.enchimento ? (item.enchimento * 100).toFixed(0) + '%' : 'N/A'}</span>
-                              <div className="w-16 bg-gray200 rounded-full h-1.5">
-                                <div 
-                                  className={`h-1.5 rounded-full ${item.enchimento ? getFillColorClass(item.enchimento * 100) : 'bg-gray400'}`} 
-                                  style={{ width: `${item.enchimento ? item.enchimento * 100 : 0}%` }}
-                                />
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">{item.volume_total?.toFixed(2) + ' hm³' || 'N/A'}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">{item.volume_util?.toFixed(2) + ' hm³' || 'N/A'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="mt-4 flex justify-center">
-                    <nav className="flex items-center space-x-1">
-                      <button
-                        onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                        disabled={currentPage === 1}
-                        className={`px-3 py-1 rounded-md ${
-                          currentPage === 1 
-                            ? 'text-gray400 cursor-not-allowed' 
-                            : 'text-primary hover:bg-primary-light'
-                        }`}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      
-                      {/* Page numbers */}
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        // Show pages around current page
-                        let pageNum;
-                        if (totalPages <= 5) {
-                          // If 5 or fewer pages, show all
-                          pageNum = i + 1;
-                        } else if (currentPage <= 3) {
-                          // If near start, show first 5 pages
-                          pageNum = i + 1;
-                        } else if (currentPage >= totalPages - 2) {
-                          // If near end, show last 5 pages
-                          pageNum = totalPages - 4 + i;
-                        } else {
-                          // Otherwise show 2 before and 2 after current page
-                          pageNum = currentPage - 2 + i;
-                        }
-                        
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => handlePageChange(pageNum)}
-                            className={`px-3 py-1 rounded-md ${
-                              currentPage === pageNum
-                                ? 'bg-primary text-white'
-                                : 'text-darkGray hover:bg-gray200'
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-                      
-                      <button
-                        onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                        disabled={currentPage === totalPages}
-                        className={`px-3 py-1 rounded-md ${
-                          currentPage === totalPages
-                            ? 'text-gray400 cursor-not-allowed'
-                            : 'text-primary hover:bg-primary-light'
-                        }`}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </nav>
                   </div>
                 )}
-              </>
+              />
             ) : (
               <div className="bg-background p-4 sm:p-8 rounded-lg border text-center shadow text-sm">
                 {t('common.noData')}

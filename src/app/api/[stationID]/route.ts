@@ -26,6 +26,9 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{stat
         "Content-Type": "application/x-www-form-urlencoded", // ✅ Correct content type
       },
       body: formData.toString(), // ✅ Send as form data string
+      next: { 
+        revalidate: 43200 // 12 hours for daily data
+      }
     });
 
     if (!response.ok) {
@@ -45,7 +48,10 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{stat
 
     return new Response(JSON.stringify(stationData), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Cache-Control": "public, s-maxage=43200, stale-while-revalidate=21600" // 12 hours cache, stale for 6 more hours
+      },
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
