@@ -3,7 +3,7 @@ import { useCallback, useMemo, ReactNode } from 'react';
 interface Column {
   key: string;
   header: string;
-  render?: (value: unknown, row?: any) => ReactNode;
+  render?: (value: unknown, row?: unknown) => ReactNode;
 }
 
 interface DataTableProps<T> {
