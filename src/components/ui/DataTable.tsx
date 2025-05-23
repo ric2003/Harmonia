@@ -3,7 +3,7 @@ import { useCallback, useMemo, ReactNode } from 'react';
 interface Column {
   key: string;
   header: string;
-  render?: (value: unknown) => ReactNode;
+  render?: (value: unknown, row?: any) => ReactNode;
 }
 
 interface DataTableProps<T> {
@@ -39,7 +39,19 @@ export function DataTable<T>({
 
   const renderCell = (item: T, column: Column): ReactNode => {
     const value = item[column.key as keyof T];
-    return column.render ? column.render(value) : String(value);
+    
+    // Handle date formatting for columns with date values
+    if (column.key === '_time' || column.key === 'date') {
+      const dateStr = String(value);
+      if (dateStr) {
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+          return `${date.toLocaleDateString('en-GB')}`;
+        }
+      }
+    }
+    
+    return column.render ? column.render(value, item) : String(value);
   };
 
   return (
@@ -88,6 +100,23 @@ export function DataTable<T>({
       {totalPages > 1 && (
         <div className="mt-4 flex justify-center">
           <nav className="flex items-center space-x-1">
+            {/* First page button */}
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === 1 
+                  ? 'text-gray400 cursor-not-allowed' 
+                  : 'text-primary hover:bg-primary-light'
+              }`}
+              title="First page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Previous page button */}
             <button
               onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
@@ -135,6 +164,7 @@ export function DataTable<T>({
               );
             })}
             
+            {/* Next page button */}
             <button
               onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
@@ -148,9 +178,25 @@ export function DataTable<T>({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
+
+            {/* Last page button */}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === totalPages
+                  ? 'text-gray400 cursor-not-allowed'
+                  : 'text-primary hover:bg-primary-light'
+              }`}
+              title="Last page"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7m-8-14l7 7-7 7" />
+              </svg>
+            </button>
           </nav>
         </div>
       )}
     </>
   );
-} 
+}

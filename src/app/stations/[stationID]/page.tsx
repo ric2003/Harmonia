@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useContext, useMemo, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import StationImage from "@/components/StationImage";
 import {
@@ -59,6 +59,7 @@ const MapComponent = dynamic<MapComponentProps>(
 
 export default function StationDetailsPage() {
   const params = useParams() as { stationID: string };
+  const router = useRouter();
   const { t } = useTranslation();
 
   function formatDate(date: Date): string {
@@ -171,6 +172,12 @@ export default function StationDetailsPage() {
       .sort((a, b) => Number(b.date.slice(8)) - Number(a.date.slice(8)));
   }, [min10Data]);
 
+  const handleStationSelect = useCallback((selectedId: string | null) => {
+    if (selectedId) {
+      router.push(`/stations/${selectedId}`);
+    }
+  }, [router]);
+
   return (
     <div className="text-darkGray min-h-screen">
       {/* Hero section with image and overlay */}
@@ -236,7 +243,7 @@ export default function StationDetailsPage() {
                     stations={stations}
                     selectedStationId={stationID}
                     onMarkerHover={() => {}}
-                    onStationSelect={() => {}}
+                    onStationSelect={handleStationSelect}
                     showMenu={false}
                   />
                 ) : (
@@ -431,13 +438,15 @@ export default function StationDetailsPage() {
                   rowsPerPage={rowsPerPage}
                   columns={[
                     {
-                      key: 'date',
-                      header: t('station.table.date')
+                      key: 'hour',
+                      header: t('station.table.hour'),
+                      render: (value: unknown) => String(value).substring(0, 5)|| "N/A"
                     },
                     {
-                      key: 'hour',
-                      header: t('station.table.hour')
+                      key: 'date',
+                      header: t('station.table.date'),
                     },
+                  
                     {
                       key: 'air_temp_avg',
                       header: t('station.table.avgTemp'),
@@ -526,13 +535,15 @@ export default function StationDetailsPage() {
                   rowsPerPage={rowsPerPage}
                   columns={[
                     {
+                      key: 'hour',
+                      header: t('station.table.hour'),
+                      render: (value: unknown) => String(value).substring(0, 5)|| "N/A"
+                    },
+                    {
                       key: 'date',
                       header: t('station.table.date')
                     },
-                    {
-                      key: 'hour',
-                      header: t('station.table.hour')
-                    },
+                  
                     {
                       key: 'air_temp_avg',
                       header: t('station.table.avgTemp'),
