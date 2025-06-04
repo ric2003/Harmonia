@@ -26,6 +26,7 @@ const GLOBAL_DAM_CACHE: {
   fetchPromise: null,
 };
 
+// Configure cache time constants for consistency
 const ONE_DAY = 24 * 60 * 60 * 1000;
 const ONE_MONTH = ONE_DAY * 30;
 const CACHE_DURATION = ONE_MONTH;

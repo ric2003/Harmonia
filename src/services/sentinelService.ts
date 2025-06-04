@@ -1,5 +1,6 @@
 export const INSTANCE_ID = "5e988f97-a2ef-40c2-8235-c8a2e2130cd8";
 
+// Filter of Sentinel Map
 export type FilterKey = 
   | "1_TRUE_COLOR"
   | "3_NDVI"
