@@ -18,9 +18,9 @@ import CustomTooltip from "@/components/ui/CustomTooltip";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import { useTranslation } from 'react-i18next';
-import DataSourceFooter from "@/components/DataSourceFooter";
 import { useStations, useStationDailyData, useStationHourlyData, useStation10MinData } from "@/hooks/useStations";
 import { DataTable } from "@/components/ui/DataTable";
+import DataSource from "@/components/DataSource";
 
 interface Station {
   id: string;
@@ -180,7 +180,12 @@ export default function StationDetailsPage() {
 
   return (
     <div className="text-darkGray min-h-screen">
-      {/* Hero section with image and overlay */}
+      <DataSource 
+          position="header"
+          textKey="home.dataSource"
+          linkKey="home.irristrat"
+          linkUrl="https://irristrat.com/new/index.php"
+        />
       <div className="relative w-full h-48 sm:h-72 md:h-96">
         <StationImage
           src={imageUrl}
@@ -195,9 +200,8 @@ export default function StationDetailsPage() {
           </div>
         </div>
       </div>
-
       {/* Main content container */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 -mt-8 sm:-mt-16 relative">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 mt-4 relative">
         <div className="bg-backgroundColor rounded-xl shadow-lg p-4 sm:p-6">
           {/* Station info and map grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mb-6 sm:mb-8">
@@ -601,12 +605,6 @@ export default function StationDetailsPage() {
           </div>
         </div>
       </div>
-      
-      <DataSourceFooter 
-        textKey="home.dataSource"
-        linkKey="home.irristrat"
-        linkUrl="https://irristrat.com/new/index.php"
-      />
     </div>
   );
 }

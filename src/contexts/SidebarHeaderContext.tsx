@@ -1,41 +1,67 @@
 "use client"
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState, ReactNode } from "react";
 
 interface SidebarHeaderContextType {
     sidebarOpen: boolean;
-    handleChangeSidebar: () => void;
+    setSidebarOpen: (open: boolean) => void;
+    dataSourceExpanded: boolean;
+    setDataSourceExpanded: (expanded: boolean) => void;
 }
 
-export const SidebarHeaderContext = createContext({} as SidebarHeaderContextType);
+export const SidebarHeaderContext = createContext<SidebarHeaderContextType>({
+    sidebarOpen: false,
+    setSidebarOpen: () => {},
+    dataSourceExpanded: true, // Default to expanded
+    setDataSourceExpanded: () => {},
+});
 
 interface SidebarHeaderProviderProps {
-    children: React.ReactNode;
+    children: ReactNode;
 }
 
 export function SidebarHeaderProvider({ children }: SidebarHeaderProviderProps) {
-    const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
-        const saved = localStorage.getItem("sidebarOpen");
-        return saved !== null ? JSON.parse(saved) : true;
+    // Initialize sidebar state from localStorage
+    const [sidebarOpen, setSidebarOpenState] = useState<boolean>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem("sidebarOpen");
+            return saved !== null ? JSON.parse(saved) : true;
+        }
+        return true;
     });
 
-    // function handleChangeSidebar() {
-    //     setSidebarOpen(state => !state);
-    // }
+    // Initialize data source state from localStorage
+    const [dataSourceExpanded, setDataSourceExpandedState] = useState<boolean>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem("dataSourceExpanded");
+            return saved !== null ? JSON.parse(saved) : true;
+        }
+        return true;
+    });
 
-    function handleChangeSidebar() {
-        setSidebarOpen(prev => {
-            const newValue = !prev;
-            localStorage.setItem("sidebarOpen", JSON.stringify(newValue));
-            return newValue;
-        });
-    }
+    // Wrapper functions to handle localStorage
+    const setSidebarOpen = (open: boolean) => {
+        setSidebarOpenState(open);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem("sidebarOpen", JSON.stringify(open));
+        }
+    };
 
-    useEffect(() => {
-        localStorage.setItem("sidebarOpen", JSON.stringify(sidebarOpen));
-    }, [sidebarOpen]);
-    
+    const setDataSourceExpanded = (expanded: boolean) => {
+        setDataSourceExpandedState(expanded);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem("dataSourceExpanded", JSON.stringify(expanded));
+        }
+    };
+
     return (
-        <SidebarHeaderContext.Provider value={{sidebarOpen, handleChangeSidebar}}>
+        <SidebarHeaderContext.Provider
+            value={{
+                sidebarOpen,
+                setSidebarOpen,
+                dataSourceExpanded,
+                setDataSourceExpanded,
+            }}
+        >
             {children}
         </SidebarHeaderContext.Provider>
     );

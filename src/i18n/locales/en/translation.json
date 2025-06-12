@@ -17,7 +17,9 @@
     "sorraiaMap": "Predictive Model",
     "sorraiaMapShort": "Model",
     "excelUpload": "Excel Upload",
-    "excelUploadShort": "Excel"
+    "excelUploadShort": "Excel",
+    "about": "About",
+    "aboutShort": "About"
   },
   "title": {
     "home": "Home",
@@ -28,7 +30,8 @@
     "station": "Meteorological Station of {{station}}",
     "sentinelMap": "Satellite Images",
     "sorraiaMap": "Predictive Water Simulation Map of the Sorraia River",
-    "excelUpload": "Excel Upload"
+    "excelUpload": "Excel Upload",
+    "about": "About Water Wise"
   },
   "home": {
     "title": "Meteorological Stations",
@@ -54,7 +57,8 @@
       "contact": "For questions or feedback, contact",
       "or": "or",
       "university": "Universidade Lusófona",
-      "department": "Department of Computer Science"
+      "department": "Department of Computer Science",
+      "learnMore": "Learn more about the team, technologies and project architecture"
     }
   },
   "common": {
@@ -349,5 +353,181 @@
   "sentinel": {
     "dataSource": "Data source:",
     "sentinelHub": "Sentinel Hub - Sentinel Satellite Data"
+  },
+  "about": {
+    "title": "About Water Wise",
+    "subtitle": "A Geospatial Platform for Intelligent Water Management",
+    "description": "Water Wise is a web application developed as part of the Final Year Project in Computer Engineering at Universidade Lusófona. The platform aims to support efficient water resource management, focusing on reservoirs, rivers, and agricultural zones.",
+    "mission": {
+      "title": "Mission",
+      "description": "To provide an integrated, visual, and predictive overview of the current hydrological situation, collecting and integrating real-time and historical data to support sustainable water management."
+    },
+    "team": {
+      "title": "Team",
+      "developers": "Developed by",
+      "supervisors": "Supervisors",
+      "supervisor": "Supervisor",
+      "cosupervisor": "Co-supervisor"
+    },
+    "techStack": {
+      "title": "Technology Stack",
+      "frontend": {
+        "title": "Frontend",
+        "description": "Modern and responsive interface built with the latest web technologies"
+      },
+      "backend": {
+        "title": "Backend & APIs",
+        "description": "Robust architecture for data processing and external source integration"
+      },
+      "database": {
+        "title": "Database",
+        "description": "Efficient storage of temporal and geospatial data"
+      },
+      "maps": {
+        "title": "Maps & Visualization",
+        "description": "Interactive components for geospatial visualization"
+      },
+      "tools": {
+        "title": "Development Tools",
+        "description": "Modern and efficient development environment"
+      },
+      "ai": {
+        "title": "AI Assistance",
+        "description": "LLMs used to support design, development and application optimization"
+      }
+    },
+    "architecture": {
+      "title": "System Architecture",
+      "overview": "Water Wise uses a modern architecture based on microservices and integration of multiple data sources:",
+      "dataFlow": {
+        "title": "Data Flow",
+        "steps": [
+          "Automatic data collection from external sources (Irristrat, SIR, Sentinel)",
+          "Processing and normalization through dedicated APIs",
+          "Storage in InfluxDB for temporal data",
+          "Intelligent caching for performance optimization",
+          "Real-time presentation through interactive dashboards"
+        ]
+      },
+      "components": {
+        "title": "Main Components",
+        "list": [
+          "Meteorological station monitoring system",
+          "Dam dashboard with automatic alerts",
+          "Sentinel satellite image viewer",
+          "Predictive model of the Sorraia river basin",
+          "Excel upload and processing system",
+          "Multilingual interface (PT/EN) with dark/light theme"
+        ]
+      }
+    },
+    "features": {
+      "title": "Key Features",
+      "realtime": {
+        "title": "Real-time Monitoring",
+        "description": "Updated data from meteorological stations and dam levels"
+      },
+      "visualization": {
+        "title": "Interactive Visualizations",
+        "description": "Maps, charts and dashboards with geospatial data"
+      },
+      "multilingual": {
+        "title": "Multilingual Support",
+        "description": "Interface available in Portuguese and English"
+      },
+      "responsive": {
+        "title": "Responsive Design",
+        "description": "Optimized experience for desktop, tablet and mobile"
+      },
+      "offline": {
+        "title": "Smart Caching",
+        "description": "Caching system to reduce API calls and improve response speed for users"
+      },
+      "predictions": {
+        "title": "Predictive Models",
+        "description": "Hydrological simulations for future scenario prediction"
+      }
+    },
+    "dataSources": {
+      "title": "Data Sources",
+      "description": "The system integrates data from multiple reliable sources:",
+      "visit": "Visit",
+      "sources": [
+        {
+          "name": "Irristrat",
+          "description": "Meteorological data from stations in Portugal",
+          "type": "Temperature, humidity, wind, solar radiation, precipitation"
+        },
+        {
+          "name": "SIR - Irrigation Information System",
+          "description": "Dam and reservoir data",
+          "type": "Water levels, volumes, filling"
+        },
+        {
+          "name": "Sentinel Hub",
+          "description": "ESA satellite imagery",
+          "type": "NDVI, moisture indices, natural color"
+        },
+        {
+          "name": "Hydrological Simulations",
+          "description": "Computational models of the Sorraia basin",
+          "type": "Water flows, water quality, forecasts"
+        }
+      ]
+    },
+    "performance": {
+      "title": "Optimization & Performance",
+      "features": [
+        "Intelligent caching with React Query to reduce API calls",
+        "Strategic data prefetching during idle time",
+        "Image compression and asset optimization",
+        "Server-side rendering (SSR) for better SEO",
+        "Fallback system for high availability",
+        "Lazy loading of components for fast loading"
+      ]
+    },
+    "accessibility": {
+      "title": "Accessibility & UX",
+      "features": [
+        "Responsive design for all devices",
+        "Dark/light theme for visual comfort",
+        "Intuitive navigation with breadcrumbs",
+        "Informative tooltips for better understanding",
+        "Loading indicators and visual feedback",
+        "Keyboard support and assistive technologies"
+      ]
+    },
+    "technical": {
+      "title": "Technical Details",
+      "deployment": {
+        "title": "Deployment",
+        "description": "Containerized application with Docker, ready for deployment in any cloud or on-premise environment"
+      },
+      "security": {
+        "title": "Security",
+        "description": "Implementation of security best practices, environment variables for sensitive credentials"
+      },
+      "monitoring": {
+        "title": "Monitoring",
+        "description": "Detailed logging and error handling for proactive maintenance"
+      }
+    },
+    "future": {
+      "title": "Future Developments",
+      "features": [
+        "Automatic alert system via email/SMS",
+        "Public API for integration with external systems",
+        "Machine learning for more accurate predictions",
+        "Administrative dashboard for user management",
+        "Integration with more meteorological data sources",
+        "Native mobile application"
+      ]
+    },
+    "contact": {
+      "title": "Contact & Contributions",
+      "description": "This project was developed with passion and dedication. For questions, suggestions or collaborations:",
+      "github": "Code available on GitHub",
+      "feedback": "Your feedback is important for us to continuously improve the platform."
+    }
   }
 }

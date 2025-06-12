@@ -6,7 +6,6 @@ import { useDamData } from "@/hooks/useDamData";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
-import DataSourceFooter from "@/components/DataSourceFooter";
 import { useTranslation } from 'react-i18next';
 import dynamic from "next/dynamic";
 import { useDamLocation, useMultipleDamLocations } from "@/hooks/useDamLocations";
@@ -22,6 +21,7 @@ import {
   Area,
 } from "recharts";
 import { DataTable } from "@/components/ui/DataTable";
+import DataSource from "@/components/DataSource";
 
 // Import the map component dynamically to avoid SSR issues
 const MapComponent = dynamic(() => import("@/components/MapComponent"), {
@@ -211,6 +211,12 @@ export default function DamDetailsPage() {
 
   return (
     <div className="text-darkGray min-h-screen">
+      <DataSource 
+        position="header"
+        textKey="dam.dataSource"
+        linkKey="dam.sir"
+        linkUrl="https://sir.dgadr.gov.pt/outras/reserva-de-agua-nas-albufeiras"
+      />
       {/* Hero section with water wave visualization */}
       <div className="relative w-full h-48 sm:h-72 md:h-96 rounded-xl overflow-hidden mb-8">
         {/* Using WaterWave component */}
@@ -488,12 +494,6 @@ export default function DamDetailsPage() {
           </div>
         </div>
       </div>
-      
-      <DataSourceFooter 
-        textKey="dam.dataSource"
-        linkKey="dam.sir"
-        linkUrl="https://sir.dgadr.gov.pt/outras/reserva-de-agua-nas-albufeiras"
-      />
     </div>
   );
 } 

@@ -7,9 +7,10 @@ import {AlertMessage} from "@/components/ui/AlertMessage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import { useTranslation } from 'react-i18next';
 import ScrollIndicator from "@/components/ScrollIndicator";
-import DataSourceFooter from "@/components/DataSourceFooter";
-import Image from "next/image";
+import DataSource from "@/components/DataSource";
 import { useStations, usePrefetchStationData } from "@/hooks/useStations";
+import Link from "next/link";
+import { Users } from "lucide-react";
 
 interface Station {
   id: string;
@@ -46,8 +47,6 @@ export default function HomePage() {
   // Prefetch station data when stations are loaded, with navigation-friendly timing
   useEffect(() => {
     if (stations.length > 0) {
-      // Use requestIdleCallback if available to run when the browser is idle
-      // This ensures we don't block navigation or other important work
       const prefetchWithIdleCallback = () => {
         if ('requestIdleCallback' in window) {
           window.requestIdleCallback(
@@ -91,7 +90,7 @@ export default function HomePage() {
         {/* First container - Map and title */}
         <div className="bg-backgroundColor p-4 rounded-xl shadow-md flex flex-col gap-2">
           <div className="h-8 bg-gray200 rounded w-1/3 animate-pulse"></div>
-          <div className="h-[65vh] bg-gray200 rounded-lg animate-pulse"></div>
+          <div className="h-[55vh] bg-gray200 rounded-lg animate-pulse"></div>
         </div>
         
         {/* Second container - Information section */}
@@ -148,55 +147,41 @@ export default function HomePage() {
 
       <ScrollIndicator targetId="intro-section" text={t('home.scrollForInfo')} />
 
-      <div id="intro-section" className="bg-backgroundColor rounded-lg p-6 mt-6 shadow-md">
-        <div className="prose max-w-none text-darkGray">
-          <p className="mb-4">{t('home.intro')}</p>
-          <p className="mb-4">{t('home.purpose')}</p>
+      <div id="intro-section" className="bg-backgroundColor rounded-lg p-8 mt-8 shadow-md">
+        <div className="prose max-w-none text-gray600">
+          <p className="mb-6 text-lg leading-relaxed">{t('home.intro')}</p>
+          <p className="mb-6 text-lg leading-relaxed">{t('home.purpose')}</p>
 
-          <h3 className="text-lg font-semibold mt-6 mb-2">{t('home.monitoredData')}</h3>
-          <ul className="list-disc pl-6 space-y-1">
+          <h3 className="text-xl font-semibold mt-8 mb-4 text-gray700">{t('home.monitoredData')}</h3>
+          <ul className="list-disc pl-8 space-y-2 text-gray600">
             {(t('home.dataList', { returnObjects: true }) as string[]).map((item: string, index: number) => (
-              <li key={index}>{item}</li>
+              <li key={index} className="leading-relaxed">{item}</li>
             ))}
           </ul>
         </div>
       </div>
 
-      <div id="project-info-section" className="bg-backgroundColor rounded-lg p-6 mt-6 shadow-md border border-gray200">
-        <div className="flex flex-col justify-center md:flex-row w-full">
-          <div className="mb-6 md:mb-0 md:mr-6 flex-1">
-            <p className="text-darkGray mb-4 leading-relaxed">
-              {t('home.projectInfo.description')}
-            </p>
-            <p className="text-darkGray">
-              {t('home.projectInfo.contact')}{' '}
-              <a 
-                href="mailto:ricgon20035@gmail.com" 
-                className="text-primary hover:text-primary/80 underline transition-colors"
-              >
-                ricgon20035@gmail.com
-              </a>
-              {' '}{t('home.projectInfo.or')}{' '}
-              <a 
-                href="mailto:ricardokao2004@gmail.com" 
-                className="text-primary hover:text-primary/80 underline transition-colors"
-              >
-                ricardokao2004@gmail.com
-              </a>
-            </p>
-          </div>
-          
-          {/* University logo section */}
-          <div className="flex flex-col items-center pt-4 border-t md:border-t-0 md:border-l md:border-gray200 md:pl-6 md:pt-0">
-            <div className="w-28 h-28 bg-white rounded-lg flex items-center justify-center mb-2">
-              <Image src="/ul.png" alt="Universidade Lusófona" className="w-24 h-24 object-contain" width={96} height={96} />
-            </div>
-            <p className="text-center text-sm text-gray600">{t('home.projectInfo.department')}</p>
-          </div>
+      <div id="project-info-section" className="bg-backgroundColor rounded-lg p-8 mt-8 shadow-md">
+        <div className="text-center">
+          <h3 className="text-2xl font-bold text-gray700 mb-4">{t('home.projectInfo.title')}</h3>
+          <p className="text-lg text-gray600 mb-8 leading-relaxed max-w-2xl mx-auto">
+            {t('home.projectInfo.description')}
+          </p>
+          <Link 
+            href="/about" 
+            className="inline-flex items-center gap-3 bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-lg transition-colors font-semibold text-lg shadow-md hover:shadow-lg"
+          >
+            <Users className="w-6 h-6" />
+            {t('navigation.about')}
+          </Link>
+          <p className="text-sm text-gray500 mt-4 leading-relaxed">
+            {t('home.projectInfo.learnMore')}
+          </p>
         </div>
       </div>
       
-      <DataSourceFooter 
+      <DataSource 
+        position="footer"
         textKey="home.dataSource"
         linkKey="home.irristrat"
         linkUrl="https://irristrat.com/new/index.php"

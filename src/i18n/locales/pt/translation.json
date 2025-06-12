@@ -17,7 +17,9 @@
     "sorraiaMap": "Modelo Preditivo",
     "sorraiaMapShort": "Modelo",
     "excelUpload": "Carregar Excel",
-    "excelUploadShort": "Excel"
+    "excelUploadShort": "Excel",
+    "about": "Sobre",
+    "aboutShort": "Sobre"
   },
   "title": {
     "home": "Início",
@@ -28,7 +30,8 @@
     "station": "Estação Meteorológica de {{station}}",
     "sentinelMap": "Imagens de Satélite",
     "sorraiaMap": "Mapa Preditivo de Simulação de Água do Sorraia",
-    "excelUpload": "Carregar Excel"
+    "excelUpload": "Carregar Excel",
+    "about": "Sobre o Water Wise"
   },
   "home": {
     "title": "Estações Meteorológicas",
@@ -54,7 +57,8 @@
       "contact": "Para questões ou sugestões, contacte",
       "or": "ou",
       "university": "Universidade Lusófona",
-      "department": "Departamento de Engenharia Informática"
+      "department": "Departamento de Engenharia Informática",
+      "learnMore": "Saiba mais sobre a equipa, tecnologias e arquitetura do projeto"
     } 
   },
   "common": {
@@ -346,5 +350,181 @@
   "sentinel": {
     "dataSource": "Fonte de dados:",
     "sentinelHub": "Sentinel Hub - Dados de Satélite Sentinel"
+  },
+  "about": {
+    "title": "Sobre o Water Wise",
+    "subtitle": "Uma Plataforma Geoespacial para Gestão Inteligente de Recursos Hídricos",
+    "description": "O Water Wise é uma aplicação web desenvolvida como parte do Trabalho Final de Curso em Engenharia Informática na Universidade Lusófona. A plataforma tem como objetivo apoiar a gestão eficiente de recursos hídricos, focando-se em reservatórios, rios e zonas agrícolas.",
+    "mission": {
+      "title": "Missão",
+      "description": "Fornecer uma visão integrada, visual e preditiva da situação hidrológica atual, coletando e integrando dados em tempo real e históricos para apoiar a gestão sustentável da água."
+    },
+    "team": {
+      "title": "Equipa",
+      "developers": "Desenvolvido por",
+      "supervisors": "Orientadores",
+      "supervisor": "Orientador",
+      "cosupervisor": "Coorientador"
+    },
+    "techStack": {
+      "title": "Stack Tecnológica",
+      "frontend": {
+        "title": "Frontend",
+        "description": "Interface moderna e responsiva construída com as mais recentes tecnologias web"
+      },
+      "backend": {
+        "title": "Backend & APIs",
+        "description": "Arquitetura robusta para processamento de dados e integração com fontes externas"
+      },
+      "database": {
+        "title": "Base de Dados",
+        "description": "Armazenamento eficiente de dados temporais e geoespaciais"
+      },
+      "maps": {
+        "title": "Mapas & Visualização",
+        "description": "Componentes interativos para visualização geoespacial"
+      },
+      "tools": {
+        "title": "Ferramentas de Desenvolvimento",
+        "description": "Ambiente de desenvolvimento moderno e eficiente"
+      },
+      "ai": {
+        "title": "Assistência por IA",
+        "description": "LLMs utilizados para apoio no design, desenvolvimento e otimização da aplicação"
+      }
+    },
+    "architecture": {
+      "title": "Arquitetura do Sistema",
+      "overview": "O Water Wise utiliza uma arquitetura moderna baseada em microserviços e integração de múltiplas fontes de dados:",
+      "dataFlow": {
+        "title": "Fluxo de Dados",
+        "steps": [
+          "Recolha automática de dados de fontes externas (Irristrat, SIR, Sentinel)",
+          "Processamento e normalização através de APIs dedicadas",
+          "Armazenamento em InfluxDB para dados temporais",
+          "Cache inteligente para otimização de performance",
+          "Apresentação em tempo real através de dashboards interativos"
+        ]
+      },
+      "components": {
+        "title": "Componentes Principais",
+        "list": [
+          "Sistema de monitorização de estações meteorológicas",
+          "Dashboard de barragens com alertas automáticos",
+          "Visualizador de imagens de satélite Sentinel",
+          "Modelo preditivo da bacia hidrográfica do Sorraia",
+          "Sistema de upload e processamento de dados Excel",
+          "Interface multilingue (PT/EN) com tema escuro/claro"
+        ]
+      }
+    },
+    "features": {
+      "title": "Funcionalidades Principais",
+      "realtime": {
+        "title": "Monitorização em Tempo Real",
+        "description": "Dados atualizados de estações meteorológicas e níveis de barragens"
+      },
+      "visualization": {
+        "title": "Visualizações Interativas",
+        "description": "Mapas, gráficos e dashboards com dados geoespaciais"
+      },
+      "multilingual": {
+        "title": "Suporte Multilingue",
+        "description": "Interface disponível em Português e Inglês"
+      },
+      "responsive": {
+        "title": "Design Responsivo",
+        "description": "Experiência otimizada para desktop, tablet e móvel"
+      },
+      "offline": {
+        "title": "Caching Inteligente",
+        "description": "Sistema de cache para reduzir chamadas às APIs e melhorar a velocidade de resposta para o utilizador"
+      },
+      "predictions": {
+        "title": "Modelos Preditivos",
+        "description": "Simulações hidrológicas para previsão de cenários futuros"
+      }
+    },
+    "dataSources": {
+      "title": "Fontes de Dados",
+      "description": "O sistema integra dados de múltiplas fontes confiáveis:",
+      "visit": "Visitar",
+      "sources": [
+        {
+          "name": "Irristrat",
+          "description": "Dados meteorológicos de estações em Portugal",
+          "type": "Temperatura, humidade, vento, radiação solar, precipitação"
+        },
+        {
+          "name": "SIR - Sistema de Informação de Regadio",
+          "description": "Dados de barragens e reservatórios",
+          "type": "Níveis de água, volumes, enchimento"
+        },
+        {
+          "name": "Sentinel Hub",
+          "description": "Imagens de satélite da ESA",
+          "type": "NDVI, índices de humidade, cor natural"
+        },
+        {
+          "name": "Simulações Hidrológicas",
+          "description": "Modelos computacionais da bacia do Sorraia",
+          "type": "Fluxos de água, qualidade da água, previsões"
+        }
+      ]
+    },
+    "performance": {
+      "title": "Otimização & Performance",
+      "features": [
+        "Cache inteligente com React Query para reduzir chamadas à API",
+        "Pré-carregamento estratégico de dados durante idle time",
+        "Compressão de imagens e otimização de assets",
+        "Server-side rendering (SSR) para melhor SEO",
+        "Sistema de fallback para alta disponibilidade",
+        "Lazy loading de componentes para carregamento rápido"
+      ]
+    },
+    "accessibility": {
+      "title": "Acessibilidade & UX",
+      "features": [
+        "Design responsivo para todos os dispositivos",
+        "Tema escuro/claro para conforto visual",
+        "Navegação intuitiva com breadcrumbs",
+        "Tooltips informativos para melhor compreensão",
+        "Indicadores de carregamento e feedback visual",
+        "Suporte a teclado e tecnologias assistivas"
+      ]
+    },
+    "technical": {
+      "title": "Detalhes Técnicos",
+      "deployment": {
+        "title": "Deployment",
+        "description": "Aplicação containerizada com Docker, pronta para deployment em qualquer ambiente cloud ou on-premise"
+      },
+      "security": {
+        "title": "Segurança",
+        "description": "Implementação de boas práticas de segurança, variáveis de ambiente para credenciais sensíveis"
+      },
+      "monitoring": {
+        "title": "Monitorização",
+        "description": "Logs detalhados e tratamento de erros para manutenção proactiva"
+      }
+    },
+    "future": {
+      "title": "Desenvolvimentos Futuros",
+      "features": [
+        "Sistema de alertas automáticos por email/SMS",
+        "API pública para integração com sistemas externos",
+        "Machine learning para previsões mais precisas",
+        "Dashboard administrativo para gestão de utilizadores",
+        "Integração com mais fontes de dados meteorológicos",
+        "Aplicação móvel nativa"
+      ]
+    },
+    "contact": {
+      "title": "Contacto & Contribuições",
+      "description": "Este projeto foi desenvolvido com paixão e dedicação. Para questões, sugestões ou colaborações:",
+      "github": "Código disponível no GitHub",
+      "feedback": "O seu feedback é importante para melhorarmos continuamente a plataforma."
+    }
   }
 }

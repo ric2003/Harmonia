@@ -1,7 +1,7 @@
 "use client"
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import { usePageTitle } from "@/contexts/PageTitleContext";
-import { Menu, Home, Building, Droplets, Map, Sheet, Satellite, Dam } from "lucide-react";
+import { Menu, Home, Building, Droplets, Map, Sheet, Satellite, Dam, Info } from "lucide-react";
 import { useContext, useState, useEffect, useRef } from "react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
@@ -9,14 +9,9 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-interface SidebarHeaderContextType {
-  sidebarOpen: boolean;
-  handleChangeSidebar: () => void;
-}
-
 export function Header() {
     const { pageTitle } = usePageTitle();
-    const { sidebarOpen, handleChangeSidebar } = useContext(SidebarHeaderContext) as SidebarHeaderContextType;
+    const { sidebarOpen, setSidebarOpen } = useContext(SidebarHeaderContext);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { t } = useTranslation();
     const pathName = usePathname().split('/');
@@ -42,12 +37,13 @@ export function Header() {
 
     const navigationItems = [
         { route: "/", name: t('navigation.home'), icon: <Home size={20} /> },
+        { route: "/about", name: t('navigation.about'), icon: <Info size={20} /> },
         { route: "/stations", name: t('navigation.stations'), icon: <Building size={20} /> },
         { route: "/dams", name: t('navigation.dams'), icon: <Dam size={20} /> },
         { route: "/dam-monitoring", name: t('navigation.damMonitoring'), icon: <Droplets size={20} /> },
         { route:"/sentinel", name:t('navigation.sentinelMap'), icon: <Satellite size={20}/> },
         { route: "/sorraia-map", name: t('navigation.sorraiaMap'), icon: <Map size={20} /> },
-        { route: "/excel", name: t('navigation.excelUpload'), icon: <Sheet size={20} /> }
+        { route: "/excel", name: t('navigation.excelUpload'), icon: <Sheet size={20} /> },
     ];
 
     return (
@@ -68,7 +64,7 @@ export function Header() {
                         </button>
                         {/* Desktop menu button */}
                         <button 
-                            onClick={handleChangeSidebar}
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
                             className="hidden sm:block"
                         >
                             {sidebarOpen ?
@@ -77,7 +73,7 @@ export function Header() {
                                 <Menu className="text-primary bg-background rounded-lg p-1" size={30} />
                             }
                         </button>
-                        <span className="text-primary text-lg sm:text-3xl font-extrabold pl-4">{pageTitle}</span>
+                        <span className="text-primary text-sm sm:text-3xl font-extrabold pl-4 truncate max-w-[200px] sm:max-w-none">{pageTitle}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <LanguageSwitcher />

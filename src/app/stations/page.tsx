@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import StationImage from "@/components/StationImage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
-import DataSourceFooter from "@/components/DataSourceFooter";
+import DataSource from "@/components/DataSource";
 
 export default function StationsPage() {
   const [stations, setStations] = useState<Station[]>([]);
@@ -44,6 +44,13 @@ export default function StationsPage() {
 
   return (
     <div className="text-darkGray">
+      <DataSource 
+        position="header"
+        textKey="home.dataSource"
+        linkKey="home.irristrat"
+        linkUrl="https://irristrat.com/new/index.php"
+      />
+      
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, index) => (
@@ -84,12 +91,6 @@ export default function StationsPage() {
           })}
         </ul>
       )}
-      
-      <DataSourceFooter 
-        textKey="home.dataSource"
-        linkKey="home.irristrat"
-        linkUrl="https://irristrat.com/new/index.php"
-      />
     </div>
   );
 }

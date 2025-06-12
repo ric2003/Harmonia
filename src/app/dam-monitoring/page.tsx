@@ -4,7 +4,7 @@ import { DamMonitoringTable } from "@/components/dam/DamTable";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
-import DataSourceFooter from "@/components/DataSourceFooter";
+import DataSource from "@/components/DataSource";
 import { useDamData } from "@/hooks/useDamData";
 import TableCard from "@/components/dam/TableCard";
 import PageController from "@/components/dam/PageController";
@@ -206,6 +206,12 @@ export default function DamMonitoringPage() {
 
   return (
     <div className="container mx-auto max-h-[100%]">
+      <DataSource 
+        position="header"
+        textKey="dam.dataSource"
+        linkKey="dam.sir"
+        linkUrl="https://sir.dgadr.gov.pt/outras/reserva-de-agua-nas-albufeiras"
+      />
       
       {isFallbackSource && (
         <AlertMessage type="warning" message={t('dam.fetchingError')} /> 
@@ -259,12 +265,6 @@ export default function DamMonitoringPage() {
           onResetFilters={handleResetFilters}
         />
       </div>
-      
-      <DataSourceFooter 
-        textKey="dam.dataSource"
-        linkKey="dam.sir"
-        linkUrl="https://sir.dgadr.gov.pt/outras/reserva-de-agua-nas-albufeiras"
-      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image";
 import { LinkButton } from "./LinkButton";
-import { Building, Home, Sheet,Dam, Droplets, Map, Satellite} from "lucide-react";
+import { Building, Home, Sheet, Dam, Droplets, Map, Satellite, Info } from "lucide-react";
 import { useContext } from "react";
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import { ThemeContext } from "@/contexts/ThemeContext";
@@ -31,6 +31,12 @@ export function Sidebar() {
                             route="/" 
                             name={sidebarOpen ? t('navigation.home') : t('navigation.homeShort')} 
                             icon={<Home size={sidebarOpen ? 18 : 22} />} 
+                            compact={!sidebarOpen}
+                        />
+                        <LinkButton 
+                            route="/about" 
+                            name={sidebarOpen ? t('navigation.about') : t('navigation.aboutShort')} 
+                            icon={<Info size={sidebarOpen ? 18 : 22} />} 
                             compact={!sidebarOpen}
                         />
                         <LinkButton 

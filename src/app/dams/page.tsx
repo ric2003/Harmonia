@@ -5,7 +5,7 @@ import { useDamData } from "@/hooks/useDamData";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { useTranslatedPageTitle } from "@/hooks/useTranslatedPageTitle";
-import DataSourceFooter from "@/components/DataSourceFooter";
+import DataSource from "@/components/DataSource";
 import { useTranslation } from "react-i18next";
 import WaterWave from "@/components/WaterWave"; // Import the new component
 
@@ -59,6 +59,13 @@ export default function DamsPage() {
 
   return (
     <div className="text-darkGray">
+      <DataSource
+        position="header"
+        textKey="dam.dataSource"
+        linkKey="dam.sir"
+        linkUrl="https://sir.dgadr.gov.pt/outras/reserva-de-agua-nas-albufeiras"
+      />
+      
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {uniqueDams.map((dam) => {
           const percent = dam.enchimento
@@ -96,12 +103,6 @@ export default function DamsPage() {
           );
         })}
       </ul>
-
-      <DataSourceFooter
-        textKey="dam.dataSource"
-        linkKey="dam.sir"
-        linkUrl="https://sir.dgadr.gov.pt/outras/reserva-de-agua-nas-albufeiras"
-      />
     </div>
   );
 }

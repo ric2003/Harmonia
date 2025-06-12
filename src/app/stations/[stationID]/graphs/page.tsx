@@ -16,7 +16,7 @@ import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { useTranslation } from 'react-i18next';
-import DataSourceFooter from "@/components/DataSourceFooter";
+import DataSource from "@/components/DataSource";
 import { useStations, useStationDailyData, useStationHourlyData } from "@/hooks/useStations";
 
 // Define interfaces for type safety
@@ -134,6 +134,12 @@ export default function StationGraphsPage() {
 
   return (
     <div className="p-6 text-darkGray">
+      <DataSource 
+        position="header"
+        textKey="home.dataSource"
+        linkKey="home.irristrat"
+        linkUrl="https://irristrat.com/new/index.php"
+      />
 
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -214,16 +220,15 @@ export default function StationGraphsPage() {
             <YAxis />
             <Tooltip content={<CustomTooltip />} />
             <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
-            <Line type="monotone" dataKey="humidity" stroke="#ff7300" name={t('station.chart.humidity')} />
+            <Line
+              type="monotone"
+              dataKey="humidity"
+              stroke="#ffc658"
+              name={t('station.chart.humidity')}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
-      
-      <DataSourceFooter 
-        textKey="home.dataSource"
-        linkKey="home.irristrat"
-        linkUrl="https://irristrat.com/new/index.php"
-      />
     </div>
   );
 }
