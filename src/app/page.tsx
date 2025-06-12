@@ -20,7 +20,7 @@ interface Station {
   lon: number;
 }
 
-// Definição do tipo para as props do MapComponent
+// Definição dos tipos das props do MapComponent
 interface MapComponentProps {
   stations: Station[];
   selectedStationId: string | null;
