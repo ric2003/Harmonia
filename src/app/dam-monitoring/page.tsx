@@ -207,7 +207,7 @@ export default function DamMonitoringPage() {
   return (
     <div className="container mx-auto max-h-[100%]">
       <DataSource 
-        position="header"
+        introTextKey="dam.dataSourceIntro"
         textKey="dam.dataSource"
         linkKey="dam.sir"
         linkUrl="https://sir.dgadr.gov.pt/outras/reserva-de-agua-nas-albufeiras"

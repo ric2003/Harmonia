@@ -77,6 +77,22 @@ export default function StationDetailsPage() {
   const [toDate, setToDate] = useState(defaultToDate);
   const [activeTab, setActiveTab] = useState("daily");
 
+  // Scroll to top when tab changes to prevent jarring scroll shifts
+  useEffect(() => {
+    // Use setTimeout to ensure content has rendered before scrolling
+    const timeoutId = setTimeout(() => {
+      // Always scroll to the top of the main content area when switching tabs
+      const mainContent = document.querySelector('[data-main-content]');
+      if (mainContent) {
+        mainContent.scrollIntoView({ behavior: 'instant', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
+  }, [activeTab]);
+
   // Use React Query hooks instead of direct fetching
   const { data: stations = [], isLoading: stationsLoading, error: stationsError } = useStations();
   const { data: dailyDataRaw, isLoading: dailyLoading, error: dailyError } = useStationDailyData(stationID, fromDate, toDate);
@@ -179,94 +195,100 @@ export default function StationDetailsPage() {
   }, [router]);
 
   return (
-    <div className="text-darkGray min-h-screen">
+    <div >
       <DataSource 
-          position="header"
+          introTextKey="station.stationDetailIntro"
           textKey="home.dataSource"
           linkKey="home.irristrat"
           linkUrl="https://irristrat.com/new/index.php"
         />
-      <div className="relative w-full h-48 sm:h-72 md:h-96">
-        <StationImage
-          src={imageUrl}
-          alt={t('station.imageAlt', { station: stationName })}
-          width={1200}
-          height={600}
-          className="w-full h-full object-cover rounded-xl"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-xl">
-          <div className="absolute bottom-0 left-0 p-4 sm:p-6 md:p-8">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-10">{stationName}</h1>
+      
+        <div className="glass-panel rounded-2xl overflow-hidden mb-8" style={{ border: 'none' }}>
+          <div className="relative w-full h-48 sm:h-72 md:h-96">
+            <StationImage
+              src={imageUrl}
+              alt={t('station.imageAlt', { station: stationName })}
+              width={1200}
+              height={600}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-transparent">
+              <div className="absolute bottom-0 left-0 p-4 sm:p-6 md:p-8">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-10 drop-shadow-lg">{stationName}</h1>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+
       {/* Main content container */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 mt-4 relative">
-        <div className="bg-backgroundColor rounded-xl shadow-lg p-4 sm:p-6">
-          {/* Station info and map grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mb-6 sm:mb-8">
-            {/* Temperature trend graph */}
-            <div className="lg:col-span-2 bg-background p-4 rounded-lg shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-4 gap-2">
-                <h2 className="text-lg sm:text-xl font-semibold">{t('station.dailyTemperatureTrend')}</h2>
-                <a className="text-blue-500 text-sm" href={`/stations/${stationID}/graphs`}>{t('station.viewMoreGraphs')}</a>
-              </div>
-              <div className="h-[250px] sm:h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart 
-                    data={dailyData}
-                    margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
-                  >
-                    <XAxis 
-                      dataKey="date" 
-                      tickFormatter={(date) => {
-                        const [year, month, day] = date.split('-');
-                        return `${day}-${month}-${year.slice(2)}`;
-                      }}
-                      style={{ fontSize: '10px' }}
-                    />
-                    <YAxis style={{ fontSize: '10px' }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend style={{ fontSize: '10px' }} />
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
-                    <Line type="monotone" dataKey="max" stroke="#ff7300" name={t('station.chart.maximum')} />
-                    <Line type="monotone" dataKey="avg" stroke="#8884d8" name={t('station.chart.average')} />
-                    <Line type="monotone" dataKey="min" stroke="#82ca9d" name={t('station.chart.minimum')} />
-                  </LineChart>
-                </ResponsiveContainer>
+      <div className="glass-panel p-4 -mt-16 relative bg-background" data-main-content>
+        
+        {/* Station info and map grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Temperature trend graph */}
+          <div className="lg:col-span-2 glass-panel-visible p-6">
+            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-4 gap-2">
+              <h2 className="text-lg sm:text-xl text-gray700 font-extrabold">{t('station.dailyTemperatureTrend')}</h2>
+              <div className="glass-frosted p-2 rounded-lg">
+                <a className="text-primary hover:text-primary/80 text-sm font-medium transition-colors" href={`/stations/${stationID}/graphs`}>{t('station.viewMoreGraphs')}</a>
               </div>
             </div>
-
-            {/* Map section */}
-            <div className="bg-background p-4 rounded-xl shadow-sm">
-              <h2 className="text-lg sm:text-xl font-semibold mb-4">{t('station.location')}</h2>
-              <div className="h-48 sm:h-72 rounded-lg overflow-hidden shadow-md">
-                {stations.length > 0 ? (
-                  <MapComponent
-                    key={sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}
-                    stations={stations}
-                    selectedStationId={stationID}
-                    onMarkerHover={() => {}}
-                    onStationSelect={handleStationSelect}
-                    showMenu={false}
+            <div className="h-[250px] sm:h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart 
+                  data={dailyData}
+                  margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
+                >
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={(date) => {
+                      const [year, month, day] = date.split('-');
+                      return `${day}-${month}-${year.slice(2)}`;
+                    }}
+                    style={{ fontSize: '12px', fill: 'var(--gray-700)', fontWeight: 'bold'}}
                   />
-                ) : (
-                  <div className="w-full h-full bg-gray200 flex items-center justify-center text-darkGray">
-                    <p>{t('station.loadingMap')}</p>
-                  </div>
-                )}
-              </div>
+                  <YAxis style={{ fontSize: '12px', fill: 'var(--gray-700)', fontWeight: 'bold'}} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend style={{ fontSize: '12px', fill: 'var(--gray-700)' , fontWeight: 'bold'}} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-400)" />
+                  <Line type="monotone" dataKey="max" stroke="#ff7300" name={t('station.chart.maximum')} />
+                  <Line type="monotone" dataKey="avg" stroke="#8884d8" name={t('station.chart.average')} />
+                  <Line type="monotone" dataKey="min" stroke="#82ca9d" name={t('station.chart.minimum')} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
+          {/* Map section */}
+          <div className="glass-panel-visible p-6">
+            <h2 className="text-lg sm:text-xl font-extrabold text-gray700  mb-4">{t('station.location')}</h2>
+            <div className="h-48 sm:h-72 rounded-xl overflow-hidden border border-gray700/20 dark:border-gray700/10">
+              {stations.length > 0 ? (
+                <MapComponent
+                  key={sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}
+                  stations={stations}
+                  selectedStationId={stationID}
+                  onMarkerHover={() => {}}
+                  onStationSelect={handleStationSelect}
+                  showMenu={false}
+                />
+              ) : (
+                <div className="w-full h-full glass-light flex items-center justify-center">
+                  <p className="text-gray700 ">{t('station.loadingMap')}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        
           {/* Navigation tabs */}
-          <div className="border-b mb-4 sm:mb-6 overflow-x-auto">
+          <div className="border-b mb-2 sm:mb-6 overflow-x-auto">
             <nav className="flex space-x-4 sm:space-x-8 min-w-max">
               <button
                 onClick={() => setActiveTab("daily")}
                 className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm ${
                   activeTab === "daily"
-                    ? "border-blue-500 text-blue-600"
+                    ? "border-primary text-primary"
                     : "border-transparent text-gray600 hover:text-gray700 hover:border-gray300"
                 }`}
               >
@@ -276,7 +298,7 @@ export default function StationDetailsPage() {
                 onClick={() => setActiveTab("hourly")}
                 className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm ${
                   activeTab === "hourly"
-                    ? "border-blue-500 text-blue-600"
+                    ? "border-primary text-primary"
                     : "border-transparent text-gray600 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
@@ -286,7 +308,7 @@ export default function StationDetailsPage() {
                 onClick={() => setActiveTab("min10")}
                 className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm ${
                   activeTab === "min10"
-                    ? "border-blue-500 text-blue-600"
+                    ? "border-primary text-primary"
                     : "border-transparent text-gray600 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
@@ -306,11 +328,11 @@ export default function StationDetailsPage() {
           <div
             className={`${
               activeTab === "daily" ? "block" : "hidden"
-            } flex-1 overflow-auto`}
+            } flex-1`}
           >
-            <div className="bg-backgroundColor p-4 rounded-xl shadow-md">
+            <div className="pb-8">
               {/* Date selector */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 pb-4 border-b border-lightGray">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray600">{t('station.dateRange.startDate')}</span>
                   <input
@@ -385,32 +407,32 @@ export default function StationDetailsPage() {
                     }
                   ]}
                   mobileCardRenderer={(item) => (
-                    <div className="bg-background rounded-xl shadow-sm p-4 border border-gray200">
-                      <h4 className="font-semibold text-sm text-darkGray mb-3">{item.date}</h4>
+                    <div className="glass-card p-4 border border-gray700/20 dark:border-gray700/10">
+                      <h4 className="font-semibold text-sm text-gray700 mb-3">{item.date}</h4>
                       <div className="grid grid-cols-2 gap-3 text-[12px]">
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.avgTemp')}</span>
-                          <span className="font-medium text-darkGray">{item.air_temp_avg || "N/A"}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.avgTemp')}</span>
+                          <span className="font-medium text-gray700">{item.air_temp_avg || "N/A"}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.minTemp')}</span>
-                          <span className="font-medium text-darkGray">{item.air_temp_min || "N/A"}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.minTemp')}</span>
+                          <span className="font-medium text-gray700">{item.air_temp_min || "N/A"}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.maxTemp')}</span>
-                          <span className="font-medium text-darkGray">{item.air_temp_max || "N/A"}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.maxTemp')}</span>
+                          <span className="font-medium text-gray700">{item.air_temp_max || "N/A"}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.humidity')}</span>
-                          <span className="font-medium text-darkGray">{item.relative_humidity_avg || "N/A"}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.humidity')}</span>
+                          <span className="font-medium text-gray700">{item.relative_humidity_avg || "N/A"}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.wind')}</span>
-                          <span className="font-medium text-darkGray">{item.wind_speed_avg || "N/A"}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.wind')}</span>
+                          <span className="font-medium text-gray700">{item.wind_speed_avg || "N/A"}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.radiation')}</span>
-                          <span className="font-medium text-darkGray">{item.solar_radiation_avg || "N/A"}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.radiation')}</span>
+                          <span className="font-medium text-gray700">{item.solar_radiation_avg || "N/A"}</span>
                         </div>
                       </div>
                     </div>
@@ -430,9 +452,9 @@ export default function StationDetailsPage() {
           <div
             className={`${
               activeTab === "hourly" ? "block" : "hidden"
-            } flex-1 overflow-auto`}
+            } flex-1`}
           >
-            <div className="bg-backgroundColor p-4 rounded-xl shadow-md">
+            <div>
 
               {hourlyData && Object.keys(hourlyData).length > 0 ? (
                 <DataTable
@@ -483,32 +505,32 @@ export default function StationDetailsPage() {
                     }
                   ]}
                   mobileCardRenderer={(row) => (
-                    <div className="bg-background rounded-xl shadow-sm p-4 border border-gray200">
-                      <h4 className="font-semibold text-sm text-darkGray mb-3">{row.date} - {row.hour}</h4>
+                    <div className="glass-card p-4 border border-gray700/20 dark:border-gray700/10">
+                      <h4 className="font-semibold text-sm text-gray700 mb-3">{row.date} - {row.hour}</h4>
                       <div className="grid grid-cols-2 gap-3 text-[12px]">
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.avgTemp')}</span>
-                          <span className="font-medium text-darkGray">{row.air_temp_avg}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.avgTemp')}</span>
+                          <span className="font-medium text-gray700">{row.air_temp_avg}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.minTemp')}</span>
-                          <span className="font-medium text-darkGray">{row.air_temp_min}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.minTemp')}</span>
+                          <span className="font-medium text-gray700">{row.air_temp_min}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.maxTemp')}</span>
-                          <span className="font-medium text-darkGray">{row.air_temp_max}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.maxTemp')}</span>
+                          <span className="font-medium text-gray700">{row.air_temp_max}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.humidity')}</span>
-                          <span className="font-medium text-darkGray">{row.relative_humidity_avg}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.humidity')}</span>
+                          <span className="font-medium text-gray700">{row.relative_humidity_avg}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.wind')}</span>
-                          <span className="font-medium text-darkGray">{row.wind_speed_avg}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.wind')}</span>
+                          <span className="font-medium text-gray700">{row.wind_speed_avg}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.radiation')}</span>
-                          <span className="font-medium text-darkGray">{row.solar_radiation_avg}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.radiation')}</span>
+                          <span className="font-medium text-gray700">{row.solar_radiation_avg}</span>
                         </div>
                       </div>
                     </div>
@@ -516,8 +538,8 @@ export default function StationDetailsPage() {
                 />
               ) : (
                 !isLoading && (
-                  <div className="bg-background p-4 sm:p-8 rounded-lg border text-center shadow text-sm">
-                    {t('common.noData')}
+                  <div className="glass-panel-visible rounded-xl p-8 text-center">
+                    <p className="text-gray700">{t('common.noData')}</p>
                   </div>
                 )
               )}
@@ -528,9 +550,9 @@ export default function StationDetailsPage() {
           <div
             className={`${
               activeTab === "min10" ? "block" : "hidden"
-            } flex-1 overflow-auto`}
+            } flex-1`}
           >
-            <div className="bg-backgroundColor p-4 rounded-xl shadow-md">
+            <div>
               {min10Data && Object.keys(min10Data).length > 0 ? (
                 <DataTable
                   data={min10TableData}
@@ -570,24 +592,24 @@ export default function StationDetailsPage() {
                     }
                   ]}
                   mobileCardRenderer={(row) => (
-                    <div className="bg-background rounded-xl shadow-sm p-4 border border-gray200">
-                      <h4 className="font-semibold text-sm text-darkGray mb-3">{row.date} - {row.hour}</h4>
+                    <div className="glass-card p-4 border border-gray700/20 dark:border-gray700/10">
+                      <h4 className="font-semibold text-sm text-gray700 mb-3">{row.date} - {row.hour}</h4>
                       <div className="grid grid-cols-2 gap-3 text-[12px]">
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.avgTemp')}</span>
-                          <span className="font-medium text-darkGray">{row.air_temp_avg}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.avgTemp')}</span>
+                          <span className="font-medium text-gray700">{row.air_temp_avg}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.humidity')}</span>
-                          <span className="font-medium text-darkGray">{row.relative_humidity_avg}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.humidity')}</span>
+                          <span className="font-medium text-gray700">{row.relative_humidity_avg}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.wind')}</span>
-                          <span className="font-medium text-darkGray">{row.wind_speed_avg}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.wind')}</span>
+                          <span className="font-medium text-gray700">{row.wind_speed_avg}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-gray600 mb-1">{t('station.table.radiation')}</span>
-                          <span className="font-medium text-darkGray">{row.solar_radiation_avg}</span>
+                          <span className="text-gray700 font-bold mb-1">{t('station.table.radiation')}</span>
+                          <span className="font-medium text-gray700">{row.solar_radiation_avg}</span>
                         </div>
                     
                       </div>
@@ -596,15 +618,14 @@ export default function StationDetailsPage() {
                 />
               ) : (
                 !isLoading && (
-                  <div className="bg-background p-4 sm:p-8 rounded-lg border text-center shadow text-sm">
-                    {t('common.noData')}
+                  <div className="glass-panel-visible rounded-xl p-8 text-center">
+                    <p className="text-gray700">{t('common.noData')}</p>
                   </div>
                 )
               )}
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 }

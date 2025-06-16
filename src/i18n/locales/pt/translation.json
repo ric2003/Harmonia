@@ -19,7 +19,8 @@
     "excelUpload": "Carregar Excel",
     "excelUploadShort": "Excel",
     "about": "Sobre",
-    "aboutShort": "Sobre"
+    "aboutShort": "Sobre",
+    "siteDetails": "Detalhes do Site"
   },
   "title": {
     "home": "Início",
@@ -41,6 +42,7 @@
     "scrollForInfo": "Desça para saber mais",
     "dataSource": "Fonte dos dados:",
     "irristrat": "Irristrat – Gestão de Irrigação",
+    "dataSourceIntro": "Bem-vindo! Aqui pode explorar estações meteorológicas em todo Portugal num mapa interativo. Clique em qualquer marcador de estação para ver dados meteorológicos detalhados incluindo temperatura, humidade, vento e precipitação. Perfeito para agricultores, investigadores ou qualquer pessoa curiosa sobre padrões meteorológicos locais.",
     "dataList": [
       "Níveis de água nas barragens",
       "Temperatura do ar (média, mínima e máxima)",
@@ -59,6 +61,24 @@
       "university": "Universidade Lusófona",
       "department": "Departamento de Engenharia Informática",
       "learnMore": "Saiba mais sobre a equipa, tecnologias e arquitetura do projeto"
+    },
+    "dataTypes": {
+      "weatherData": {
+        "title": "Dados Meteorológicos",
+        "description": "Temperatura, humidade, vento e precipitação"
+      },
+      "damLevels": {
+        "title": "Níveis de Barragens", 
+        "description": "Níveis de água e capacidade de reservatórios"
+      },
+      "satelliteImages": {
+        "title": "Imagens de Satélite",
+        "description": "NDVI, humidade e índices de vegetação"
+      },
+      "predictions": {
+        "title": "Previsões",
+        "description": "Simulações hidrológicas e previsões"
+      }
     } 
   },
   "common": {
@@ -83,6 +103,9 @@
     "dailyTemperatureTrend": "Tendência Diária da Temperatura",
     "viewMoreGraphs": "Ver mais Gráficos",
     "backToStation": "Voltar à estação",
+    "stationsOverviewIntro": "Navegue através de todas as nossas estações meteorológicas em Portugal. Cada cartão mostra uma estação com a sua localização e uma imagem de pré-visualização. Clique em qualquer estação para explorar medições meteorológicas detalhadas, dados históricos e tendências para essa localização específica.",
+    "stationDetailIntro": "Explore dados meteorológicos detalhados para esta estação específica. Alterne entre intervalos diários, horários e de 10 minutos usando os separadores acima. Use o seletor de data para ver dados históricos e consulte o mapa para ver estações próximas. Perfeito para acompanhar padrões meteorológicos locais ao longo do tempo.",
+    "stationGraphsIntro": "Veja gráficos detalhados para esta estação meteorológica. Compare tendências de temperatura, padrões de vento e mudanças de humidade durante a última semana. Estes insights visuais ajudam a identificar padrões meteorológicos e compreender variações climáticas locais rapidamente.",
     "tabs": {
       "daily": "Dados Diários",
       "hourly": "Dados Horários",
@@ -154,6 +177,7 @@
     "clickMapToNavigate": "Clique num marcador de barragem para ver os seus detalhes",
     "dataSource": "Fonte de dados:",
     "sir": "SIR - Sistema de Informação de Regadio",
+    "dataSourceIntro": "Monitorize os níveis de água nas barragens de Portugal num formato de tabela abrangente. Use os filtros poderosos para pesquisar por nome da barragem, intervalos de data, níveis de enchimento e volumes. Ordene colunas para encontrar níveis de água críticos ou ideais. Perfeito para gestores de água e investigadores que precisam de dados comparativos detalhados.",
     "fetchingError": "Erro ao obter dados do InfluxDB. Estás a ver dados de backup que podem não estar atualizados.",
     "noFilteredResults": "Nenhum resultado corresponde aos seus critérios de filtro.",
     "loading": "A carregar dados...",
@@ -242,7 +266,7 @@
         "description": "Índice de Vegetação por Diferença Normalizada - Mostra saúde e densidade da vegetação"
       },
       "moisture": {
-        "label": "Índice de Umidade",
+        "label": "Índice de humidade",
         "description": "Mostra o teor de água na vegetação e no solo"
       },
       "urban": {
@@ -261,8 +285,8 @@
       "description": "O Índice de Vegetação por Diferença Normalizada (NDVI) mede o verdor da vegetação com base na reflexão da luz visível e infravermelha próxima. Os valores vão de –1 a +1: abaixo de –0,5 indicam água; de –0,5 a 0, áreas estéreis; de 0 a 0,2, vegetação muito esparsa; de 0,2 a 0,6, arbustos e pastagens; e acima de 0,6, vegetação densa e saudável."
     },
     "moisture": {
-      "title": "Índice de Umidade (NDMI)",
-      "description": "O Índice de Umidade por Diferença Normalizada (NDMI) mede o teor de água na vegetação usando luz infravermelha próxima e infravermelha de ondas curtas refletida. Os valores variam de –1 a +1, onde valores abaixo de –0,2 indicam solo seco ou estéril, 0 a 0,4 sugere vegetação sob estresse hídrico, e valores acima de 0,4 representam vegetação saudável com maior teor de umidade."
+      "title": "Índice de humidade (NDMI)",
+      "description": "O Índice de humidade por Diferença Normalizada (NDMI) mede o teor de água na vegetação usando luz infravermelha próxima e infravermelha de ondas curtas refletida. Os valores variam de –1 a +1, onde valores abaixo de –0,2 indicam solo seco ou estéril, 0 a 0,4 sugere vegetação sob estresse hídrico, e valores acima de 0,4 representam vegetação saudável com maior teor de humidade."
     },
     "urban": {
       "title": "Áreas Urbanas",
@@ -280,53 +304,62 @@
     },
     "parameters": {
       "flowout_m3_s": {
-        "label": "Caudal (m³/s)",
+        "label": "Taxa de Fluxo de Água",
         "description": "Taxa de Fluxo de Água"
       },
       "ammonia_mg_l": {
-        "label": "NH₄ (mg/l)",
+        "label": "Concentração de Amónia",
         "description": "Concentração de Amónia"
       },
       "dissolved_phosphorus_mg_l": {
-        "label": "PO₄ (mg/l)",
+        "label": "Fósforo Dissolvido",
         "description": "Fósforo Dissolvido"
       },
       "dissolved_oxygen_mg_l": {
-        "label": "OD (mg/l)",
+        "label": "Oxigénio Dissolvido",
         "description": "Oxigénio Dissolvido"
       },
       "nitrate_mg_l": {
-        "label": "NO₃ (mg/l)",
+        "label": "Nitrato",
         "description": "Nitrato"
       },
       "nitrite_mg_l": {
-        "label": "NO₂ (mg/l)",
+        "label": "Nitrito",
         "description": "Nitrito"
       },
       "organic_nitrogen_mg_l": {
-        "label": "N-Org (mg/l)",
+        "label": "Nitrogénio Orgânico",
         "description": "Nitrogénio Orgânico"
       },
       "organic_phosphorus_mg_l": {
-        "label": "P-Org (mg/l)",
+        "label": "Fósforo Orgânico",
         "description": "Fósforo Orgânico"
       },
       "saturation_oxygen_mg_l": {
-        "label": "OD-Sat (mg/l)",
+        "label": "Nível de Saturação de Oxigénio",
         "description": "Nível de Saturação de Oxigénio"
       },
       "temperature_cc": {
-        "label": "Temp (°C)",
+        "label": "Temperatura da Água",
         "description": "Temperatura da Água"
       },
       "sediments_tons": {
-        "label": "Sed (ton)",
+        "label": "Carga de Sedimentos",
         "description": "Carga de Sedimentos"
       }
     }
   },
   "excelUploader": {
     "title": "Carregar Dados Excel Manualmente",
+    "purpose": {
+      "title": "O que faz isto?",
+      "description": "Carregue dados de monitorização de barragens a partir de ficheiros Excel diretamente no nosso sistema. Os seus dados serão processados e integrados com as informações de monitorização existentes."
+    },
+    "dataFlow": {
+      "step1": "Carregue o seu ficheiro Excel com dados de barragens",
+      "step2": "Os dados são processados e armazenados na base de dados InfluxDB",
+      "step3": "Visualize os seus dados na tabela de Monitorização de Barragens e Visão Geral das Barragens"
+    },
     "infoButton": "Informações de Requisitos do Arquivo",
     "selectFile": "Selecionar Arquivo Excel",
     "chooseFile": "Escolher Arquivo",
@@ -349,7 +382,8 @@
   },
   "sentinel": {
     "dataSource": "Fonte de dados:",
-    "sentinelHub": "Sentinel Hub - Dados de Satélite Sentinel"
+    "sentinelHub": "Sentinel Hub - Dados de Satélite Sentinel",
+    "dataSourceIntro": "Explore imagens de satélite de Portugal do espaço! Alterne entre diferentes modos de visualização para ver saúde da vegetação, conteúdo de água, áreas urbanas ou cores naturais. Use os controlos do mapa para aproximar na sua área de interesse e observe como a paisagem muda ao longo do tempo."
   },
   "about": {
     "title": "Sobre o Water Wise",
@@ -364,7 +398,9 @@
       "developers": "Desenvolvido por",
       "supervisors": "Orientadores",
       "supervisor": "Orientador",
-      "cosupervisor": "Coorientador"
+      "cosupervisor": "Coorientador",
+      "collaborator": "Orientador Externo",
+      "collaboratorInfo": "Faculdade de Engenharia"
     },
     "techStack": {
       "title": "Stack Tecnológica",
@@ -525,6 +561,8 @@
       "description": "Este projeto foi desenvolvido com paixão e dedicação. Para questões, sugestões ou colaborações:",
       "github": "Código disponível no GitHub",
       "feedback": "O seu feedback é importante para melhorarmos continuamente a plataforma."
-    }
+    },
+    "damsOverviewIntro": "Navegue por todas as barragens e reservatórios monitorizados de Portugal numa vista geral. Cada cartão mostra o nível de enchimento atual com um indicador visual de água e data da última atualização. Clique em qualquer barragem para explorar dados históricos detalhados, tendências e informações de localização para esse reservatório específico.",
+    "damDetailIntro": "Explore dados abrangentes para esta barragem específica incluindo níveis de enchimento em tempo real, tendências históricas e localização geográfica. Veja o gráfico de nível de enchimento para entender padrões de água ao longo do tempo, consulte estatísticas atuais e navegue pelos registos históricos detalhados. Use o mapa para ver barragens próximas e navegar entre elas."
   }
 }

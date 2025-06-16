@@ -58,15 +58,15 @@ export default function DamsPage() {
     );
 
   return (
-    <div className="text-darkGray">
+    <div>
       <DataSource
-        position="header"
+        introTextKey="dam.damsOverviewIntro"
         textKey="dam.dataSource"
         linkKey="dam.sir"
         linkUrl="https://sir.dgadr.gov.pt/outras/reserva-de-agua-nas-albufeiras"
       />
       
-      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {uniqueDams.map((dam) => {
           const percent = dam.enchimento
             ? Math.min(dam.enchimento * 100, 100)
@@ -77,7 +77,7 @@ export default function DamsPage() {
               href={`/dams/${dam.barragem}`}
               key={dam.barragem}
             >
-              <li className="p-4 border border-gray200 rounded-lg shadow h-full w-full cursor-pointer hover:shadow-md transition-shadow">
+              <li className="glass-card p-6 h-full w-full cursor-pointer">
                 {/* Using the new WaterWave component */}
                 <div className="mb-4">
                   <WaterWave 
@@ -87,10 +87,10 @@ export default function DamsPage() {
                   />
                 </div>
 
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-xl font-semibold text-gray700 mb-2">
                   {dam.barragem}
                 </h2>
-                <p className="text-gray600 text-sm">
+                <p className="text-gray700 text-sm opacity-80">
                   {t("dam.lastUpdated")}:{" "}
                   {dam._time
                     ? new Date(

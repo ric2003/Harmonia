@@ -133,101 +133,117 @@ export default function StationGraphsPage() {
   }
 
   return (
-    <div className="p-6 text-darkGray">
+    <div className="p-6">
       <DataSource 
-        position="header"
+        introTextKey="station.stationGraphsIntro"
         textKey="home.dataSource"
         linkKey="home.irristrat"
         linkUrl="https://irristrat.com/new/index.php"
       />
 
-      <div className="mb-8">
+      <div className="glass-card p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold mb-4">{t('station.dailyTemperatureTrend')}</h2>
-          <a href={`/stations/${stationID}`} className="flex items-center gap-2 text-sm font-medium text-blue-500 hover:text-blue-700 transition-colors">
-            <span className="text-lg">←</span>
-            {t('station.backToStation')}
-          </a>
+          <h2 className="text-2xl font-bold text-gray700 mb-4">{t('station.dailyTemperatureTrend')}</h2>
+          <div className="glass-frosted p-2 rounded-lg">
+            <a href={`/stations/${stationID}`} className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+              <span className="text-lg">←</span>
+              {t('station.backToStation')}
+            </a>
+          </div>
         </div>
-        <ResponsiveContainer width="100%" height={300} className="bg-background">
-          <LineChart data={dailyData}>
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
-            <Line type="monotone" dataKey="max" stroke="#ff7300" name={t('station.chart.maximum')} />
-            <Line type="monotone" dataKey="avg" stroke="#8884d8" name={t('station.chart.average')} />
-            <Line type="monotone" dataKey="min" stroke="#82ca9d" name={t('station.chart.minimum')} />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="glass-card px-8 py-12 rounded-xl">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={dailyData}>
+              <XAxis 
+                dataKey="date" 
+                style={{ fontSize: '12px', fill: '#374151', fontWeight: 'bold' }}
+              />
+              <YAxis style={{ fontSize: '12px', fill: '#374151', fontWeight: 'bold' }} />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend style={{ fontSize: '12px', fill: '#374151', fontWeight: 'bold' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-400)" />
+              <Line type="monotone" dataKey="max" stroke="#ff7300" name={t('station.chart.maximum')} />
+              <Line type="monotone" dataKey="avg" stroke="#8884d8" name={t('station.chart.average')} />
+              <Line type="monotone" dataKey="min" stroke="#82ca9d" name={t('station.chart.minimum')} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">{t('station.graphs.hourlyTemperature')}</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={hourlyData}>
-            <XAxis
-              dataKey="timestamp"
-              tickFormatter={(value) =>
-                value.slice(11, 13) + "h (" + value.slice(0, 10) + ")"
-              }
-              tick={{ fontSize: 10 }}
-            />
-            <YAxis />
-            <Tooltip content={<CustomTooltip />} />
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
-            <Line type="monotone" dataKey="temp" stroke="#8884d8" name={t('station.chart.temperature')} />
-          </LineChart>
-        </ResponsiveContainer>
+      <div className="glass-card p-6 mb-8">
+        <h2 className="text-2xl font-bold text-gray700 mb-4">{t('station.graphs.hourlyTemperature')}</h2>
+        <div className="glass-card px-8 py-12 rounded-xl">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={hourlyData}>
+              <XAxis
+                dataKey="timestamp"
+                tickFormatter={(value) =>
+                  value.slice(11, 13) + "h (" + value.slice(0, 10) + ")"
+                }
+                tick={{ fontSize: 10 }}
+                style={{ fontSize: '10px', fill: '#374151', fontWeight: 'bold' }}
+              />
+              <YAxis style={{ fontSize: '12px', fill: '#374151', fontWeight: 'bold' }} />
+              <Tooltip content={<CustomTooltip />} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-400)" />
+              <Line type="monotone" dataKey="temp" stroke="#8884d8" name={t('station.chart.temperature')} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">{t('station.graphs.hourlyWindSpeed')}</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={hourlyData}>
-            <XAxis
-              dataKey="timestamp"
-              tickFormatter={(value) =>
-                value.slice(11, 13) + "h (" + value.slice(0, 10) + ")"
-              }
-              tick={{ fontSize: 10 }}
-            />
-            <YAxis />
-            <Tooltip content={<CustomTooltip />} />
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
-            <Line
-              type="monotone"
-              dataKey="windSpeed"
-              stroke="#82ca9d"
-              name={t('station.chart.windSpeed')}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+      <div className="glass-card p-6 mb-8">
+        <h2 className="text-2xl font-bold text-gray700 mb-4">{t('station.graphs.hourlyWindSpeed')}</h2>
+        <div className="glass-card px-8 py-12 rounded-xl">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={hourlyData}>
+              <XAxis
+                dataKey="timestamp"
+                tickFormatter={(value) =>
+                  value.slice(11, 13) + "h (" + value.slice(0, 10) + ")"
+                }
+                tick={{ fontSize: 10 }}
+                style={{ fontSize: '10px', fill: '#374151', fontWeight: 'bold' }}
+              />
+              <YAxis style={{ fontSize: '12px', fill: '#374151', fontWeight: 'bold' }} />
+              <Tooltip content={<CustomTooltip />} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-400)" />
+              <Line
+                type="monotone"
+                dataKey="windSpeed"
+                stroke="#82ca9d"
+                name={t('station.chart.windSpeed')}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">{t('station.graphs.hourlyHumidity')}</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={hourlyData}>
-            <XAxis
-              dataKey="timestamp"
-              tickFormatter={(value) =>
-                value.slice(11, 13) + "h (" + value.slice(0, 10) + ")"
-              }
-              tick={{ fontSize: 10 }}
-            />
-            <YAxis />
-            <Tooltip content={<CustomTooltip />} />
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
-            <Line
-              type="monotone"
-              dataKey="humidity"
-              stroke="#ffc658"
-              name={t('station.chart.humidity')}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+      <div className="glass-card p-6 mb-8">
+        <h2 className="text-2xl font-bold text-gray700 mb-4">{t('station.graphs.hourlyHumidity')}</h2>
+        <div className="glass-card px-8 py-12 rounded-xl">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={hourlyData}>
+              <XAxis
+                dataKey="timestamp"
+                tickFormatter={(value) =>
+                  value.slice(11, 13) + "h (" + value.slice(0, 10) + ")"
+                }
+                tick={{ fontSize: 10 }}
+                style={{ fontSize: '10px', fill: '#374151', fontWeight: 'bold' }}
+              />
+              <YAxis style={{ fontSize: '12px', fill: '#374151', fontWeight: 'bold' }} />
+              <Tooltip content={<CustomTooltip />} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-400)" />
+              <Line
+                type="monotone"
+                dataKey="humidity"
+                stroke="#ffc658"
+                name={t('station.chart.humidity')}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

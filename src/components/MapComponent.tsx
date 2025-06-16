@@ -80,6 +80,10 @@ const MapComponent = ({ stations, selectedStationId, onMarkerHover, onStationSel
 
       // Add hover interactions
       const element = marker.getElement();
+      
+      // Set cursor to pointer for better UX
+      element.style.cursor = 'pointer';
+      
       element.addEventListener('mouseenter', () => {
         // Call the original hover callback
         if (onMarkerHover) {

@@ -15,8 +15,8 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
-  Legend,
-  CartesianGrid
+  CartesianGrid,
+  Brush
 } from 'recharts';
 
 
@@ -81,8 +81,32 @@ const TimeSeriesChart: React.FC<{
     ).values()
   );
 
+  // Format date for brush to show only month/year
+  const formatBrushDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.getFullYear().toString();
+  };
+
+  // Get unit for the current parameter
+  const getYAxisLabel = (parameterKey: string): string => {
+    const unitMap: { [key: string]: string } = {
+      'flowout_m3_s': 'm³/s',
+      'ammonia_mg_l': 'mg/L',
+      'dissolved_phosphorus_mg_l': 'mg/L',
+      'dissolved_oxygen_mg_l': 'mg/L',
+      'nitrate_mg_l': 'mg/L',
+      'nitrite_mg_l': 'mg/L',
+      'organic_nitrogen_mg_l': 'mg/L',
+      'organic_phosphorus_mg_l': 'mg/L',
+      'saturation_oxygen_mg_l': 'mg/L',
+      'temperature_cc': '°C',
+      'sediments_tons': 'tons'
+    };
+    return unitMap[parameterKey] || '';
+  };
+
   return (
-    <div className="h-[300px] w-full -mx-4 sm:mx-0">
+    <div className="h-[300px] w-full m-4">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
@@ -93,9 +117,13 @@ const TimeSeriesChart: React.FC<{
             angle={-45}
             textAnchor="end"
             height={70}
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 12 , fontWeight: 'bold' }}
+            label={{ value: 'Year', position: 'outside'}}
           />
-          <YAxis tick={{ fontSize: 12 }} />
+          <YAxis 
+            tick={{ fontSize: 14, fontWeight: 'bold' }} 
+            label={{ value: getYAxisLabel(dataKey), angle: 0, position: 'top' }}
+          />
           <Line
             type="monotone"
             dataKey={dataKey}
@@ -103,7 +131,13 @@ const TimeSeriesChart: React.FC<{
             dot={false}
             name={label}
           />
-          <Legend />
+          <Brush 
+            dataKey="timestamp" 
+            height={30} 
+            stroke="var(--primary)"
+            fill="var(--background)"
+            tickFormatter={formatBrushDate}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>
@@ -340,6 +374,7 @@ const SimulationMap: React.FC = () => {
       return num.toFixed(decimalPlaces);
   }
 
+
   // Get current entry based on selected date
   const getCurrentEntry = () => {
     if (!selectedRchData?.timeseries || !selectedDate) return null;
@@ -362,36 +397,38 @@ const SimulationMap: React.FC = () => {
     <div className="flex flex-col h-full relative">
       {/* Map Container */}
       <div className={`w-full transition-all duration-300 ease-in-out ${isPanelVisible ? 'h-[85vh]' : 'h-screen'} relative z-0`}>
-        <MapContainer
-          center={mapCenter}
-          zoom={initialZoom}
-          style={{ height: '100%', width: '100%' }}
-          className="rounded-lg overflow-hidden"
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {riv1Data && <GeoJSON data={riv1Data} style={() => ({ color: '#007bff', weight: 2, opacity: 0.8 })} />}
-          {localizData && (
-            <GeoJSON
-              data={localizData}
-              pointToLayer={pointToLayer}
-              onEachFeature={onEachFeaturePoint}
+        <div className="glass-card h-full w-full overflow-hidden">
+          <MapContainer
+            center={mapCenter}
+            zoom={initialZoom}
+            style={{ height: '100%', width: '100%' }}
+            className="rounded-lg overflow-hidden"
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-          )}
-        </MapContainer>
+            {riv1Data && <GeoJSON data={riv1Data} style={() => ({ color: '#007bff', weight: 2, opacity: 0.8 })} />}
+            {localizData && (
+              <GeoJSON
+                data={localizData}
+                pointToLayer={pointToLayer}
+                onEachFeature={onEachFeaturePoint}
+              />
+            )}
+          </MapContainer>
+        </div>
       </div>
 
       {/* Data Display Section */}
       {selectedLocationId !== null && isPanelVisible && (
-        <div className="w-full py-2 bg-background flex-shrink-0 relative max-h-[50vh] overflow-y-auto">
+        <div className="w-full py-4 glass-card flex-shrink-0 relative max-h-[50vh] overflow-y-auto">
           {/* Location Name Display */}
           {locationName && (
             <div className="mb-4 px-4">
-              <h2 className="text-lg font-semibold text-primary">
+              <h2 className="text-lg font-semibold text-gray700">
                 {locationName.city || locationName.county || locationName.formatted}
               </h2>
-              <p className="text-sm text-gray600">
+              <p className="text-sm text-gray700">
                 {[locationName.county, locationName.state, locationName.country]
                   .filter(Boolean)
                   .join(', ')}
@@ -402,7 +439,7 @@ const SimulationMap: React.FC = () => {
           {/* Close Button */}
           <button
             onClick={handleClosePanel}
-            className="absolute top-4 right-4 bg-background text-gray600 hover:text-primary p-1 rounded-full shadow-md border border-gray200 transition-colors"
+            className="absolute top-4 right-4 glass-card text-gray700 hover:text-primary p-2 rounded-full shadow-md transition-all duration-200 hover:glass-card"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M14.707 5.293a1 1 0 010 1.414L11.414 10l3.293 3.293a1 1 0 01-1.414 1.414L10 11.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 10 5.293 6.707a1 1 0 011.414-1.414L10 8.586l3.293-3.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -410,210 +447,221 @@ const SimulationMap: React.FC = () => {
           </button>
 
           <div className="px-4">
-            <select id="parameterSelector"
-                className="w-full p-1 border rounded-md bg-background text-darkGray"
-                value={selectedParameter}
-                onChange={(e) => setSelectedParameter(e.target.value)}
-              >
-                {Object.keys(parameters).map((key) => (
-                  <option key={key} value={key}>
-                    {parameters[key].label}
-                  </option>
-                ))}
-              </select>
-              {/* Time Series Charts */}
-              <div className="space-y-4">
-                <div className="bg-background p-4 rounded-lg">
-                  {selectedRchData && (
-                    <TimeSeriesChart
-                      data={selectedRchData.timeseries}
-                      dataKey={selectedParameter}
-                      label={parameters[selectedParameter]?.label}
-                      color="#2B96F3"
-                    />
-                  )}
-                </div>
+            <div className="glass-card p-3 mb-4 rounded-lg">
+              <select id="parameterSelector"
+                  className="w-full p-2 glass-light rounded-md text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                  value={selectedParameter}
+                  onChange={(e) => setSelectedParameter(e.target.value)}
+                >
+                  {Object.keys(parameters).map((key) => (
+                    <option key={key} value={key} className="bg-white text-gray700">
+                      {parameters[key].label}
+                    </option>
+                  ))}
+                </select>
+            </div>
+            
+            {/* Time Series Charts */}
+            <div className="space-y-4">
+              <div className="glass-card p-4 rounded-lg">
+                {selectedRchData && (
+                  <TimeSeriesChart
+                    data={selectedRchData.timeseries}
+                    dataKey={selectedParameter}
+                    label={parameters[selectedParameter]?.label}
+                    color="#2B96F3"
+                  />
+                )}
               </div>
+            </div>
           </div>
 
-          <div className="space-y-2 px-4">
+          <div className="space-y-4 px-4 mt-4">
             {loadingRch && (
               <div className="space-y-3">
                 {/* Date Selection Controls Skeleton */}
-                <div className="flex flex-wrap gap-2 items-end">
-                  <div className="w-32">
-                    <div className="h-5 w-12 bg-gray200 rounded mb-1 animate-pulse"></div>
-                    <div className="h-7 w-full bg-gray200 rounded animate-pulse"></div>
-                  </div>
-                  <div className="w-32">
-                    <div className="h-3 w-12 bg-gray200 rounded mb-1 animate-pulse"></div>
-                    <div className="h-7 w-full bg-gray200 rounded animate-pulse"></div>
-                  </div>
-                  <div className="w-32">
-                    <div className="h-3 w-12 bg-gray200 rounded mb-1 animate-pulse"></div>
-                    <div className="h-7 w-full bg-gray200 rounded animate-pulse"></div>
+                <div className="glass-card p-4 rounded-lg">
+                  <div className="flex flex-wrap gap-2 items-end">
+                    <div className="w-32">
+                      <div className="h-5 w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
+                      <div className="h-7 w-full bg-gray-200/50 rounded animate-pulse"></div>
+                    </div>
+                    <div className="w-32">
+                      <div className="h-3 w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
+                      <div className="h-7 w-full bg-gray-200/50 rounded animate-pulse"></div>
+                    </div>
+                    <div className="w-32">
+                      <div className="h-3 w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
+                      <div className="h-7 w-full bg-gray-200/50 rounded animate-pulse"></div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Data Grid Skeleton */}
-                <div className="bg-backgroundColor rounded-lg py-2">
+                <div className="glass-card p-4 rounded-lg">
                   <div className="grid grid-cols-4 md:grid-cols-6 gap-2 text-sm">
                     {[...Array(11)].map((_, index) => (
-                      <div key={index} className="bg-background py-1.5 rounded shadow-sm">
-                        <div className="h-3 w-12 bg-gray200 rounded mb-1 animate-pulse"></div>
-                        <div className="h-5 w-10 bg-gray200 rounded animate-pulse"></div>
+                      <div key={index} className="glass-card p-2 rounded shadow-sm">
+                        <div className="h-3 w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
+                        <div className="h-5 w-10 bg-gray-200/50 rounded animate-pulse"></div>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
             )}
-            {errorRch && (<AlertMessage message={errorRch} type='error'/>)}
+            {errorRch && (
+              <div className="glass-card p-4 rounded-lg">
+                <AlertMessage message={errorRch} type='error'/>
+              </div>
+            )}
 
             {selectedRchData && !loadingRch && !errorRch && (
               <div>
                 {selectedRchData.timeseries && selectedRchData.timeseries.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {/* Date Selection Controls */}
-                    <div className="flex flex-wrap gap-2 items-end">
-                    <div className="w-24 sm:w-32">
-                        <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.day')}</label>
-                        <select
-                            className="w-full py-1 border rounded-md bg-background text-sm text-darkGray"
-                            value={selectedDay}
-                            onChange={(e) => {
-                            const newDay = Number(e.target.value);
-                            updateSelectedDate(selectedYear, selectedMonth, newDay);
-                            }}
-                        >
-                            {Array.from({ length: daysInCurrentMonth }, (_, i) => i + 1).map((day) => (
-                            <option key={day} value={day}>
-                                {day}
-                            </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="w-24 sm:w-32">
-                        <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.month')}</label>
-                        <select
-                          className="w-full p-1 border rounded-md bg-background text-sm text-darkGray"
-                          value={selectedMonth}
-                          onChange={(e) => {
-                            const newMonth = Number(e.target.value);
-                            setSelectedMonth(newMonth);
-                            updateSelectedDate(selectedYear, newMonth, selectedDay);
-                          }}
-                        >
-                          {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
-                            const currentLang = i18next.language || 'en';
-                            const monthName = new Date(2000, month - 1, 1).toLocaleString(currentLang, { month: 'long' });
-                            return (
-                              <option key={month} value={month}>
-                                {monthName}
+                    <div className="glass-card p-4 rounded-lg">
+                      <div className="flex flex-wrap gap-3 items-end">
+                        <div className="w-24 sm:w-32">
+                          <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.day')}</label>
+                          <select
+                              className="w-full py-2 px-3 glass-light rounded-md text-sm text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                              value={selectedDay}
+                              onChange={(e) => {
+                              const newDay = Number(e.target.value);
+                              updateSelectedDate(selectedYear, selectedMonth, newDay);
+                              }}
+                          >
+                              {Array.from({ length: daysInCurrentMonth }, (_, i) => i + 1).map((day) => (
+                              <option key={day} value={day} className="bg-white text-gray700">
+                                  {day}
                               </option>
-                            );
-                          })}
-                        </select>
-                      </div>
+                              ))}
+                          </select>
+                        </div>
 
-                      <div className="w-24 sm:w-32">
-                        <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.year')}</label>
-                        <select
-                          className="w-full p-1 border rounded-md bg-background text-sm text-darkGray"
-                          value={selectedYear}
-                          onChange={(e) => {
-                            const newYear = Number(e.target.value);
-                            setSelectedYear(newYear);
-                            updateSelectedDate(newYear, selectedMonth, selectedDay);
-                          }}>
-                          {getUniqueYears().map((year) => (
-                            <option key={year} value={year}>{year}</option>
-                          ))}
-                        </select>
+                        <div className="w-24 sm:w-32">
+                          <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.month')}</label>
+                          <select
+                            className="w-full py-2 px-3 glass-light rounded-md text-sm text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            value={selectedMonth}
+                            onChange={(e) => {
+                              const newMonth = Number(e.target.value);
+                              setSelectedMonth(newMonth);
+                              updateSelectedDate(selectedYear, newMonth, selectedDay);
+                            }}
+                          >
+                            {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
+                              const currentLang = i18next.language || 'en';
+                              const monthName = new Date(2000, month - 1, 1).toLocaleString(currentLang, { month: 'long' });
+                              return (
+                                <option key={month} value={month} className="bg-white text-gray700">
+                                  {monthName}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+
+                        <div className="w-24 sm:w-32">
+                          <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.year')}</label>
+                          <select
+                            className="w-full py-2 px-3 glass-light rounded-md text-sm text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            value={selectedYear}
+                            onChange={(e) => {
+                              const newYear = Number(e.target.value);
+                              setSelectedYear(newYear);
+                              updateSelectedDate(newYear, selectedMonth, selectedDay);
+                            }}>
+                            {getUniqueYears().map((year) => (
+                              <option key={year} value={year} className="bg-white text-gray700">{year}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     </div>
 
                     {/* Data Display */}
                     {selectedDate && getCurrentEntry() && (
                       <>
-                        <div className="bg-background rounded-lg py-2">
-                          <div className="grid grid-cols-4 md:grid-cols-6 gap-2 text-sm">
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                        <div className="glass-card p-4 rounded-lg">
+                          <div className="grid grid-cols-4 md:grid-cols-6 gap-3 text-sm">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.flowout_m3_s.label')} description={t('simulationMap.parameters.flowout_m3_s.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.flowout_m3_s)}</div>
                             </div>
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.ammonia_mg_l.label')} description={t('simulationMap.parameters.ammonia_mg_l.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.ammonia_mg_l)}</div>
                             </div>
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.dissolved_phosphorus_mg_l.label')} description={t('simulationMap.parameters.dissolved_phosphorus_mg_l.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.dissolved_phosphorus_mg_l)}</div>
                             </div>
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.dissolved_oxygen_mg_l.label')} description={t('simulationMap.parameters.dissolved_oxygen_mg_l.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.dissolved_oxygen_mg_l)}</div>
                             </div>
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.nitrate_mg_l.label')} description={t('simulationMap.parameters.nitrate_mg_l.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.nitrate_mg_l)}</div>
                             </div>
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.nitrite_mg_l.label')} description={t('simulationMap.parameters.nitrite_mg_l.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.nitrite_mg_l)}</div>
                             </div>
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.organic_nitrogen_mg_l.label')} description={t('simulationMap.parameters.organic_nitrogen_mg_l.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.organic_nitrogen_mg_l)}</div>
                             </div>
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.organic_phosphorus_mg_l.label')} description={t('simulationMap.parameters.organic_phosphorus_mg_l.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.organic_phosphorus_mg_l)}</div>
                             </div>
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.saturation_oxygen_mg_l.label')} description={t('simulationMap.parameters.saturation_oxygen_mg_l.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.saturation_oxygen_mg_l)}</div>
                             </div>
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.temperature_cc.label')} description={t('simulationMap.parameters.temperature_cc.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.temperature_cc)}</div>
                             </div>
-                            <div className="bg-backgroundColor p-1.5 rounded shadow-sm">
-                              <div className="text-xs text-gray600">
+                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                              <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.sediments_tons.label')} description={t('simulationMap.parameters.sediments_tons.description')} />
                               </div>
                               <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.sediments_tons)}</div>
                             </div>
                           </div>
                         </div>
-                        
-
                       </>
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray600 text-sm">{t('simulationMap.noData')}</p>
+                  <div className="glass-card p-4 rounded-lg">
+                    <p className="text-gray700 text-sm">{t('simulationMap.noData')}</p>
+                  </div>
                 )}
               </div>
             )}

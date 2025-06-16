@@ -19,16 +19,103 @@ const FILTERS: { value: FilterKey; key: string }[] = [
 
 // CSS styles
 const controlStyles = `
-  .custom-filter-control-container { margin: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius:8px; border:none; background:none; }
-  .filter-controls-content { background-color: var(--backgroundColor, white); color: var(--gray-700, #4a5568); padding: 16px; border-radius:8px; width:200px; transition: background-color 0.2s ease, color 0.2s ease; }
-  .filter-title { margin:0 0 12px; font-size:14px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
-  .filter-options { display:flex; flex-direction:column; gap:8px; }
-  .filter-button { width:100%; background:var(--gray-100,#f7fafc); border:2px solid transparent; border-radius:6px; padding:10px 16px; cursor:pointer; font-size:14px; font-weight:500; text-align:left; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
-  .filter-button:hover { background-color: var(--gray-200, #edf2f7); }
-  .filter-button.active { background-color: var(--primary, #4299e1); color: var(--white, white); border-color: var(--blue-200, #bee3f8); }
-  .filter-button:focus { outline:none; }
-  .filter-button:focus-visible { outline:2px solid var(--primary,#4299e1); outline-offset:2px; }
-  @media (max-width:600px) { .filter-controls-content { width:180px; } .filter-button { padding:8px 12px; font-size:13px; } }
+  .custom-filter-control-container { 
+    margin: 10px; 
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); 
+    border-radius: 12px; 
+    border: 1px solid rgba(255, 255, 255, 0.2); 
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+  }
+  .dark .custom-filter-control-container {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  .filter-controls-content { 
+    background: transparent; 
+    color: #111827; 
+    padding: 16px; 
+    border-radius: 12px; 
+    width: 200px; 
+  }
+  .dark .filter-controls-content {
+    color: #f9fafb;
+  }
+  .filter-title { 
+    margin: 0 0 12px; 
+    font-size: 14px; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+    color: #000000;
+  }
+  .dark .filter-title {
+    color: #ffffff;
+  }
+  .filter-options { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+  }
+  .filter-button { 
+    width: 100%; 
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(0, 0, 0, 0.1); 
+    border-radius: 8px; 
+    padding: 12px 16px; 
+    cursor: pointer; 
+    font-size: 14px; 
+    font-weight: 500; 
+    text-align: left; 
+    color: #1f2937; 
+  }
+  .dark .filter-button {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e5e7eb;
+  }
+  .filter-button:hover { 
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    border-color: rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+  }
+  .dark .filter-button:hover {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  .filter-button.active:hover {
+    background: var(--primary, #2B96F3);
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  .filter-button.active { 
+    background: var(--primary, #2B96F3); 
+    color: white; 
+    border-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgba(43, 150, 243, 0.3);
+  }
+  .filter-button:focus { 
+    outline: none; 
+  }
+  .filter-button:focus-visible { 
+    outline: 2px solid var(--primary, #2B96F3); 
+    outline-offset: 2px; 
+  }
+  @media (max-width: 600px) { 
+    .filter-controls-content { 
+      width: 180px; 
+      padding: 12px;
+    } 
+    .filter-button { 
+      padding: 10px 12px; 
+      font-size: 13px; 
+    } 
+  }
 `;
 
 const STYLE_ELEMENT_ID = 'leaflet-custom-filter-styles';

@@ -15,10 +15,10 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Legend,
   CartesianGrid,
   AreaChart,
   Area,
+  Brush,
 } from "recharts";
 import { DataTable } from "@/components/ui/DataTable";
 import DataSource from "@/components/DataSource";
@@ -32,6 +32,12 @@ const MapComponent = dynamic(() => import("@/components/MapComponent"), {
     </div>
   ),
 });
+
+function getTooltipPosition(percent: number): string {
+  if (percent > 50)
+    return "top-0";
+  return "-top-6";
+}
 
 const getBadgeGradient = (percent: number): string => {
   if (percent > 70)
@@ -96,19 +102,48 @@ export default function DamDetailsPage() {
     return damData.length > 0 ? damData[0] : null;
   }, [damData]);
 
-  // Prepare data for the trend graph
+  // Prepare data for the trend graph - grouped by year
   const trendData = useMemo(() => {
-    return damData
-      .slice()
-      .reverse()
-      .map(item => ({
-        date: item._time ? new Date(item._time).toLocaleDateString('en-GB') : '',
-        enchimento: item.enchimento ? Math.round(item.enchimento * 100) : 0,
-        cota_lida: item.cota_lida || 0,
-        volume_total: item.volume_total || 0,
-        volume_util: item.volume_util || 0,
-      }))
-      .filter(item => item.date); // Filter out items without a date
+    if (damData.length === 0) return [];
+    
+    // Group data by year
+    const yearGroups: { [year: string]: typeof damData } = {};
+    
+    damData.forEach(item => {
+      if (item._time) {
+        const year = new Date(item._time).getFullYear().toString();
+        if (!yearGroups[year]) {
+          yearGroups[year] = [];
+        }
+        yearGroups[year].push(item);
+      }
+    });
+    
+    // Calculate averages for each year
+    return Object.entries(yearGroups)
+      .map(([year, items]) => {
+        const validEnchimento = items.filter(item => item.enchimento && item.enchimento > 0);
+        const validCotaLida = items.filter(item => item.cota_lida && item.cota_lida > 0);
+        const validVolumeTotal = items.filter(item => item.volume_total && item.volume_total > 0);
+        const validVolumeUtil = items.filter(item => item.volume_util && item.volume_util > 0);
+        
+        return {
+          date: year,
+          enchimento: validEnchimento.length > 0 
+            ? Math.round((validEnchimento.reduce((sum, item) => sum + (item.enchimento || 0), 0) / validEnchimento.length) * 100)
+            : 0,
+          cota_lida: validCotaLida.length > 0 
+            ? validCotaLida.reduce((sum, item) => sum + (item.cota_lida || 0), 0) / validCotaLida.length
+            : 0,
+          volume_total: validVolumeTotal.length > 0 
+            ? validVolumeTotal.reduce((sum, item) => sum + (item.volume_total || 0), 0) / validVolumeTotal.length
+            : 0,
+          volume_util: validVolumeUtil.length > 0 
+            ? validVolumeUtil.reduce((sum, item) => sum + (item.volume_util || 0), 0) / validVolumeUtil.length
+            : 0,
+        };
+      })
+      .sort((a, b) => parseInt(a.date) - parseInt(b.date)); // Sort by year
   }, [damData]);
 
   // Calculate statistics
@@ -210,15 +245,15 @@ export default function DamDetailsPage() {
   const fillPercentage = latestDamData?.enchimento ? Math.min(latestDamData.enchimento * 100, 100) : 0;
 
   return (
-    <div className="text-darkGray min-h-screen">
+    <div className="min-h-screen">
       <DataSource 
-        position="header"
+        introTextKey="dam.damDetailIntro"
         textKey="dam.dataSource"
         linkKey="dam.sir"
         linkUrl="https://sir.dgadr.gov.pt/outras/reserva-de-agua-nas-albufeiras"
       />
       {/* Hero section with water wave visualization */}
-      <div className="relative w-full h-48 sm:h-72 md:h-96 rounded-xl overflow-hidden mb-8">
+      <div className="glass-card relative w-full h-48 sm:h-72 md:h-96 rounded-xl overflow-hidden mb-8">
         {/* Using WaterWave component */}
         <WaterWave 
           fillPercentage={fillPercentage} 
@@ -253,245 +288,253 @@ export default function DamDetailsPage() {
       </div>
 
       {/* Main content container */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="bg-backgroundColor rounded-xl shadow-lg p-4 sm:p-6">
-          {/* Dam info and data grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mb-6 sm:mb-8">
-            {/* Left column: graph and map */}
-            <div className="lg:col-span-2 space-y-4">
-              {/* Fill level trend graph */}
-              <div className="bg-background p-4 rounded-lg shadow-sm">
-                <h2 className="text-lg sm:text-xl font-semibold mb-4">{t('dam.fillLevelTrend')}</h2>
-                <div className="h-[250px] sm:h-[300px]">
+      <div className="glass-card p-4 sm:p-6 mb-8">
+        {/* Dam info and data grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mb-6 sm:mb-8">
+          {/* Left column: graph and map */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Fill level trend graph */}
+            <div className="glass-card-visible p-4 rounded-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray700 mb-4">{t('dam.fillLevelTrend')}</h2>
+              <div className="glass-card p-4 rounded-xl">
+                <div className="h-[250px] sm:h-[300px] relative z-50">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart 
                       data={trendData}
-                      margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
+                      margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
                     >
                       <defs>
                         <linearGradient id="colorEnchimento" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#8884d8" stopOpacity={0.2}/>
+                          <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.2}/>
                         </linearGradient>
                       </defs>
                       <XAxis 
                         dataKey="date" 
-                        style={{ fontSize: '10px' }}
+                        label={{ 
+                          value: 'Year', 
+                          angle: 0, 
+                          position: 'insideBottom',
+                          style: { textAnchor: 'middle', fontSize: '10px', fill: '#374151', transform: 'translateY(2px)' }
+                        }}
+                        style={{ fontSize: '12px', fill: '#374151', fontWeight: 'bold' }}
                       />
                       <YAxis 
-                        style={{ fontSize: '10px' }}
+                        style={{ fontSize: '12px', fill: '#374151', fontWeight: 'bold' }}
+                        tickFormatter={(value) => `${value}%`}
                         domain={[0, 100]}
-                        label={{ 
-                          value: '%', 
-                          angle: -90, 
-                          position: 'insideLeft',
-                          style: { textAnchor: 'middle', fontSize: '10px' }
-                        }}
                       />
-                      <Tooltip />
-                      <Legend style={{ fontSize: '10px' }} />
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-300)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-400)" />
                       <Area 
                         type="monotone" 
                         dataKey="enchimento" 
-                        stroke="#8884d8" 
+                        stroke="var(--primary)" 
                         fillOpacity={1} 
                         fill="url(#colorEnchimento)" 
                         name={t('dam.table.enchimento')}
+                      />
+                      <Tooltip />
+                      <Brush 
+                        dataKey="date" 
+                        height={30}
+                        startIndex={0}
+                        stroke="var(--primary)"
+                        fill="var(--background)"
                       />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
-              
-              {/* Map */}
-              <div className="bg-background p-4 rounded-lg shadow-sm">
-                <h2 className="text-lg sm:text-xl font-semibold mb-4">{t('dam.location')}</h2>
-                {allDamStations.length > 0 ? (
-                  <div>
-                    <div className="h-[250px] sm:h-[300px] relative rounded-lg overflow-hidden">
-                      <MapComponent
-                        stations={allDamStations}
-                        selectedStationId={damId}
-                        onMarkerHover={handleMarkerHover}
-                        onStationSelect={handleDamSelect}
-                        showMenu={false}
-                      />
-                    </div>
-                    <p className="text-xs text-gray600 mt-2">{t('dam.clickMapToNavigate')}</p>
-                    {locationLoading && (
-                      <p className="text-xs text-gray600 mt-1">
-                        <span className="inline-block w-2 h-2 rounded-full bg-blue-600 animate-pulse mr-1"></span>
-                        {t('common.loading')}
-                      </p>
-                    )}
-                  </div>
-                ) : locationLoading ? (
-                  <div className="flex justify-center py-12 h-[250px]">
-                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                ) : (
-                  <p className="text-gray600 text-sm py-12 text-center">
-                    {t('dam.locationNotFound')}
-                  </p>
-                )}
-              </div>
             </div>
-
-            {/* Stats summary */}
-            <div className="bg-background p-4 rounded-lg shadow-sm">
-              <h2 className="text-lg sm:text-xl font-semibold mb-4">{t('dam.currentStatus')}</h2>
-              
-              <div className="grid grid-cols-1 gap-4">
-                {/* Current values */}
-                <div className="bg-backgroundColor p-4 rounded-lg">
-                  <h3 className="text-sm font-bold text-gray600 mb-2">{t('dam.currentValues')}</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray600">{t('dam.table.cotaLida')}:</span>
-                      <span className="font-medium">{latestDamData?.cota_lida?.toFixed(2) + "m"|| 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray600">{t('dam.table.volumeTotal')}:</span>
-                      <span className="font-medium">{latestDamData?.volume_total?.toFixed(2) + "hm³" || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray600">{t('dam.table.volumeUtil')}:</span>
-                      <span className="font-medium">{latestDamData?.volume_util?.toFixed(2) + "hm³"|| 'N/A'}</span>
-                    </div>
-                  
-                  </div>
-                </div>
-                
-                {/* Statistics */}
-                <div className="bg-backgroundColor p-4 rounded-lg">
-                  <h3 className="text-sm font-bold text-gray600 mb-2">{t('dam.fillStatistics')}</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray600">{t('dam.minFill')}:</span>
-                      <span className="font-medium">{stats.min.toFixed(2)}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray600">{t('dam.avgFill')}:</span>
-                      <span className="font-medium">{stats.avg.toFixed(2)}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray600">{t('dam.maxFill')}:</span>
-                      <span className="font-medium">{stats.max.toFixed(2)}%</span>
-                    </div>
-                  </div>
-                </div>
-                
-                
-                {/* Important levels */}
-                <div className="bg-backgroundColor p-4 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray600 mb-2">{t('dam.table.enchimento')}</h3>
-                  
-                  <div className="relative h-72 mt-2 bg-gray100 rounded overflow-hidden">
-                    {/* Current level indicator */}
-                    <div className="absolute inset-x-0 bottom-0 h-[1px] bg-black z-10" 
-                      style={{ bottom: `${latestDamData?.enchimento ? latestDamData.enchimento * 100 : 0}%` }}>
-                      <div className="absolute -top-0 -left-0 bg-black px-1 text-white text-xs">
-                        {latestDamData?.enchimento ? (latestDamData.enchimento * 100).toFixed(0) + '%' : '0%'}
-                      </div>
-                    </div>
-                    
-                    {/* Level bands */}
-                    <div className="absolute inset-x-0 bottom-0 h-[20%] bg-red-500 bg-opacity-30"></div>
-                    <div className="absolute inset-x-0 bottom-[20%] h-[20%] bg-orange-500 bg-opacity-30"></div>
-                    <div className="absolute inset-x-0 bottom-[40%] h-[30%] bg-yellow-500 bg-opacity-30"></div>
-                    <div className="absolute inset-x-0 bottom-[70%] h-[30%] bg-green-500 bg-opacity-30"></div>
-                    
-                    {/* Level labels */}
-                    <div className="absolute right-1 bottom-[5%] text-xs text-gray600">{t('dam.critical')}</div>
-                    <div className="absolute right-1 bottom-[25%] text-xs text-gray600">{t('dam.low')}</div>
-                    <div className="absolute right-1 bottom-[55%] text-xs text-gray600">{t('dam.medium')}</div>
-                    <div className="absolute right-1 bottom-[85%] text-xs text-gray600">{t('dam.high')}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Historical Data Table */}
-          <div id="historical-data">
-            <h3 className="text-lg font-medium mb-4">{t('dam.historicalData')}</h3>
             
-            {damData.length > 0 ? (
-              <DataTable
-                data={damData}
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-                rowsPerPage={rowsPerPage}
-                columns={[
-                  {
-                    key: '_time',
-                    header: t('dam.table.date'),
-                    render: (value: unknown) => value ? new Date(value as string | number | Date).toLocaleDateString('en-GB') : 'N/A'
-                  },
-                  {
-                    key: 'cota_lida',
-                    header: t('dam.table.cotaLida'),
-                    render: (value: unknown) => (value as number)?.toFixed(2) + ' m' || 'N/A'
-                  },
-                  {
-                    key: 'enchimento',
-                    header: t('dam.table.enchimento'),
-                    render: (value: unknown) => (
-                      <div className="flex items-center">
-                        <span className="mr-2">{value ? ((value as number) * 100).toFixed(0) + '%' : 'N/A'}</span>
-                        <div className="w-16 bg-gray200 rounded-full h-1.5">
-                          <div 
-                            className={`h-1.5 rounded-full ${value ? getFillColorClass((value as number) * 100) : 'bg-gray400'}`} 
-                            style={{ width: `${value ? (value as number) * 100 : 0}%` }}
-                          />
-                        </div>
-                      </div>
-                    )
-                  },
-                  {
-                    key: 'volume_total',
-                    header: t('dam.table.volumeTotal'),
-                    render: (value: unknown) => (value as number)?.toFixed(2) + ' hm³' || 'N/A'
-                  },
-                  {
-                    key: 'volume_util',
-                    header: t('dam.table.volumeUtil'),
-                    render: (value: unknown) => (value as number)?.toFixed(2) + ' hm³' || 'N/A'
-                  }
-                ]}
-                mobileCardRenderer={(item) => (
-                  <div key={item._time} className="bg-background rounded-xl shadow-sm p-4 border border-gray200">
-                    <h4 className="font-semibold text-sm text-darkGray mb-3">
-                      {item._time ? new Date(item._time).toLocaleDateString('en-GB') : 'N/A'}
-                    </h4>
-                    <div className="grid grid-cols-2 gap-3 text-[12px]">
-                      <div className="flex flex-col">
-                        <span className="text-gray600 mb-1">{t('dam.table.cotaLida')}</span>
-                        <span className="font-medium text-darkGray">{item.cota_lida?.toFixed(2) + ' m'|| 'N/A'}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-gray600 mb-1">{t('dam.table.enchimento')}</span>
-                        <span className="font-medium text-darkGray">{item.enchimento ? (item.enchimento * 100).toFixed(2) + '%' : 'N/A'}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-gray600 mb-1">{t('dam.table.volumeTotal')}</span>
-                        <span className="font-medium text-darkGray">{item.volume_total?.toFixed(2) + ' hm³' || 'N/A'}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-gray600 mb-1">{t('dam.table.volumeUtil')}</span>
-                        <span className="font-medium text-darkGray">{item.volume_util?.toFixed(2) + ' hm³' || 'N/A'}</span>
-                      </div>
+            {/* Map */}
+            <div className="glass-card-visible p-4 rounded-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray700 mb-4">{t('dam.location')}</h2>
+              {allDamStations.length > 0 ? (
+                <div>
+                  <div className="h-[250px] sm:h-[300px] relative rounded-lg overflow-hidden border border-gray700/20">
+                    <MapComponent
+                      stations={allDamStations}
+                      selectedStationId={damId}
+                      onMarkerHover={handleMarkerHover}
+                      onStationSelect={handleDamSelect}
+                      showMenu={false}
+                    />
+                  </div>
+                  {locationLoading && (
+                    <p className="text-xs text-gray700 mt-1">
+                      <span className="inline-block w-2 h-2 rounded-full bg-blue-600 animate-pulse mr-1"></span>
+                      {t('common.loading')}
+                    </p>
+                  )}
+                </div>
+              ) : locationLoading ? (
+                <div className="flex justify-center py-12 h-[250px]">
+                  <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : (
+                <p className="text-gray700 text-sm py-12 text-center">
+                  {t('dam.locationNotFound')}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Stats summary */}
+          <div className="glass-card-visible p-4 rounded-lg">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray700 mb-4">{t('dam.currentStatus')}</h2>
+            
+            <div className="grid grid-cols-1 gap-4">
+              {/* Current values */}
+              <div className="glass-card p-4 rounded-lg">
+                <h3 className="text-sm font-bold text-gray700 mb-2">{t('dam.currentValues')}</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray700">{t('dam.table.cotaLida')}:</span>
+                    <span className="font-medium text-gray700">{latestDamData?.cota_lida?.toFixed(2) + "m"|| 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray700">{t('dam.table.volumeTotal')}:</span>
+                    <span className="font-medium text-gray700">{latestDamData?.volume_total?.toFixed(2) + "hm³" || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray700">{t('dam.table.volumeUtil')}:</span>
+                    <span className="font-medium text-gray700">{latestDamData?.volume_util?.toFixed(2) + "hm³"|| 'N/A'}</span>
+                  </div>
+                
+                </div>
+              </div>
+              
+              {/* Statistics */}
+              <div className="glass-card p-4 rounded-lg">
+                <h3 className="text-sm font-bold text-gray700 mb-2">{t('dam.fillStatistics')}</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray700">{t('dam.minFill')}:</span>
+                    <span className="font-medium text-gray700">{stats.min.toFixed(2)}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray700">{t('dam.avgFill')}:</span>
+                    <span className="font-medium text-gray700">{stats.avg.toFixed(2)}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray700">{t('dam.maxFill')}:</span>
+                    <span className="font-medium text-gray700">{stats.max.toFixed(2)}%</span>
+                  </div>
+                </div>
+              </div>
+            
+              
+              {/* Important levels */}
+              <div className="glass-card p-4 rounded-lg">
+                <h3 className="text-sm font-medium text-gray700 mb-2">{t('dam.table.enchimento')}</h3>
+                
+                <div className="relative h-80 mt-2 bg-gray100 rounded overflow-hidden">
+                  {/* Current level indicator */}
+                  <div className="absolute inset-x-0 bottom-0 h-[2px] bg-black z-10" 
+                    style={{ 
+                      bottom: `${Math.max(0.1, Math.min(99.3, latestDamData?.enchimento ? latestDamData.enchimento * 100 : 0))}%` 
+                    }}>
+                    <div className={`absolute ${getTooltipPosition(latestDamData?.enchimento ? latestDamData.enchimento * 100 : 0)} left-2 bg-black px-2 py-1 text-white text-xs rounded`}>
+                      {latestDamData?.enchimento ? (latestDamData.enchimento * 100).toFixed(0) + '%' : '0%'}
                     </div>
                   </div>
-                )}
-              />
-            ) : (
-              <div className="bg-background p-4 sm:p-8 rounded-lg border text-center shadow text-sm">
-                {t('common.noData')}
+                  
+                  {/* Level bands */}
+                  <div className="absolute inset-x-0 bottom-0 h-[20%] bg-red-500 bg-opacity-30"></div>
+                  <div className="absolute inset-x-0 bottom-[20%] h-[20%] bg-orange-500 bg-opacity-30"></div>
+                  <div className="absolute inset-x-0 bottom-[40%] h-[30%] bg-yellow-500 bg-opacity-30"></div>
+                  <div className="absolute inset-x-0 bottom-[70%] h-[30%] bg-green-500 bg-opacity-30"></div>
+                  
+                  {/* Level labels */}
+                  <div className="absolute right-1 bottom-[5%] text-xs text-gray700">{t('dam.critical')}</div>
+                  <div className="absolute right-1 bottom-[25%] text-xs text-gray700">{t('dam.low')}</div>
+                  <div className="absolute right-1 bottom-[55%] text-xs text-gray700">{t('dam.medium')}</div>
+                  <div className="absolute right-1 bottom-[85%] text-xs text-gray700">{t('dam.high')}</div>
+                </div>
               </div>
-            )}
+            </div>
           </div>
+        </div>
+
+        {/* Historical Data Table */}
+        <div id="historical-data">
+          <h3 className="text-lg font-medium text-gray700 mb-4">{t('dam.historicalData')}</h3>
+          
+          {damData.length > 0 ? (
+            <DataTable
+              data={damData}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              rowsPerPage={rowsPerPage}
+              columns={[
+                {
+                  key: '_time',
+                  header: t('dam.table.date'),
+                  render: (value: unknown) => value ? new Date(value as string | number | Date).toLocaleDateString('en-GB') : 'N/A'
+                },
+                {
+                  key: 'cota_lida',
+                  header: t('dam.table.cotaLida'),
+                  render: (value: unknown) => (value as number)?.toFixed(2) + ' m' || 'N/A'
+                },
+                {
+                  key: 'enchimento',
+                  header: t('dam.table.enchimento'),
+                  render: (value: unknown) => (
+                    <div className="flex items-center">
+                      <span className="mr-2">{value ? ((value as number) * 100).toFixed(0) + '%' : 'N/A'}</span>
+                      <div className="w-16 bg-gray200 rounded-full h-1.5">
+                        <div 
+                          className={`h-1.5 rounded-full ${value ? getFillColorClass((value as number) * 100) : 'bg-gray400'}`} 
+                          style={{ width: `${value ? (value as number) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  )
+                },
+                {
+                  key: 'volume_total',
+                  header: t('dam.table.volumeTotal'),
+                  render: (value: unknown) => (value as number)?.toFixed(2) + ' hm³' || 'N/A'
+                },
+                {
+                  key: 'volume_util',
+                  header: t('dam.table.volumeUtil'),
+                  render: (value: unknown) => (value as number)?.toFixed(2) + ' hm³' || 'N/A'
+                }
+              ]}
+              mobileCardRenderer={(item) => (
+                <div key={item._time} className="glass-card p-4 border border-gray700/20">
+                  <h4 className="font-semibold text-sm text-gray700 mb-3">
+                    {item._time ? new Date(item._time).toLocaleDateString('en-GB') : 'N/A'}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-[12px]">
+                    <div className="flex flex-col">
+                      <span className="text-gray700 font-bold mb-1">{t('dam.table.cotaLida')}</span>
+                      <span className="font-medium text-gray700">{item.cota_lida?.toFixed(2) + ' m'|| 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-gray700 font-bold mb-1">{t('dam.table.enchimento')}</span>
+                      <span className="font-medium text-gray700">{item.enchimento ? (item.enchimento * 100).toFixed(2) + '%' : 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-gray700 font-bold mb-1">{t('dam.table.volumeTotal')}</span>
+                      <span className="font-medium text-gray700">{item.volume_total?.toFixed(2) + ' hm³' || 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-gray700 font-bold mb-1">{t('dam.table.volumeUtil')}</span>
+                      <span className="font-medium text-gray700">{item.volume_util?.toFixed(2) + ' hm³' || 'N/A'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            />
+          ) : (
+            <div className="glass-card-visible p-4 sm:p-8 rounded-lg text-center">
+              <p className="text-gray700">{t('common.noData')}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

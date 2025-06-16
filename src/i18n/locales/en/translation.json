@@ -19,7 +19,8 @@
     "excelUpload": "Excel Upload",
     "excelUploadShort": "Excel",
     "about": "About",
-    "aboutShort": "About"
+    "aboutShort": "About",
+    "siteDetails": "Site Details"
   },
   "title": {
     "home": "Home",
@@ -41,6 +42,7 @@
     "scrollForInfo": "Scroll for more info",
     "dataSource": "Data source:",
     "irristrat": "Irristrat – Irrigation Management",
+    "dataSourceIntro": "Welcome! Here you can explore weather stations across Portugal on an interactive map. Click on any station marker to see detailed weather data including temperature, humidity, wind, and rainfall. Perfect for farmers, researchers, or anyone curious about local weather patterns.",
     "dataList": [
       "Water levels in dams",
       "Air temperature (average, minimum, and maximum)",
@@ -59,6 +61,24 @@
       "university": "Universidade Lusófona",
       "department": "Department of Computer Science",
       "learnMore": "Learn more about the team, technologies and project architecture"
+    },
+    "dataTypes": {
+      "weatherData": {
+        "title": "Weather Data",
+        "description": "Temperature, humidity, wind & precipitation"
+      },
+      "damLevels": {
+        "title": "Dam Levels", 
+        "description": "Water levels & reservoir capacity"
+      },
+      "satelliteImages": {
+        "title": "Satellite Images",
+        "description": "NDVI, moisture & vegetation indices"
+      },
+      "predictions": {
+        "title": "Predictions",
+        "description": "Hydrological simulations & forecasts"
+      }
     }
   },
   "common": {
@@ -83,6 +103,9 @@
     "dailyTemperatureTrend": "Daily Temperature Trend",
     "viewMoreGraphs": "View More Graphs",
     "backToStation": "Back to station",
+    "stationsOverviewIntro": "Browse through all our weather stations across Portugal. Each card shows a station with its location and a preview image. Click on any station to dive into detailed weather measurements, historical data, and trends for that specific location.",
+    "stationDetailIntro": "Explore detailed weather data for this specific station. Switch between daily, hourly, and 10-minute intervals using the tabs above. Use the date picker to view historical data, and check the map to see nearby stations. Perfect for tracking local weather patterns over time.",
+    "stationGraphsIntro": "View detailed charts and graphs for this weather station. Compare temperature trends, wind patterns, and humidity changes over the past week. These visual insights help you spot weather patterns and understand local climate variations at a glance.",
     "tabs": {
       "daily": "Daily Data",
       "hourly": "Hourly Data",
@@ -154,6 +177,7 @@
     "clickMapToNavigate": "Click on a dam marker to view its details",
     "dataSource": "Data source:",
     "sir": "SIR - Irrigation Information System",
+    "dataSourceIntro": "Monitor water levels across Portugal's dams in a comprehensive table format. Use the powerful filters to search by dam name, date ranges, fill levels, and volumes. Sort columns to find critical or optimal water levels. Perfect for water managers and researchers who need detailed comparative data.",
     "noFilteredResults": "No results match your filter criteria.",
     "loading": "Loading data...",
     "tabs": {
@@ -202,7 +226,9 @@
   "footer": {
     "data": "Data source:",
     "source": "SIR - Sistema de Informação de Regadio"
-  }
+  },
+  "damsOverviewIntro": "Browse all of Portugal's monitored dams and reservoirs at a glance. Each card shows the current fill level with a visual water indicator and last update date. Click on any dam to dive into detailed historical data, trends, and location information for that specific reservoir.",
+  "damDetailIntro": "Explore comprehensive data for this specific dam including real-time fill levels, historical trends, and geographic location. View the fill level chart to understand water patterns over time, check current statistics, and browse detailed historical records. Use the map to see nearby dams and navigate between them."
 },
   "mobile": {
     "filters": {
@@ -283,53 +309,62 @@
     },
     "parameters": {
       "flowout_m3_s": {
-        "label": "Flow (m³/s)",
+        "label": "Water Flow Rate",
         "description": "Water Flow Rate"
       },
       "ammonia_mg_l": {
-        "label": "NH₄ (mg/l)",
+        "label": "Ammonia Concentration",
         "description": "Ammonia Concentration"
       },
       "dissolved_phosphorus_mg_l": {
-        "label": "PO₄ (mg/l)",
+        "label": "Dissolved Phosphorus",
         "description": "Dissolved Phosphorus"
       },
       "dissolved_oxygen_mg_l": {
-        "label": "DO (mg/l)",
+        "label": "Dissolved Oxygen",
         "description": "Dissolved Oxygen"
       },
       "nitrate_mg_l": {
-        "label": "NO₃ (mg/l)",
+        "label": "Nitrate",
         "description": "Nitrate"
       },
       "nitrite_mg_l": {
-        "label": "NO₂ (mg/l)",
+        "label": "Nitrite",
         "description": "Nitrite"
       },
       "organic_nitrogen_mg_l": {
-        "label": "Org-N (mg/l)",
+        "label": "Organic Nitrogen",
         "description": "Organic Nitrogen"
       },
       "organic_phosphorus_mg_l": {
-        "label": "Org-P (mg/l)",
+        "label": "Organic Phosphorus",
         "description": "Organic Phosphorus"
       },
       "saturation_oxygen_mg_l": {
-        "label": "DO-Sat (mg/l)",
+        "label": "Oxygen Saturation Level",
         "description": "Oxygen Saturation Level"
       },
       "temperature_cc": {
-        "label": "Temp (°C)",
+        "label": "Water Temperature",
         "description": "Water Temperature"
       },
       "sediments_tons": {
-        "label": "Sed (tons)",
+        "label": "Sediment Load",
         "description": "Sediment Load"
       }
     }
   },
   "excelUploader": {
     "title": "Upload Excel Data Manually",
+    "purpose": {
+      "title": "What does this do?",
+      "description": "Upload dam monitoring data from Excel files directly into our system. Your data will be processed and integrated with existing monitoring information."
+    },
+    "dataFlow": {
+      "step1": "Upload your Excel file with dam data",
+      "step2": "Data is processed and stored in InfluxDB database",
+      "step3": "View your data in Dam Monitoring table and Dams Overview"
+    },
     "infoButton": "File Requirements Info",
     "selectFile": "Select Excel File",
     "chooseFile": "Choose File",
@@ -352,7 +387,8 @@
   },
   "sentinel": {
     "dataSource": "Data source:",
-    "sentinelHub": "Sentinel Hub - Sentinel Satellite Data"
+    "sentinelHub": "Sentinel Hub - Sentinel Satellite Data",
+    "dataSourceIntro": "Explore satellite images of Portugal from space! Switch between different view modes to see vegetation health, water content, urban areas, or natural colors. Use the map controls to zoom into your area of interest and watch how the landscape changes over time."
   },
   "about": {
     "title": "About Water Wise",
@@ -367,7 +403,9 @@
       "developers": "Developed by",
       "supervisors": "Supervisors",
       "supervisor": "Supervisor",
-      "cosupervisor": "Co-supervisor"
+      "cosupervisor": "Co-supervisor",
+      "collaborator": "External Advisor",
+      "collaboratorInfo": "Faculty of Engineering"
     },
     "techStack": {
       "title": "Technology Stack",

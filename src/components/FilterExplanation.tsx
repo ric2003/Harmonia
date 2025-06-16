@@ -12,61 +12,93 @@ interface FilterExplanationProps {
 const explanationStyles = `
   .filter-explanation-container {
     margin: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    border-radius: 8px;
-    border: none;
-    background: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+  }
+  .dark .filter-explanation-container {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
 
   .filter-explanation-content {
-    background-color: var(--backgroundColor, white);
-    color: var(--gray-700, #4a5568);
-    padding: 16px;
-    border-radius: 8px;
-    width: 250px;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-    max-height: 50vh;
+    background: transparent;
+    color: #111827;
+    padding: 16px 20px;
+    border-radius: 12px;
+    width: 500px;
+    max-height: 40vh;
     overflow-y: auto;
+  }
+  .dark .filter-explanation-content {
+    color: #f9fafb;
   }
 
   .filter-explanation-title {
     margin: 0 0 8px 0;
     font-size: 14px;
     font-weight: 600;
-    color: var(--gray-700, #4a5568);
+    color: #000000;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    transition: color 0.2s ease-in-out;
+  }
+  .dark .filter-explanation-title {
+    color: #ffffff;
   }
 
   .filter-explanation-text {
-    font-size: 12px;
-    line-height: 1.3;
-    margin: 0 0 8px 0;
-    color: var(--gray-600, #718096);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0 0 10px 0;
+    color: #1f2937;
+  }
+  .dark .filter-explanation-text {
+    color: #e5e7eb;
   }
 
   .color-legend {
     display: flex;
     flex-direction: column;
-    margin-top: 8px;
+    margin-top: 10px;
     font-size: 11px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .dark .color-legend {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .color-scale {
-    height: 20px;
+    height: 16px;
     width: 100%;
-    margin: 5px 0;
+    margin: 6px 0 4px 0;
     border-radius: 4px;
     overflow: hidden;
     position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+  .dark .color-scale {
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
 
   .scale-value {
     display: flex;
     justify-content: space-between;
     margin-top: 2px;
-    font-size: 10px;
+    font-size: 9px;
+    color: #374151;
+    font-weight: 600;
+  }
+  .dark .scale-value {
+    color: #d1d5db;
   }
 
   .ndvi-scale::after {
@@ -104,9 +136,32 @@ const explanationStyles = `
     );
   }
 
+  @media (max-width: 768px) {
+    .filter-explanation-content {
+      width: 350px;
+      padding: 14px 16px;
+    }
+  }
   @media (max-width: 600px) {
     .filter-explanation-content {
-      width: 220px;
+      width: 300px;
+      padding: 12px 14px;
+    }
+    .filter-explanation-text {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+  }
+  @media (max-width: 480px) {
+    .filter-explanation-content {
+      width: 260px;
+      padding: 10px 12px;
+    }
+    .filter-explanation-title {
+      font-size: 13px;
+    }
+    .filter-explanation-text {
+      font-size: 11px;
     }
   }
 `;

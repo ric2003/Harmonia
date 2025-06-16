@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect, useContext } from "react";
+import { useState, useCallback, useContext } from "react";
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import dynamic from "next/dynamic";
 import {AlertMessage} from "@/components/ui/AlertMessage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import { useTranslation } from 'react-i18next';
 import ScrollIndicator from "@/components/ScrollIndicator";
-import DataSource from "@/components/DataSource";
 import { useStations, usePrefetchStationData } from "@/hooks/useStations";
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { Users, MapPin, Dam, Satellite, Building, Map } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Station {
   id: string;
@@ -29,7 +29,6 @@ interface MapComponentProps {
   showMenu: boolean | null;
 }
 
-// Importação dinâmica do componente de mapa para evitar problemas de SSR
 const MapComponent = dynamic<MapComponentProps>(
   () => import("@/components/MapComponent"),
   { ssr: false }
@@ -40,68 +39,56 @@ export default function HomePage() {
   const [selectedStation, setSelectedStation] = useState<string | null>(null);
   const { sidebarOpen } = useContext(SidebarHeaderContext);
   const { t } = useTranslation();
-  const { prefetchAllStationData } = usePrefetchStationData();
+  const { prefetchStationData } = usePrefetchStationData();
+  const router = useRouter();
   
   useTranslatedPageTitle('navigation.home');
 
-  // Prefetch station data when stations are loaded, with navigation-friendly timing
-  useEffect(() => {
-    if (stations.length > 0) {
-      const prefetchWithIdleCallback = () => {
-        if ('requestIdleCallback' in window) {
-          window.requestIdleCallback(
-            () => {
-              // Process stations in very small batches with high delays in between
-              prefetchAllStationData(stations);
-            },
-            { timeout: 10000 } // 10-second timeout ensures it eventually runs even on busy browsers
-          );
-        } else {
-          // Fallback for browsers without requestIdleCallback - use a longer delay
-          const timeoutId = setTimeout(() => {
-            prefetchAllStationData(stations);
-          }, 5000); // 5 seconds delay instead of 2
-          return () => clearTimeout(timeoutId);
-        }
-      };
+  // Smart hover-based prefetching with debouncing
+  const handleStationHover = useCallback((stationId: string | null) => {
+    setSelectedStation(stationId);
+    
+    // Only prefetch if we have a valid station ID and it's not already cached
+    if (stationId) {
+      // Debounce the prefetch to avoid excessive API calls
+      const timeoutId = setTimeout(() => {
+        prefetchStationData(stationId).catch(error => {
+          // Silently handle prefetch errors - they shouldn't affect the UI
+          console.log('Prefetch failed for station:', stationId, error);
+        });
+      }, 300); // 300ms delay to avoid prefetching on quick hovers
       
-      // Add event listener for before unload to cancel prefetching
-      const cancelPrefetch = () => {
-        // This isn't perfect but helps signal we're about to navigate away
-        console.log('Navigation detected, aborting prefetch');
-        // We can't actually abort the prefetch directly, but we can clean up
-      };
-      
-      window.addEventListener('beforeunload', cancelPrefetch);
-      
-      // Delay starting the prefetch to ensure it doesn't interfere with initial navigation
-      const initialDelayId = setTimeout(prefetchWithIdleCallback, 5000);
-      
-      return () => {
-        clearTimeout(initialDelayId);
-        window.removeEventListener('beforeunload', cancelPrefetch);
-      };
+      // Store timeout ID for potential cleanup
+      return () => clearTimeout(timeoutId);
     }
-  }, [stations, prefetchAllStationData]);
+  }, [prefetchStationData]);
+
+  // Handle station selection with navigation
+  const handleStationSelect = useCallback((stationId: string | null) => {
+    if (stationId) {
+      // Navigate to station details page
+      router.push(`/stations/${stationId}`);
+    }
+  }, [router]);
 
   if (isLoading) {
     return (
-      <div>
-        {/* First container - Map and title */}
-        <div className="bg-backgroundColor p-4 rounded-xl shadow-md flex flex-col gap-2">
-          <div className="h-8 bg-gray200 rounded w-1/3 animate-pulse"></div>
-          <div className="h-[55vh] bg-gray200 rounded-lg animate-pulse"></div>
+      <div className="space-y-6">
+        {/* First container - Map and title with glass loading */}
+        <div className="glass-card p-6">
+          <div className="h-8 bg-white/20 dark:bg-white/10 rounded w-1/3 animate-pulse mb-4"></div>
+          <div className="h-[55vh] bg-white/20 dark:bg-white/10 rounded-lg animate-pulse"></div>
         </div>
         
-        {/* Second container - Information section */}
-        <div className="bg-backgroundColor rounded-lg p-6 mt-6 shadow-md">
-          <div className="h-6 bg-gray200 rounded w-1/4 mb-4 animate-pulse"></div>
-          <div className="h-4 bg-gray200 rounded w-3/4 mb-3 animate-pulse"></div>
-          <div className="h-4 bg-gray200 rounded w-2/3 mb-3 animate-pulse"></div>
-          <div className="h-6 bg-gray200 rounded w-1/3 mt-6 mb-3 animate-pulse"></div>
+        {/* Second container - Information section with glass loading */}
+        <div className="glass-panel p-8">
+          <div className="h-6 bg-white/20 dark:bg-white/10 rounded w-1/4 mb-4 animate-pulse"></div>
+          <div className="h-4 bg-white/20 dark:bg-white/10 rounded w-3/4 mb-3 animate-pulse"></div>
+          <div className="h-4 bg-white/20 dark:bg-white/10 rounded w-2/3 mb-3 animate-pulse"></div>
+          <div className="h-6 bg-white/20 dark:bg-white/10 rounded w-1/3 mt-6 mb-3 animate-pulse"></div>
           <div className="space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-4 bg-gray200 rounded w-3/4 animate-pulse"></div>
+              <div key={i} className="h-4 bg-white/20 dark:bg-white/10 rounded w-3/4 animate-pulse"></div>
             ))}
           </div>
         </div>
@@ -111,81 +98,166 @@ export default function HomePage() {
   if (fetchError) return <AlertMessage type="error" message={(fetchError as Error).message} />;
 
   return (
-    <div>
-      <div className="bg-backgroundColor h-[100%] p-4 rounded-xl shadow-md flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-primary text-center sm:text-left">{t('home.title')}</h1>
+    <div className="space-y-8">
+      <div className="glass-card p-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none"></div>
+        <div className="relative z-10">
+          {/* Header with enhanced styling */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-primary mb-2">
+                {t('home.title')}
+              </h1>
+            </div>
+          
+            <div className="lg:hidden mt-4 sm:mt-0">
+              <select
+                name="stations"
+                id="select-stations"
+                className="glass-light px-4 py-2 rounded-lg text-darkGray dark:text-gray300 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                onChange={(e) => {
+                  if (e.target.value) {
+                    router.push(`/stations/${e.target.value}`);
+                  }
+                }}
+                value={selectedStation || ""}
+              >
+                <option value="">Select a station</option>
+                {stations.map((station) => {
+                  return (
+                    <option key={station.id} value={station.id}>
+                      {station.estacao.slice(7)}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          </div>
 
-        <div className="lg:hidden text-darkGray flex justify-center sm:justify-start ">
-          <select
-            name="dams"
-            id="select-dams"
-            className="bg-background border border-darkGray rounded-md py-1 px-2"
-            
-            onChange={(e) => {
-              setSelectedStation(e.target.value)
-            }}
-          >
-            <option key="default">Selecione uma barragem</option>
-            {stations.map((station) => {
-              return (
-                <option key={station.id} value={station.id}>{station.estacao.slice(7)}</option>
-              );
-            })}
-          </select>
-        </div>
-        <div className="relative rounded-lg overflow-hidden w-full border border-gray200 shadow-sm map-container-fixed">
-          <MapComponent
-            key={sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}
-            stations={stations}
-            selectedStationId={selectedStation}
-            onMarkerHover={setSelectedStation}
-            onStationSelect={setSelectedStation}
-            showMenu={true}
-          />
+          {/* Map container with enhanced glass border */}
+          <div className="relative rounded-2xl overflow-hidden border border-white/20 dark:border-white/10 shadow-2xl backdrop-blur-sm">
+            <div className="h-[55vh] w-full">
+              <MapComponent
+                key={sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}
+                stations={stations}
+                selectedStationId={selectedStation}
+                onMarkerHover={handleStationHover}
+                onStationSelect={handleStationSelect}
+                showMenu={true}
+              />
+            </div>
+            {/* Map overlay with station count */}
+            <div className="absolute top-4 left-4 glass-frosted px-3 py-2 rounded-lg">
+              <div className="flex items-center gap-2 text-sm font-medium text-darkGray dark:text-gray300">
+                <MapPin className="w-4 h-4 text-primary" />
+                <span>{stations.length} stations</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <ScrollIndicator targetId="intro-section" text={t('home.scrollForInfo')} />
 
-      <div id="intro-section" className="bg-backgroundColor rounded-lg p-8 mt-8 shadow-md">
-        <div className="prose max-w-none text-gray600">
-          <p className="mb-6 text-lg leading-relaxed">{t('home.intro')}</p>
-          <p className="mb-6 text-lg leading-relaxed">{t('home.purpose')}</p>
+      {/* Introduction Section with Glass Cards */}
+      <div id="intro-section" className="glass-card p-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Main intro text */}
+          <div className="text-center mb-12">
+            <p className="text-lg leading-relaxed text-gray600 dark:text-gray400 mb-6">
+              {t('home.intro')}
+            </p>
+            <p className="text-lg leading-relaxed text-gray600 dark:text-gray400">
+              {t('home.purpose')}
+            </p>
+          </div>
 
-          <h3 className="text-xl font-semibold mt-8 mb-4 text-gray700">{t('home.monitoredData')}</h3>
-          <ul className="list-disc pl-8 space-y-2 text-gray600">
-            {(t('home.dataList', { returnObjects: true }) as string[]).map((item: string, index: number) => (
-              <li key={index} className="leading-relaxed">{item}</li>
-            ))}
-          </ul>
+          {/* Data Types Grid */}
+          <div className="mb-12">
+            <h3 className="text-xl font-semibold mb-6 text-gray700 dark:text-gray300 text-center">
+              {t('home.monitoredData')}
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Weather Data Card */}
+              <div className="glass-card p-6 text-center group hover:glass-medium">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Building className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray700 dark:text-gray300 mb-2">{t('home.dataTypes.weatherData.title')}</h4>
+                <p className="text-sm text-gray600 dark:text-gray400">{t('home.dataTypes.weatherData.description')}</p>
+              </div>
+
+              {/* Dam Levels Card */}
+              <div className="glass-card p-6 text-center group hover:glass-medium">
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Dam className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray700 dark:text-gray300 mb-2">{t('home.dataTypes.damLevels.title')}</h4>
+                <p className="text-sm text-gray600 dark:text-gray400">{t('home.dataTypes.damLevels.description')}</p>
+              </div>
+
+              {/* Satellite Data Card */}
+              <div className="glass-card p-6 text-center group hover:glass-medium">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Satellite className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray700 dark:text-gray300 mb-2">{t('home.dataTypes.satelliteImages.title')}</h4>
+                <p className="text-sm text-gray600 dark:text-gray400">{t('home.dataTypes.satelliteImages.description')}</p>
+              </div>
+
+              {/* Predictions Card */}
+              <div className="glass-card p-6 text-center group hover:glass-medium">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Map className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray700 dark:text-gray300 mb-2">{t('home.dataTypes.predictions.title')}</h4>
+                <p className="text-sm text-gray600 dark:text-gray400">{t('home.dataTypes.predictions.description')}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed Data List */}
+          <div className="glass-card rounded-2xl p-6">
+            <h4 className="font-semibold text-gray700 dark:text-gray300 mb-4">Complete Data Coverage:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {(t('home.dataList', { returnObjects: true }) as string[]).map((item: string, index: number) => (
+                <div key={index} className="flex items-center gap-3 text-gray600 dark:text-gray400">
+                  <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                  <span className="text-sm leading-relaxed">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div id="project-info-section" className="bg-backgroundColor rounded-lg p-8 mt-8 shadow-md">
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-gray700 mb-4">{t('home.projectInfo.title')}</h3>
-          <p className="text-lg text-gray600 mb-8 leading-relaxed max-w-2xl mx-auto">
-            {t('home.projectInfo.description')}
-          </p>
-          <Link 
-            href="/about" 
-            className="inline-flex items-center gap-3 bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-lg transition-colors font-semibold text-lg shadow-md hover:shadow-lg"
-          >
-            <Users className="w-6 h-6" />
-            {t('navigation.about')}
-          </Link>
-          <p className="text-sm text-gray500 mt-4 leading-relaxed">
-            {t('home.projectInfo.learnMore')}
-          </p>
+      <div id="project-info-section" className="glass-card p-8 relative overflow-hidden">
+        <div className="relative z-10 text-center max-w-4xl mx-auto">
+          <div className="glass-card p-8 mb-8">
+            <h3 className="text-3xl font-bold text-primary mb-6">
+              {t('home.projectInfo.title')}
+            </h3>
+            <p className="text-lg text-gray600 dark:text-gray400 leading-relaxed max-w-2xl mx-auto mb-8">
+              {t('home.projectInfo.description')}
+            </p>
+            
+            <Link 
+              href="/about" 
+              className="inline-flex items-center gap-3 glass-normal hover:glass-heavy text-primary hover:text-primary/90 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 border border-primary"
+            >
+              <Users className="w-6 h-6" />
+              {t('navigation.about')}
+            </Link>
+          </div>
+          
+          <div className="glass-card rounded-xl p-6">
+            <p className="text-sm text-gray500 dark:text-gray400 leading-relaxed">
+              {t('home.projectInfo.learnMore')}
+            </p>
+          </div>
         </div>
       </div>
-      
-      <DataSource 
-        position="footer"
-        textKey="home.dataSource"
-        linkKey="home.irristrat"
-        linkUrl="https://irristrat.com/new/index.php"
-      />
     </div>
   );
 }

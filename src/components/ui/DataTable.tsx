@@ -21,7 +21,7 @@ export function DataTable<T>({
   currentPage, 
   onPageChange, 
   rowsPerPage = 10,
-  mobileCardRenderer
+  mobileCardRenderer,
 }: DataTableProps<T>) {
   // Calculate pagination values
   const totalPages = useMemo(() => {
@@ -68,25 +68,25 @@ export function DataTable<T>({
       )}
       
       {/* Desktop view: Table */}
-      <div className="hidden sm:block overflow-x-auto bg-background rounded-lg shadow">
-        <table className="min-w-full divide-y divide-lightGray">
-          <thead className="bg-gray50">
+      <div className={'hidden sm:block overflow-x-auto rounded-lg border border-gray200'}>
+        <table className="min-w-full divide-y divide-gray100">
+          <thead>
             <tr>
               {columns.map((column) => (
                 <th 
                   key={column.key}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray600 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-bold text-gray700 uppercase tracking-wider"
                 >
                   {column.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-background divide-y divide-lightGray">
+          <tbody className="glass-transparent divide-y divide-gray200">
             {paginatedData.map((item, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-gray50">
+              <tr key={rowIndex} className="hover:bg-gray100">
                 {columns.map((column) => (
-                  <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray700">
                     {renderCell(item, column)}
                   </td>
                 ))}
@@ -99,15 +99,15 @@ export function DataTable<T>({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-4 flex justify-center">
-          <nav className="flex items-center space-x-1">
+          <nav className={'flex items-center space-x-1 glass-panel-visible rounded-lg p-2'}>
             {/* First page button */}
             <button
               onClick={() => handlePageChange(1)}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded-md ${
+              className={`px-3 py-1 rounded-md transition-all ${
                 currentPage === 1 
-                  ? 'text-gray400 cursor-not-allowed' 
-                  : 'text-primary hover:bg-primary-light'
+                  ? 'text-gray500 cursor-not-allowed' 
+                  : 'text-gray700 hover:glass-panel hover:text-primary'
               }`}
               title="First page"
             >
@@ -120,10 +120,10 @@ export function DataTable<T>({
             <button
               onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded-md ${
+              className={`px-3 py-1 rounded-md transition-all ${
                 currentPage === 1 
-                  ? 'text-gray400 cursor-not-allowed' 
-                  : 'text-primary hover:bg-primary-light'
+                  ? 'text-gray200 cursor-not-allowed' 
+                  : 'text-gray700 hover:glass-panel hover:text-primary'
               }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -153,10 +153,10 @@ export function DataTable<T>({
                 <button
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
-                  className={`px-3 py-1 rounded-md ${
+                  className={`px-3 py-1 rounded-md transition-all ${
                     currentPage === pageNum
-                      ? 'bg-primary text-white'
-                      : 'text-darkGray hover:bg-gray200'
+                      ? 'glass-panel text-primary font-semibold'
+                      : 'text-gray700 hover:glass-panel hover:text-primary'
                   }`}
                 >
                   {pageNum}
@@ -168,10 +168,10 @@ export function DataTable<T>({
             <button
               onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded-md ${
+              className={`px-3 py-1 rounded-md transition-all ${
                 currentPage === totalPages
-                  ? 'text-gray400 cursor-not-allowed'
-                  : 'text-primary hover:bg-primary-light'
+                  ? 'text-gray200 cursor-not-allowed'
+                  : 'text-gray700 hover:glass-panel hover:text-primary'
               }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -183,10 +183,10 @@ export function DataTable<T>({
             <button
               onClick={() => handlePageChange(totalPages)}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded-md ${
+              className={`px-3 py-1 rounded-md transition-all ${
                 currentPage === totalPages
-                  ? 'text-gray400 cursor-not-allowed'
-                  : 'text-primary hover:bg-primary-light'
+                  ? 'text-gray200 cursor-not-allowed'
+                  : 'text-gray700 hover:glass-panel hover:text-primary'
               }`}
               title="Last page"
             >

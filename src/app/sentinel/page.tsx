@@ -10,15 +10,15 @@ export default function Home() {
   useTranslatedPageTitle('title.sentinelMap');
   const { sidebarOpen } = useContext(SidebarHeaderContext);
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <DataSource 
-        position="header"
+        introTextKey="sentinel.dataSourceIntro"
         textKey="sentinel.dataSource"
         linkKey="sentinel.sentinelHub"
         linkUrl="https://www.sentinel-hub.com/"
       />
       
-      <div className="flex-1 rounded-lg overflow-hidden">
+      <div className="rounded-lg overflow-hidden">
         <SentinelMap
           key={sidebarOpen ? 'sidebar-open' : 'sidebar-closed'} 
         />
