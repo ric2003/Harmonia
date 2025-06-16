@@ -67,8 +67,8 @@ Light Mode | Dark Mode
 - Run "npm run dev" to see the App localy;
 
 ## 👥 Team
-- Ricardo Gonçalves – [a22208676] [Linkedin](https://www.linkedin.com/in/ricardo-piedade-725485230/)
-- Ricardo Piedade – [a22207722] [Linkedin](https://www.linkedin.com/in/ricardo-gon%C3%A7alves-986780267/)
+- Ricardo Gonçalves – [a22208676] [Linkedin](https://www.linkedin.com/in/ricardo-gon%C3%A7alves-986780267/)
+- Ricardo Piedade – [a22207722] [Linkedin](https://www.linkedin.com/in/ricardo-piedade-725485230/)
 - Supervisor: Lúcio Studer
 - Co-supervisor: Martim Mourão
 
