@@ -6,36 +6,59 @@ By collecting and integrating both real-time and historical data (including sate
 
 ## Website Walkthrough
 ### Home Page
-![Home Page]()
-![Home Page Mobile]()
+Light Mode | Dark Mode
+:-: | :-:
+![Home Page Light](readme-images/home.png) | ![Home Page Dark](readme-images/home-dark.png)
 
 ### About Page
-![About Page]()
-![About Page Mobile]()
+Light Mode | Dark Mode
+:-: | :-:
+![About Page Light](readme-images/about.png) | ![About Page Dark](readme-images/about-dark.png)
 
 ### Meteorological Stations Page
-![Meteorological Stations Page]()
-![Meteorological Stations Page Mobile]()
+Light Mode | Dark Mode
+:-: | :-:
+![Meteorological Stations Page Light](readme-images/meteorological-stations.png) | ![Meteorological Stations Page Dark](readme-images/meteorological-stations-dark.png)
+
+### Meteorological Station Page
+Light Mode | Dark Mode
+:-: | :-:
+![Meteorological Station Page Light](readme-images/meteorological-station.png) | ![Meteorological Station Page Dark](readme-images/meteorological-station-dark.png)
+
+### Meteorological Station Graphs Page
+Light Mode | Dark Mode
+:-: | :-:
+![Meteorological Station Graphs Page Light](readme-images/station-graphs.png) | ![Meteorological Station Graphs Page Dark](readme-images/station-graphs-dark.png)
 
 ### Dams Overview Page
-![Dams Overview Page]()
-![Dams Overview Page Mobile]()
+Light Mode | Dark Mode
+:-: | :-:
+![Dams Overview Page Light](readme-images/dams-overview.png) | ![Dams Overview Page Dark](readme-images/dams-overview-dark.png)
+
+### Dam Page
+Light Mode | Dark Mode
+:-: | :-:
+![Dam Page Light](readme-images/dam.png) | ![Dam Page Dark](readme-images/dam-dark.png)
 
 ### Dam Monitoring Page
-![Dam Monitoring Page]()
-![Dam Monitoring Page Mobile]()
+Light Mode | Dark Mode
+:-: | :-:
+![Dam Monitoring Page Light](readme-images/dam-monitoring.png) | ![Dam Monitoring Page Dark](readme-images/dam-monitoring-dark.png)
 
 ### Sattelite Images Page
-![Sattelite Images Page]()
-![Sattelite Images Page Mobile]()
+Light Mode | Dark Mode
+:-: | :-:
+![Sattelite Images Page Light](readme-images/satellite-images.png) | ![Sattelite Images Page Dark](readme-images/satellite-images-dark.png)
 
 ### Predictive Model Page
-![Predictive Model Page]()
-![Predictive Model Page Mobile]()
+Light Mode | Dark Mode
+:-: | :-:
+![Predictive Model Page Light](readme-images/predictive-model.png) | ![Predictive Model Page Dark](readme-images/predictive-model-dark.png)
 
 ### Excel Page
-![Excel Page]()
-![Excel Page Mobile]()
+Light Mode | Dark Mode
+:-: | :-:
+![Excel Page Light](readme-images/excel.png) | ![Excel Page Dark](readme-images/excel-dark.png)
 
 ## Installation Setup
 - In your terminal use "git clone (repository url)";
