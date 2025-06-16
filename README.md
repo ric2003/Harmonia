@@ -4,9 +4,48 @@ Water-Wise is an innovative web application developed as part of the Final Year 
 
 By collecting and integrating both real-time and historical data (including satellite imagery, field measurements, and external APIs), the system offers dynamic visualizations, interactive dashboards, and personalized alerts based on machine learning models.
 
+## Website Walkthrough
+### Home Page
+![Home Page]()
+![Home Page Mobile]()
+
+### About Page
+![About Page]()
+![About Page Mobile]()
+
+### Meteorological Stations Page
+![Meteorological Stations Page]()
+![Meteorological Stations Page Mobile]()
+
+### Dams Overview Page
+![Dams Overview Page]()
+![Dams Overview Page Mobile]()
+
+### Dam Monitoring Page
+![Dam Monitoring Page]()
+![Dam Monitoring Page Mobile]()
+
+### Sattelite Images Page
+![Sattelite Images Page]()
+![Sattelite Images Page Mobile]()
+
+### Predictive Model Page
+![Predictive Model Page]()
+![Predictive Model Page Mobile]()
+
+### Excel Page
+![Excel Page]()
+![Excel Page Mobile]()
+
+## Installation Setup
+- In your terminal use "git clone (repository url)";
+- Install all packages with "npm i";
+- Update all Project Keys in your .env file;
+- Run "npm run dev" to see the App localy;
+
 ## 👥 Team
-- Ricardo Gonçalves – [a22208676]
-- Ricardo Piedade – [a22207722]
+- Ricardo Gonçalves – [a22208676] [Linkedin](https://www.linkedin.com/in/ricardo-piedade-725485230/)
+- Ricardo Piedade – [a22207722] [Linkedin](https://www.linkedin.com/in/ricardo-gon%C3%A7alves-986780267/)
 - Supervisor: Lúcio Studer
 - Co-supervisor: Martim Mourão
 
