@@ -43,6 +43,8 @@
     "dataSource": "Data source:",
     "irristrat": "Irristrat – Irrigation Management",
     "dataSourceIntro": "Welcome! Here you can explore weather stations across Portugal on an interactive map. Click on any station marker to see detailed weather data including temperature, humidity, wind, and rainfall. Perfect for farmers, researchers, or anyone curious about local weather patterns.",
+    "selectStation": "Select a station",
+    "stations": "{{count}} stations",
     "dataList": [
       "Water levels in dams",
       "Air temperature (average, minimum, and maximum)",

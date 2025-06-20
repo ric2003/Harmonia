@@ -43,6 +43,8 @@
     "dataSource": "Fonte dos dados:",
     "irristrat": "Irristrat – Gestão de Irrigação",
     "dataSourceIntro": "Bem-vindo! Aqui pode explorar estações meteorológicas em todo Portugal num mapa interativo. Clique em qualquer marcador de estação para ver dados meteorológicos detalhados incluindo temperatura, humidade, vento e precipitação. Perfeito para agricultores, investigadores ou qualquer pessoa curiosa sobre padrões meteorológicos locais.",
+    "selectStation": "Selecione uma estação",
+    "stations": "{{count}} estações",
     "dataList": [
       "Níveis de água nas barragens",
       "Temperatura do ar (média, mínima e máxima)",

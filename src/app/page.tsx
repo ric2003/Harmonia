@@ -7,7 +7,7 @@ import {AlertMessage} from "@/components/ui/AlertMessage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import { useTranslation } from 'react-i18next';
 import ScrollIndicator from "@/components/ScrollIndicator";
-import { useStations, usePrefetchStationData } from "@/hooks/useStations";
+import { useStations } from "@/hooks/useStations";
 import Link from "next/link";
 import { Users, MapPin, Dam, Satellite, Building, Map } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -39,29 +39,14 @@ export default function HomePage() {
   const [selectedStation, setSelectedStation] = useState<string | null>(null);
   const { sidebarOpen } = useContext(SidebarHeaderContext);
   const { t } = useTranslation();
-  const { prefetchStationData } = usePrefetchStationData();
   const router = useRouter();
   
   useTranslatedPageTitle('navigation.home');
 
-  // Smart hover-based prefetching with debouncing
+  // Handle station hover - only set selected station
   const handleStationHover = useCallback((stationId: string | null) => {
     setSelectedStation(stationId);
-    
-    // Only prefetch if we have a valid station ID and it's not already cached
-    if (stationId) {
-      // Debounce the prefetch to avoid excessive API calls
-      const timeoutId = setTimeout(() => {
-        prefetchStationData(stationId).catch(error => {
-          // Silently handle prefetch errors - they shouldn't affect the UI
-          console.log('Prefetch failed for station:', stationId, error);
-        });
-      }, 300); // 300ms delay to avoid prefetching on quick hovers
-      
-      // Store timeout ID for potential cleanup
-      return () => clearTimeout(timeoutId);
-    }
-  }, [prefetchStationData]);
+  }, []);
 
   // Handle station selection with navigation
   const handleStationSelect = useCallback((stationId: string | null) => {
@@ -105,24 +90,22 @@ export default function HomePage() {
           {/* Header with enhanced styling */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-primary mb-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-primary">
                 {t('home.title')}
               </h1>
             </div>
           
-            <div className="lg:hidden mt-4 sm:mt-0">
+            <div className="lg:hidden mt-3 sm:mt-0">
               <select
                 name="stations"
                 id="select-stations"
-                className="glass-light px-4 py-2 rounded-lg text-darkGray dark:text-gray300 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                className="pl-4 pr-10 py-2 rounded-lg bg-background text-darkGray border border-gray400 focus:outline-none focus:ring-1 focus:ring-primary"
                 onChange={(e) => {
-                  if (e.target.value) {
-                    router.push(`/stations/${e.target.value}`);
-                  }
+                  handleStationHover(e.target.value || null);
                 }}
                 value={selectedStation || ""}
               >
-                <option value="">Select a station</option>
+                <option value="">{t('home.selectStation')}</option>
                 {stations.map((station) => {
                   return (
                     <option key={station.id} value={station.id}>

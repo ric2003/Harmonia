@@ -18,14 +18,14 @@ export default function MapList({stations, selectedStationId, onMarkerHover, sho
             {showMenu && (
                 <div className="rounded-lg shadow-md overflow-hidden transition-all duration-300" 
                     style={{ maxHeight: showList ? '60vh' : '40px', width: '250px' }}>
-                <div className="p-2 bg-backgroundColor cursor-pointer flex justify-between items-center" 
+                <div className="p-2 bg-background cursor-pointer flex justify-between items-center" 
                     onClick={() => setShowList(!showList)}>
                     <h3 className="text-sm font-bold text-primary">Lista de Barragens</h3>
                     <span className="text-xs text-darkGray">{showList ? '▲' : '▼'}</span>
                 </div>
                 
                 {showList && (
-                    <div className="p-2 max-h-[calc(60vh-40px)] overflow-y-auto bg-gray100">
+                    <div className="p-2 max-h-[calc(60vh-40px)] overflow-y-auto bg-background">
                     <div className="space-y-1 text-darkGray">
                         {stations.map((station) => (
                         <Link 
@@ -37,7 +37,7 @@ export default function MapList({stations, selectedStationId, onMarkerHover, sho
                             className={`p-1.5 rounded-lg flex items-center text-xs ${
                                 selectedStationId === station.id 
                                 ? "bg-blue50 border-l-4 border-blue-500" 
-                                : "bg-gray50 hover:bg-blue50"
+                                : "glass-card hover:bg-blue50"
                             }`}
                             onMouseEnter={() => onMarkerHover(station.id)}
                             onMouseLeave={() => onMarkerHover(null)}
