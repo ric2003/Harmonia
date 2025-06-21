@@ -80,7 +80,7 @@ export default function ScrollIndicator({ targetId, text }: ScrollIndicatorProps
       }}
       onClick={handleClick}
     >
-      <div className="bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full shadow-md text-primary mb-4 flex items-center gap-1 animate-bounce cursor-pointer">
+      <div className="glass-card px-4 py-2 rounded-full text-primary mb-4 flex items-center gap-2 animate-bounce cursor-pointer">
         <span className="text-sm font-medium">{text}</span>
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />

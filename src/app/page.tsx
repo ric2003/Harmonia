@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import ScrollIndicator from "@/components/ScrollIndicator";
 import { useStations } from "@/hooks/useStations";
 import Link from "next/link";
-import { Users, MapPin, Dam, Satellite, Building, Map } from "lucide-react";
+import {MapPin, Dam, Satellite, Building, Map, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Station {
@@ -213,32 +213,14 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </div>
-
-      <div id="project-info-section" className="glass-card p-8 relative overflow-hidden">
-        <div className="relative z-10 text-center max-w-4xl mx-auto">
-          <div className="glass-card p-8 mb-8">
-            <h3 className="text-3xl font-bold text-primary mb-6">
-              {t('home.projectInfo.title')}
-            </h3>
-            <p className="text-lg text-gray600 dark:text-gray400 leading-relaxed max-w-2xl mx-auto mb-8">
-              {t('home.projectInfo.description')}
-            </p>
-            
-            <Link 
-              href="/about" 
-              className="inline-flex items-center gap-3 glass-normal hover:glass-heavy text-primary hover:text-primary/90 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 border border-primary"
-            >
-              <Users className="w-6 h-6" />
-              {t('navigation.about')}
-            </Link>
-          </div>
-          
-          <div className="glass-card rounded-xl p-6">
-            <p className="text-sm text-gray500 dark:text-gray400 leading-relaxed">
-              {t('home.projectInfo.learnMore')}
-            </p>
-          </div>
+        <div className="w-full flex justify-center">
+        <Link 
+          href="/about" 
+          className="inline-flex items-center gap-3 glass-normal hover:glass-heavy text-primary px-8 py-4 mt-6 rounded-xl font-bold text-md shadow-lg hover:shadow-xl hover:scale-105 border border-primary"
+        >
+          <Info className="w-5 h-5" />
+          {t('navigation.learnMore')}
+        </Link>
         </div>
       </div>
     </div>

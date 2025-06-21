@@ -68,12 +68,11 @@ export function Header() {
                             className="hidden sm:block"
                         >
                             {sidebarOpen ?
-
                                 <Menu className="text-primary bg-secondary rounded-lg p-1" size={30}/> :
                                 <Menu className="text-primary bg-background rounded-lg p-1" size={30} />
                             }
                         </button>
-                        <span className="text-primary text-sm sm:text-3xl font-extrabold pl-4 truncate max-w-[200px] sm:max-w-none">{pageTitle}</span>
+                        <span className="text-primary text-lg sm:text-3xl font-extrabold pl-4 truncate max-w-[200px] sm:max-w-none">{pageTitle}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <LanguageSwitcher />

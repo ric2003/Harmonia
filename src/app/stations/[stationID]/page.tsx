@@ -4,6 +4,7 @@ import { useState, useEffect, useContext, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import StationImage from "@/components/StationImage";
+import { BarChart3 } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -230,7 +231,13 @@ export default function StationDetailsPage() {
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-4 gap-2">
               <h2 className="text-lg sm:text-xl text-gray700 font-extrabold">{t('station.dailyTemperatureTrend')}</h2>
               <div className="glass-frosted p-2 rounded-lg">
-                <a className="text-primary hover:text-primary/80 text-sm font-medium transition-colors" href={`/stations/${stationID}/graphs`}>{t('station.viewMoreGraphs')}</a>
+                <a 
+                  className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105" 
+                  href={`/stations/${stationID}/graphs`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  {t('station.viewMoreGraphs')}
+                </a>
               </div>
             </div>
             <div className="h-[250px] sm:h-[300px]">
