@@ -2,6 +2,14 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getStations, getStationDailyData, getStationHourlyData, getStation10MinData } from '@/services/irristratService';
 import { runConvexAlertChecks } from '@/services/convexAlertService';
 
+interface AlertCheckResult {
+  triggered: boolean;
+  stationId: string;
+  threshold: number;
+  currentValue: number;
+  alertId: string;
+}
+
 // Configure cache time constants for consistency
 const ONE_MINUTE = 1000 * 60;
 const ONE_HOUR = ONE_MINUTE * 60;
@@ -50,7 +58,7 @@ export function useStation10MinData(stationId: string) {
           const results = await runConvexAlertChecks(stationId);
           
           // If any alerts were triggered, refresh notifications to show new ones
-          if (results.some((r: any) => r.triggered)) {
+          if (results.some((r: AlertCheckResult) => r.triggered)) {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
           }
         } catch (error) {

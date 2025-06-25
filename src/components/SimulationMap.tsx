@@ -335,7 +335,7 @@ const SimulationMap: React.FC = () => {
       
       // Add hover effects for desktop
       layer.on({
-        mouseover: (e: LeafletMouseEvent) => {
+        mouseover: () => {
           if (layer instanceof L.CircleMarker && selectedLocationId !== locationId) {
             layer.setStyle({ 
               fillColor: 'orange', 
@@ -346,7 +346,7 @@ const SimulationMap: React.FC = () => {
             layer.setRadius(22); // Set radius separately for CircleMarker
           }
         },
-        mouseout: (e: LeafletMouseEvent) => {
+        mouseout: () => {
           if (layer instanceof L.CircleMarker && selectedLocationId !== locationId) {
             layer.setStyle(pointStyle);
             layer.setRadius(pointStyle.radius);

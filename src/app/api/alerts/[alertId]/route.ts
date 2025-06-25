@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../../../../../convex/_generated/api';
+import { Id } from '../../../../../convex/_generated/dataModel';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -17,11 +18,10 @@ export async function PATCH(
     }
 
     const { alertId } = await context.params;
-    const body = await request.json();
 
     // Update the alert last triggered time in Convex
     await convex.mutation(api.alerts.updateLastTriggered, {
-      alertId: alertId as any, // Type assertion needed for Convex ID
+      alertId: alertId as Id<'alerts'>,
       userId,
     });
 

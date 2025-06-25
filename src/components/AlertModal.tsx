@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Thermometer, Bell, BellOff } from 'lucide-react';
 import { useConvexStationAlerts, useCreateConvexAlert, useDeleteConvexAlert } from '@/hooks/useConvexAlerts';
-import { runConvexAlertChecks } from '@/services/convexAlertService';
 
 interface AlertModalProps {
   isOpen: boolean;
