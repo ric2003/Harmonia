@@ -1,13 +1,15 @@
 "use client"
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
 import { usePageTitle } from "@/contexts/PageTitleContext";
-import { Menu, Home, Building, Droplets, Map, Sheet, Satellite, Dam, Info } from "lucide-react";
+import { Menu, Home, Building, Droplets, Map, Sheet, Satellite, Dam, Info, User } from "lucide-react";
 import { useContext, useState, useEffect, useRef } from "react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUser, SignInButton, UserButton } from "@clerk/nextjs";
+import NotificationDropdown from "./NotificationDropdown";
 
 export function Header() {
     const { pageTitle } = usePageTitle();
@@ -17,14 +19,36 @@ export function Header() {
     const pathName = usePathname().split('/');
     const menuRef = useRef<HTMLDivElement>(null);
     const menuButtonRef = useRef<HTMLButtonElement>(null);
+    const { isSignedIn, user } = useUser();
+    const mobileUserButtonRef = useRef<HTMLDivElement>(null);
+
+    const handleMobileProfileClick = () => {
+        if (mobileUserButtonRef.current) {
+            const button = mobileUserButtonRef.current.querySelector('button');
+            if (button) {
+                button.click();
+            }
+        }
+    };
 
     // Handle click outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Node;
+            
+            // Check if click is on Clerk elements
+            const element = target as Element;
+            const isClerkElement = element.closest?.('[data-clerk-modal]') ||
+                                 element.closest?.('.cl-userButtonPopoverCard') ||
+                                 element.closest?.('.cl-modal') ||
+                                 element.closest?.('.cl-userButton') ||
+                                 element.closest?.('[data-clerk-user-button]');
+            
             if (mobileMenuOpen && 
                 menuRef.current && 
-                !menuRef.current.contains(event.target as Node) &&
-                !menuButtonRef.current?.contains(event.target as Node)) {
+                !menuRef.current.contains(target) &&
+                !menuButtonRef.current?.contains(target) &&
+                !isClerkElement) {
                 setMobileMenuOpen(false);
             }
         };
@@ -43,7 +67,7 @@ export function Header() {
         { route: "/dam-monitoring", name: t('navigation.damMonitoring'), icon: <Droplets size={20} /> },
         { route:"/sentinel", name:t('navigation.sentinelMap'), icon: <Satellite size={20}/> },
         { route: "/sorraia-map", name: t('navigation.sorraiaMap'), icon: <Map size={20} /> },
-        { route: "/excel", name: t('navigation.excelUpload'), icon: <Sheet size={20} /> },
+        ...(isSignedIn ? [{ route: "/excel", name: t('navigation.excelUpload'), icon: <Sheet size={20} /> }] : []),
     ];
 
     return (
@@ -72,9 +96,10 @@ export function Header() {
                                 <Menu className="text-primary bg-background rounded-lg p-1" size={30} />
                             }
                         </button>
-                        <span className="text-primary text-lg sm:text-3xl font-extrabold pl-4 truncate max-w-[200px] sm:max-w-none">{pageTitle}</span>
+                        <span className="text-primary text-lg sm:text-3xl font-extrabold pl-4 truncate max-w-[180px] sm:max-w-none">{pageTitle}</span>
                     </div>
                     <div className="flex items-center gap-2">
+                        {isSignedIn && <NotificationDropdown />}
                         <LanguageSwitcher />
                         <ThemeToggle />
                     </div>
@@ -105,6 +130,37 @@ export function Header() {
                                 </Link>
                             );
                         })}
+                        
+                        {/* Authentication Section */}
+                        <hr className="h-0.5 bg-lightGray my-2" />
+                        {isSignedIn ? (
+                            <div 
+                                className="flex items-center gap-3 p-3 rounded-lg bg-background border-2 border-background hover:border-primary hover:bg-secondary/50 cursor-pointer"
+                                onClick={handleMobileProfileClick}
+                            >
+                                <div className="scale-[1.2] pointer-events-none" ref={mobileUserButtonRef}>
+                                    <UserButton />
+                                </div>
+                                <div className="flex-1 min-w-0 pointer-events-none">
+                                    <p className="text-primary font-semibold text-[15px] truncate">
+                                        {user?.firstName || 'User'}
+                                    </p>
+                                    <p className="text-gray700 text-[13px] truncate">
+                                        {user?.username || user?.emailAddresses[0]?.emailAddress}
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <SignInButton mode="modal">
+                                <button 
+                                    className="flex items-center gap-3 p-3 rounded-lg bg-background text-primary border-2 border-background hover:border-primary hover:bg-secondary/50"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <User size={20} className="text-primary" strokeWidth={2.5} />
+                                    <span className="text-[15px] font-semibold">{t('navigation.signIn')}</span>
+                                </button>
+                            </SignInButton>
+                        )}
                     </div>
                 </div>
             )}

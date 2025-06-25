@@ -9,6 +9,8 @@ import { PageTitleProvider } from "@/contexts/PageTitleContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import I18nClientProvider from "@/components/I18nClientProvider";
 import QueryProvider from "@/providers/QueryProvider";
+import ClerkProviderWrapper from "@/providers/ClerkProvider";
+import ConvexClientProvider from "@/providers/ConvexProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,19 +41,23 @@ export default function RootLayout({
           <PageTitleProvider>
             <I18nClientProvider>
               <LanguageProvider>
-                <QueryProvider>
-                  <SidebarHeaderProvider>
-                    <div className="flex h-screen">
-                      <Sidebar />
-                      <div className="flex flex-1 flex-col z-[1]">
-                        <Header />
-                        <main className="overflow-auto bg-background h-full p-2 sm:p-8">
-                          {children}
-                        </main>
+                <ClerkProviderWrapper>
+                  <ConvexClientProvider>
+                    <QueryProvider>
+                      <SidebarHeaderProvider>
+                      <div className="flex h-screen">
+                        <Sidebar />
+                        <div className="flex flex-1 flex-col z-[1]">
+                          <Header />
+                          <main className="overflow-auto bg-background h-full p-2 sm:p-8 pb-24">
+                            {children}
+                          </main>
+                        </div>
                       </div>
-                    </div>
-                  </SidebarHeaderProvider>
-                </QueryProvider>
+                    </SidebarHeaderProvider>
+                  </QueryProvider>
+                </ConvexClientProvider>
+              </ClerkProviderWrapper>
               </LanguageProvider>
             </I18nClientProvider>
           </PageTitleProvider>

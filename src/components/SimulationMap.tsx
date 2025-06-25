@@ -7,7 +7,7 @@ import { getParsedRchData } from '@/services/simulationService';
 import { AlertMessage } from "@/components/ui/AlertMessage";
 import { Feature, Geometry } from 'geojson';
 import { useTranslation } from 'react-i18next';
-import i18next from 'i18next';
+import i18next, { t } from 'i18next';
 import { getLocationName, GeoapifyLocation } from '@/services/geoapifyLocation';
 import {
   LineChart,
@@ -117,8 +117,8 @@ const TimeSeriesChart: React.FC<{
             angle={-45}
             textAnchor="end"
             height={70}
-            tick={{ fontSize: 12 , fontWeight: 'bold' }}
-            label={{ value: 'Year', position: 'outside'}}
+            tick={{ fontSize: 12, fontWeight: 'bold' }}
+            label={{ value: t('simulationMap.dateControls.year'), position: 'outside' }}
           />
           <YAxis 
             tick={{ fontSize: 14, fontWeight: 'bold' }} 
@@ -176,10 +176,10 @@ const SimulationMap: React.FC = () => {
 
   // Base style for the points
   const pointStyle = useMemo(() => ({
-    radius: 16,
+    radius: 20,
     fillColor: "#ff7800",
     color: "#000",
-    weight: 1,
+    weight: 2,
     opacity: 1,
     fillOpacity: 0.8
   }), []);
@@ -299,6 +299,10 @@ const SimulationMap: React.FC = () => {
   const resetPointStyle = useCallback(() => {
     if (lastClickedLayerRef.current) {
       lastClickedLayerRef.current.setStyle(pointStyle);
+      // Also reset radius if it's a CircleMarker
+      if (lastClickedLayerRef.current instanceof L.CircleMarker) {
+        lastClickedLayerRef.current.setRadius(pointStyle.radius);
+      }
       lastClickedLayerRef.current = null;
     }
   }, [pointStyle]);
@@ -308,7 +312,7 @@ const SimulationMap: React.FC = () => {
     setIsPanelVisible(false);
     resetPointStyle();
     setSelectedLocationId(null);
-    setLocationName(null); // Add this line
+    setLocationName(null);
   }, [resetPointStyle]);
 
   // Function to fetch location name
@@ -324,17 +328,38 @@ const SimulationMap: React.FC = () => {
     }
   };
 
-  // Handler for clicking on map points
+  // Handler for clicking on map points - improved for mobile
   const onEachFeaturePoint = useCallback((feature: Feature<Geometry>, layer: Layer) => {
     if (feature.properties && feature.properties.id) {
       const locationId = feature.properties.id;
+      
+      // Add hover effects for desktop
       layer.on({
+        mouseover: (e: LeafletMouseEvent) => {
+          if (layer instanceof L.CircleMarker && selectedLocationId !== locationId) {
+            layer.setStyle({ 
+              fillColor: 'orange', 
+              color: 'red', 
+              weight: 3, 
+              fillOpacity: 0.9
+            });
+            layer.setRadius(22); // Set radius separately for CircleMarker
+          }
+        },
+        mouseout: (e: LeafletMouseEvent) => {
+          if (layer instanceof L.CircleMarker && selectedLocationId !== locationId) {
+            layer.setStyle(pointStyle);
+            layer.setRadius(pointStyle.radius);
+          }
+        },
         click: async (e: LeafletMouseEvent) => {
+          // Prevent event bubbling
+          L.DomEvent.stopPropagation(e);
+          
           // If clicking the same point that's already selected
           if (selectedLocationId === locationId) {
             handleClosePanel();
             setLocationName(null);
-            L.DomEvent.stopPropagation(e);
             return;
           }
 
@@ -347,17 +372,22 @@ const SimulationMap: React.FC = () => {
             await fetchLocationName(feature.geometry.coordinates);
           }
 
-          if (layer instanceof L.Path) {
-            layer.setStyle({ fillColor: 'orange', color: 'red', weight: 3, fillOpacity: 0.8 });
+          if (layer instanceof L.CircleMarker) {
+            layer.setStyle({ 
+              fillColor: 'orange', 
+              color: 'red', 
+              weight: 4, // Thicker border for selected state
+              fillOpacity: 0.9
+            });
+            layer.setRadius(24); // Larger for selected state
             lastClickedLayerRef.current = layer;
           }
-          L.DomEvent.stopPropagation(e);
         }
       });
     } else {
       console.warn("Feature found without properties or id:", feature);
     }
-  }, [selectedLocationId, handleClosePanel, resetPointStyle]);
+  }, [selectedLocationId, handleClosePanel, resetPointStyle, pointStyle]);
 
   const pointToLayer = (feature: Feature<Geometry>, latlng: L.LatLngExpression): L.Layer => {
     return L.circleMarker(latlng, pointStyle);
@@ -394,14 +424,29 @@ const SimulationMap: React.FC = () => {
   const daysInCurrentMonth = new Date(selectedYear, selectedMonth, 0).getDate();
 
   return (
-    <div className="flex flex-col h-full relative">
-      {/* Map Container */}
-      <div className={`w-full transition-all duration-300 ease-in-out ${isPanelVisible ? 'h-[85vh]' : 'h-screen'} relative z-0`}>
-        <div className="glass-card h-full w-full overflow-hidden">
+    <div className="flex flex-col h-75vh relative">
+      {/* Map Container with responsive heights */}
+      <div className={`w-full transition-all duration-300 ease-in-out relative z-0 ${
+        isPanelVisible 
+          ? 'h-[35vh]'
+          : 'h-[75vh]'
+      }`}>
+        <div 
+          className="glass-card h-full w-full overflow-hidden"
+          style={{
+            touchAction: 'pan-x pan-y',
+            userSelect: 'none',
+            WebkitUserSelect: 'none'
+          }}
+        >
           <MapContainer
             center={mapCenter}
             zoom={initialZoom}
-            style={{ height: '100%', width: '100%' }}
+            style={{ 
+              height: '100%', 
+              width: '100%',
+              touchAction: 'pan-x pan-y'
+            }}
             className="rounded-lg overflow-hidden"
           >
             <TileLayer
@@ -421,14 +466,14 @@ const SimulationMap: React.FC = () => {
 
       {/* Data Display Section */}
       {selectedLocationId !== null && isPanelVisible && (
-        <div className="w-full py-4 glass-card flex-shrink-0 relative max-h-[50vh] overflow-y-auto">
+        <div className="w-full py-2 sm:py-4 glass-card flex-shrink-0 relative max-h-[65vh] sm:max-h-[55vh] lg:max-h-[40vh] overflow-y-auto z-10">
           {/* Location Name Display */}
           {locationName && (
-            <div className="mb-4 px-4">
-              <h2 className="text-lg font-semibold text-gray700">
+            <div className="mb-2 sm:mb-4 px-2 sm:px-4">
+              <h2 className="text-base sm:text-lg font-semibold text-gray700">
                 {locationName.city || locationName.county || locationName.formatted}
               </h2>
-              <p className="text-sm text-gray700">
+              <p className="text-xs sm:text-sm text-gray700">
                 {[locationName.county, locationName.state, locationName.country]
                   .filter(Boolean)
                   .join(', ')}
@@ -439,19 +484,21 @@ const SimulationMap: React.FC = () => {
           {/* Close Button */}
           <button
             onClick={handleClosePanel}
-            className="absolute top-4 right-4 glass-card text-gray700 hover:text-primary p-2 rounded-full shadow-md transition-all duration-200 hover:glass-card"
+            className="absolute top-2 sm:top-4 right-2 sm:right-4 glass-card text-gray700 hover:text-primary p-2 sm:p-2 rounded-full shadow-md transition-all duration-200 hover:glass-card z-20 touch-manipulation"
+            style={{ minWidth: '44px', minHeight: '44px' }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M14.707 5.293a1 1 0 010 1.414L11.414 10l3.293 3.293a1 1 0 01-1.414 1.414L10 11.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 10 5.293 6.707a1 1 0 011.414-1.414L10 8.586l3.293-3.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
           </button>
 
-          <div className="px-4">
-            <div className="glass-card p-3 mb-4 rounded-lg">
+          <div className="px-2 sm:px-4">
+            <div className="glass-card p-2 sm:p-3 mb-2 sm:mb-4 rounded-lg">
               <select id="parameterSelector"
-                  className="w-full p-2 glass-light rounded-md text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                  className="w-full p-2 glass-light rounded-md text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none text-sm sm:text-base"
                   value={selectedParameter}
                   onChange={(e) => setSelectedParameter(e.target.value)}
+                  style={{ minHeight: '44px' }}
                 >
                   {Object.keys(parameters).map((key) => (
                     <option key={key} value={key} className="bg-white text-gray700">
@@ -462,8 +509,8 @@ const SimulationMap: React.FC = () => {
             </div>
             
             {/* Time Series Charts */}
-            <div className="space-y-4">
-              <div className="glass-card p-4 rounded-lg">
+            <div className="space-y-2 sm:space-y-4">
+              <div className="glass-card p-2 sm:p-4 rounded-lg">
                 {selectedRchData && (
                   <TimeSeriesChart
                     data={selectedRchData.timeseries}
@@ -476,34 +523,34 @@ const SimulationMap: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-4 px-4 mt-4">
+          <div className="space-y-2 sm:space-y-4 px-2 sm:px-4 mt-2 sm:mt-4">
             {loadingRch && (
               <div className="space-y-3">
                 {/* Date Selection Controls Skeleton */}
-                <div className="glass-card p-4 rounded-lg">
+                <div className="glass-card p-2 sm:p-4 rounded-lg">
                   <div className="flex flex-wrap gap-2 items-end">
-                    <div className="w-32">
-                      <div className="h-5 w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
-                      <div className="h-7 w-full bg-gray-200/50 rounded animate-pulse"></div>
+                    <div className="w-20 sm:w-32">
+                      <div className="h-4 sm:h-5 w-8 sm:w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
+                      <div className="h-6 sm:h-7 w-full bg-gray-200/50 rounded animate-pulse"></div>
                     </div>
-                    <div className="w-32">
-                      <div className="h-3 w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
-                      <div className="h-7 w-full bg-gray-200/50 rounded animate-pulse"></div>
+                    <div className="w-20 sm:w-32">
+                      <div className="h-3 w-8 sm:w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
+                      <div className="h-6 sm:h-7 w-full bg-gray-200/50 rounded animate-pulse"></div>
                     </div>
-                    <div className="w-32">
-                      <div className="h-3 w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
-                      <div className="h-7 w-full bg-gray-200/50 rounded animate-pulse"></div>
+                    <div className="w-20 sm:w-32">
+                      <div className="h-3 w-8 sm:w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
+                      <div className="h-6 sm:h-7 w-full bg-gray-200/50 rounded animate-pulse"></div>
                     </div>
                   </div>
                 </div>
 
                 {/* Data Grid Skeleton */}
-                <div className="glass-card p-4 rounded-lg">
-                  <div className="grid grid-cols-4 md:grid-cols-6 gap-2 text-sm">
+                <div className="glass-card p-2 sm:p-4 rounded-lg">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 text-sm">
                     {[...Array(11)].map((_, index) => (
                       <div key={index} className="glass-card p-2 rounded shadow-sm">
-                        <div className="h-3 w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
-                        <div className="h-5 w-10 bg-gray-200/50 rounded animate-pulse"></div>
+                        <div className="h-3 w-8 sm:w-12 bg-gray-200/50 rounded mb-1 animate-pulse"></div>
+                        <div className="h-4 sm:h-5 w-6 sm:w-10 bg-gray-200/50 rounded animate-pulse"></div>
                       </div>
                     ))}
                   </div>
@@ -511,7 +558,7 @@ const SimulationMap: React.FC = () => {
               </div>
             )}
             {errorRch && (
-              <div className="glass-card p-4 rounded-lg">
+              <div className="glass-card p-2 sm:p-4 rounded-lg">
                 <AlertMessage message={errorRch} type='error'/>
               </div>
             )}
@@ -519,19 +566,20 @@ const SimulationMap: React.FC = () => {
             {selectedRchData && !loadingRch && !errorRch && (
               <div>
                 {selectedRchData.timeseries && selectedRchData.timeseries.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-2 sm:space-y-4">
                     {/* Date Selection Controls */}
-                    <div className="glass-card p-4 rounded-lg">
-                      <div className="flex flex-wrap gap-3 items-end">
-                        <div className="w-24 sm:w-32">
+                    <div className="glass-card p-2 sm:p-4 rounded-lg">
+                      <div className="flex flex-wrap gap-2 sm:gap-3 items-end">
+                        <div className="w-20 sm:w-24 md:w-32">
                           <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.day')}</label>
                           <select
-                              className="w-full py-2 px-3 glass-light rounded-md text-sm text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                              className="w-full py-2 px-2 sm:px-3 glass-light rounded-md text-xs sm:text-sm text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none touch-manipulation"
                               value={selectedDay}
                               onChange={(e) => {
                               const newDay = Number(e.target.value);
                               updateSelectedDate(selectedYear, selectedMonth, newDay);
                               }}
+                              style={{ minHeight: '40px' }}
                           >
                               {Array.from({ length: daysInCurrentMonth }, (_, i) => i + 1).map((day) => (
                               <option key={day} value={day} className="bg-white text-gray700">
@@ -541,16 +589,17 @@ const SimulationMap: React.FC = () => {
                           </select>
                         </div>
 
-                        <div className="w-24 sm:w-32">
+                        <div className="w-20 sm:w-24 md:w-32">
                           <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.month')}</label>
                           <select
-                            className="w-full py-2 px-3 glass-light rounded-md text-sm text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            className="w-full py-2 px-2 sm:px-3 glass-light rounded-md text-xs sm:text-sm text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none touch-manipulation"
                             value={selectedMonth}
                             onChange={(e) => {
                               const newMonth = Number(e.target.value);
                               setSelectedMonth(newMonth);
                               updateSelectedDate(selectedYear, newMonth, selectedDay);
                             }}
+                            style={{ minHeight: '40px' }}
                           >
                             {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
                               const currentLang = i18next.language || 'en';
@@ -564,16 +613,18 @@ const SimulationMap: React.FC = () => {
                           </select>
                         </div>
 
-                        <div className="w-24 sm:w-32">
+                        <div className="w-20 sm:w-24 md:w-32">
                           <label className="block text-xs font-medium text-gray700 mb-1">{t('simulationMap.dateControls.year')}</label>
                           <select
-                            className="w-full py-2 px-3 glass-light rounded-md text-sm text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            className="w-full py-2 px-2 sm:px-3 glass-light rounded-md text-xs sm:text-sm text-gray700 border-0 focus:ring-2 focus:ring-primary/50 focus:outline-none touch-manipulation"
                             value={selectedYear}
                             onChange={(e) => {
                               const newYear = Number(e.target.value);
                               setSelectedYear(newYear);
                               updateSelectedDate(newYear, selectedMonth, selectedDay);
-                            }}>
+                            }}
+                            style={{ minHeight: '40px' }}
+                          >
                             {getUniqueYears().map((year) => (
                               <option key={year} value={year} className="bg-white text-gray700">{year}</option>
                             ))}
@@ -585,73 +636,73 @@ const SimulationMap: React.FC = () => {
                     {/* Data Display */}
                     {selectedDate && getCurrentEntry() && (
                       <>
-                        <div className="glass-card p-4 rounded-lg">
-                          <div className="grid grid-cols-4 md:grid-cols-6 gap-3 text-sm">
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                        <div className="glass-card p-2 sm:p-4 rounded-lg">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3 text-xs sm:text-sm">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.flowout_m3_s.label')} description={t('simulationMap.parameters.flowout_m3_s.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.flowout_m3_s)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.flowout_m3_s)}</div>
                             </div>
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.ammonia_mg_l.label')} description={t('simulationMap.parameters.ammonia_mg_l.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.ammonia_mg_l)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.ammonia_mg_l)}</div>
                             </div>
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.dissolved_phosphorus_mg_l.label')} description={t('simulationMap.parameters.dissolved_phosphorus_mg_l.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.dissolved_phosphorus_mg_l)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.dissolved_phosphorus_mg_l)}</div>
                             </div>
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.dissolved_oxygen_mg_l.label')} description={t('simulationMap.parameters.dissolved_oxygen_mg_l.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.dissolved_oxygen_mg_l)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.dissolved_oxygen_mg_l)}</div>
                             </div>
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.nitrate_mg_l.label')} description={t('simulationMap.parameters.nitrate_mg_l.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.nitrate_mg_l)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.nitrate_mg_l)}</div>
                             </div>
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.nitrite_mg_l.label')} description={t('simulationMap.parameters.nitrite_mg_l.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.nitrite_mg_l)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.nitrite_mg_l)}</div>
                             </div>
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.organic_nitrogen_mg_l.label')} description={t('simulationMap.parameters.organic_nitrogen_mg_l.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.organic_nitrogen_mg_l)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.organic_nitrogen_mg_l)}</div>
                             </div>
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.organic_phosphorus_mg_l.label')} description={t('simulationMap.parameters.organic_phosphorus_mg_l.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.organic_phosphorus_mg_l)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.organic_phosphorus_mg_l)}</div>
                             </div>
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.saturation_oxygen_mg_l.label')} description={t('simulationMap.parameters.saturation_oxygen_mg_l.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.saturation_oxygen_mg_l)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.saturation_oxygen_mg_l)}</div>
                             </div>
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.temperature_cc.label')} description={t('simulationMap.parameters.temperature_cc.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.temperature_cc)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.temperature_cc)}</div>
                             </div>
-                            <div className="glass-card p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200">
+                            <div className="glass-card p-2 sm:p-3 rounded-lg shadow-sm hover:glass-card transition-all duration-200 touch-manipulation">
                               <div className="text-xs text-gray700 mb-1">
                                 <Tooltip title={t('simulationMap.parameters.sediments_tons.label')} description={t('simulationMap.parameters.sediments_tons.description')} />
                               </div>
-                              <div className="font-medium text-primary">{formatValue(getCurrentEntry()?.sediments_tons)}</div>
+                              <div className="font-medium text-primary text-xs sm:text-sm">{formatValue(getCurrentEntry()?.sediments_tons)}</div>
                             </div>
                           </div>
                         </div>
@@ -659,8 +710,8 @@ const SimulationMap: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="glass-card p-4 rounded-lg">
-                    <p className="text-gray700 text-sm">{t('simulationMap.noData')}</p>
+                  <div className="glass-card p-2 sm:p-4 rounded-lg">
+                    <p className="text-gray700 text-xs sm:text-sm">{t('simulationMap.noData')}</p>
                   </div>
                 )}
               </div>

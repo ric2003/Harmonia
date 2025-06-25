@@ -4,7 +4,7 @@ import { useState, useEffect, useContext, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import StationImage from "@/components/StationImage";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Bell } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -22,6 +22,9 @@ import { useTranslation } from 'react-i18next';
 import { useStations, useStationDailyData, useStationHourlyData, useStation10MinData } from "@/hooks/useStations";
 import { DataTable } from "@/components/ui/DataTable";
 import DataSource from "@/components/DataSource";
+import AlertModal from "@/components/AlertModal";
+import { useConvexStationAlerts } from "@/hooks/useConvexAlerts";
+import { useUser } from "@clerk/nextjs";
 
 interface Station {
   id: string;
@@ -62,6 +65,7 @@ export default function StationDetailsPage() {
   const params = useParams() as { stationID: string };
   const router = useRouter();
   const { t } = useTranslation();
+  const { isSignedIn } = useUser();
 
   function formatDate(date: Date): string {
     return date.toISOString().split("T")[0];
@@ -77,28 +81,19 @@ export default function StationDetailsPage() {
   const [fromDate, setFromDate] = useState(defaultFromDate);
   const [toDate, setToDate] = useState(defaultToDate);
   const [activeTab, setActiveTab] = useState("daily");
+  const [showAlertModal, setShowAlertModal] = useState(false);
 
-  // Scroll to top when tab changes to prevent jarring scroll shifts
+  // Scroll to top when tab changes to prevent jarring scroll shifts (but not on initial load)
   useEffect(() => {
-    // Use setTimeout to ensure content has rendered before scrolling
-    const timeoutId = setTimeout(() => {
-      // Always scroll to the top of the main content area when switching tabs
-      const mainContent = document.querySelector('[data-main-content]');
-      if (mainContent) {
-        mainContent.scrollIntoView({ behavior: 'instant', block: 'start' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }
-    }, 0);
-    
-    return () => clearTimeout(timeoutId);
-  }, [activeTab]);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+  });
 
   // Use React Query hooks instead of direct fetching
   const { data: stations = [], isLoading: stationsLoading, error: stationsError } = useStations();
   const { data: dailyDataRaw, isLoading: dailyLoading, error: dailyError } = useStationDailyData(stationID, fromDate, toDate);
   const { data: hourlyData = {}, isLoading: hourlyLoading, error: hourlyError } = useStationHourlyData(stationID);
   const { data: min10Data = {}, isLoading: min10Loading, error: min10Error } = useStation10MinData(stationID);
+  const { hasAlerts } = useConvexStationAlerts(stationID);
   
   const { sidebarOpen } = useContext(SidebarHeaderContext);
   
@@ -196,7 +191,7 @@ export default function StationDetailsPage() {
   }, [router]);
 
   return (
-    <div >
+    <div className="overflow-x-hidden">
       <DataSource 
           introTextKey="station.stationDetailIntro"
           textKey="home.dataSource"
@@ -215,36 +210,60 @@ export default function StationDetailsPage() {
             />
             <div className="absolute inset-0 bg-transparent">
               <div className="absolute bottom-0 left-0 p-4 sm:p-6 md:p-8">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-10 drop-shadow-lg">{stationName}</h1>
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 drop-shadow-lg">{stationName}</h1>
+              </div>
+              <div className="absolute bottom-2 right-0 p-4 sm:p-6 md:p-8 pb-10">
+              {isSignedIn && (
+                  <div className="glass-frosted p-2 rounded-lg">
+                    <button
+                      onClick={() => setShowAlertModal(true)}
+                      className={`inline-flex items-center gap-2 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 ${
+                        hasAlerts ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'
+                      }`}
+                    >
+                      <Bell className="w-4 h-4" />
+                      <span className="hidden xs:inline">
+                        {hasAlerts ? t('notifications.alerts') : t('notifications.alertSettings')}
+                      </span>
+                      <span className="xs:hidden">
+                        {t('notifications.alerts')}
+                      </span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
       {/* Main content container */}
-      <div className="glass-panel p-4 -mt-16 relative bg-background" data-main-content>
+      <div className="glass-panel p-2 sm:p-4 -mt-16 relative bg-background" data-main-content>
         
         {/* Station info and map grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8">
           {/* Temperature trend graph */}
-          <div className="lg:col-span-2 glass-panel-visible p-6">
+          <div className="lg:col-span-2 glass-panel-visible p-3 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-4 gap-2">
-              <h2 className="text-lg sm:text-xl text-gray700 font-extrabold">{t('station.dailyTemperatureTrend')}</h2>
-              <div className="glass-frosted p-2 rounded-lg">
-                <a 
-                  className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105" 
-                  href={`/stations/${stationID}/graphs`}
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  {t('station.viewMoreGraphs')}
-                </a>
+              <h2 className="text-base sm:text-lg lg:text-xl text-gray700 font-extrabold">{t('station.dailyTemperatureTrend')}</h2>
+              <div className="flex gap-2">
+      
+                <div className="glass-frosted p-2 rounded-lg">
+                  <a 
+                    className="inline-flex items-center gap-2 bg-primary text-white px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105" 
+                    href={`/stations/${stationID}/graphs`}
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    <span className="hidden xs:inline">{t('station.viewMoreGraphs')}</span>
+                    <span className="xs:hidden">{t('station.viewGraphs')}</span>
+                  </a>
+                </div>
               </div>
             </div>
-            <div className="h-[250px] sm:h-[300px]">
+            <div className="h-[200px] sm:h-[250px] lg:h-[300px] overflow-hidden">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart 
                   data={dailyData}
-                  margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
+                  margin={{ top: 5, right: 5, left: -25, bottom: 5 }}
                 >
                   <XAxis 
                     dataKey="date" 
@@ -252,23 +271,24 @@ export default function StationDetailsPage() {
                       const [year, month, day] = date.split('-');
                       return `${day}-${month}-${year.slice(2)}`;
                     }}
-                    style={{ fontSize: '12px', fill: 'var(--gray-700)', fontWeight: 'bold'}}
+                    style={{ fontSize: '10px', fill: 'var(--gray-700)', fontWeight: 'bold'}}
+                    interval="preserveStartEnd"
                   />
-                  <YAxis style={{ fontSize: '12px', fill: 'var(--gray-700)', fontWeight: 'bold'}} />
+                  <YAxis style={{ fontSize: '10px', fill: 'var(--gray-700)', fontWeight: 'bold'}} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend style={{ fontSize: '12px', fill: 'var(--gray-700)' , fontWeight: 'bold'}} />
+                  <Legend style={{ fontSize: '10px', fill: 'var(--gray-700)' , fontWeight: 'bold'}} />
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-400)" />
-                  <Line type="monotone" dataKey="max" stroke="#ff7300" name={t('station.chart.maximum')} />
-                  <Line type="monotone" dataKey="avg" stroke="#8884d8" name={t('station.chart.average')} />
-                  <Line type="monotone" dataKey="min" stroke="#82ca9d" name={t('station.chart.minimum')} />
+                  <Line type="monotone" dataKey="max" stroke="#ff7300" name={t('station.chart.maximum')} strokeWidth={2} />
+                  <Line type="monotone" dataKey="avg" stroke="#8884d8" name={t('station.chart.average')} strokeWidth={2} />
+                  <Line type="monotone" dataKey="min" stroke="#82ca9d" name={t('station.chart.minimum')} strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Map section */}
-          <div className="glass-panel-visible p-6">
-            <h2 className="text-lg sm:text-xl font-extrabold text-gray700  mb-4">{t('station.location')}</h2>
+          <div className="glass-panel-visible p-3 sm:p-6">
+            <h2 className="text-base sm:text-lg lg:text-xl font-extrabold text-gray700 mb-4">{t('station.location')}</h2>
             <div className="h-48 sm:h-72 rounded-xl overflow-hidden border border-gray700/20 dark:border-gray700/10">
               {stations.length > 0 ? (
                 <MapComponent
@@ -281,7 +301,7 @@ export default function StationDetailsPage() {
                 />
               ) : (
                 <div className="w-full h-full glass-light flex items-center justify-center">
-                  <p className="text-gray700 ">{t('station.loadingMap')}</p>
+                  <p className="text-gray700 text-sm">{t('station.loadingMap')}</p>
                 </div>
               )}
             </div>
@@ -289,11 +309,11 @@ export default function StationDetailsPage() {
         </div>
         
           {/* Navigation tabs */}
-          <div className="border-b mb-2 sm:mb-6 overflow-x-auto">
-            <nav className="flex space-x-4 sm:space-x-8 min-w-max">
+          <div className="border-b mb-2 sm:mb-6 -mx-2 sm:mx-0">
+            <nav className="flex px-2 sm:px-0">
               <button
                 onClick={() => setActiveTab("daily")}
-                className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm ${
+                className={`flex-1 sm:flex-none py-2 sm:py-4 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm text-center ${
                   activeTab === "daily"
                     ? "border-primary text-primary"
                     : "border-transparent text-gray600 hover:text-gray700 hover:border-gray300"
@@ -303,7 +323,7 @@ export default function StationDetailsPage() {
               </button>
               <button
                 onClick={() => setActiveTab("hourly")}
-                className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm ${
+                className={`flex-1 sm:flex-none py-2 sm:py-4 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm text-center ${
                   activeTab === "hourly"
                     ? "border-primary text-primary"
                     : "border-transparent text-gray600 hover:text-gray-700 hover:border-gray-300"
@@ -313,7 +333,7 @@ export default function StationDetailsPage() {
               </button>
               <button
                 onClick={() => setActiveTab("min10")}
-                className={`py-2 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm ${
+                className={`flex-1 sm:flex-none py-2 sm:py-4 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm text-center ${
                   activeTab === "min10"
                     ? "border-primary text-primary"
                     : "border-transparent text-gray600 hover:text-gray-700 hover:border-gray-300"
@@ -337,28 +357,28 @@ export default function StationDetailsPage() {
               activeTab === "daily" ? "block" : "hidden"
             } flex-1`}
           >
-            <div className="pb-8">
+            <div className="pb-2 sm:pb-4">
               {/* Date selector */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray600">{t('station.dateRange.startDate')}</span>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <div className="flex items-center gap-2 flex-1 sm:flex-none">
+                  <span className="text-xs sm:text-sm text-gray600 whitespace-nowrap">{t('station.dateRange.startDate')}</span>
                   <input
                     type="date"
                     value={fromDate}
                     max={toDate}
                     onChange={(e) => setFromDate(e.target.value)}
-                    className="px-2 py-1 text-sm border border-lightGray rounded focus:outline-none focus:ring-1 focus:ring-primary bg-background text-darkGray"
+                    className="flex-1 sm:flex-none px-2 py-1 text-xs sm:text-sm border border-lightGray rounded focus:outline-none focus:ring-1 focus:ring-primary bg-background text-darkGray min-w-0"
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray600">{t('station.dateRange.endDate')}</span>
+                <div className="flex items-center gap-2 flex-1 sm:flex-none">
+                  <span className="text-xs sm:text-sm text-gray600 whitespace-nowrap">{t('station.dateRange.endDate')}</span>
                   <input
                     type="date"
                     value={toDate}
                     min={fromDate}
                     max={formatDate(new Date())}
                     onChange={(e) => setToDate(e.target.value)}
-                    className="px-2 py-1 text-sm border border-lightGray rounded focus:outline-none focus:ring-1 focus:ring-primary bg-background text-darkGray"
+                    className="flex-1 sm:flex-none px-2 py-1 text-xs sm:text-sm border border-lightGray rounded focus:outline-none focus:ring-1 focus:ring-primary bg-background text-darkGray min-w-0"
                   />
                 </div>
               </div>
@@ -414,7 +434,7 @@ export default function StationDetailsPage() {
                     }
                   ]}
                   mobileCardRenderer={(item) => (
-                    <div className="glass-card p-4 border border-gray700/20 dark:border-gray700/10">
+                    <div className="glass-card p-2 border border-gray700">
                       <h4 className="font-semibold text-sm text-gray700 mb-3">{item.date}</h4>
                       <div className="grid grid-cols-2 gap-3 text-[12px]">
                         <div className="flex flex-col">
@@ -512,7 +532,7 @@ export default function StationDetailsPage() {
                     }
                   ]}
                   mobileCardRenderer={(row) => (
-                    <div className="glass-card p-4 border border-gray700/20 dark:border-gray700/10">
+                    <div className="glass-card p-2 border border-gray700">
                       <h4 className="font-semibold text-sm text-gray700 mb-3">{row.date} - {row.hour}</h4>
                       <div className="grid grid-cols-2 gap-3 text-[12px]">
                         <div className="flex flex-col">
@@ -633,6 +653,16 @@ export default function StationDetailsPage() {
             </div>
           </div>
         </div>
+        
+        {/* Alert Modal */}
+        {isSignedIn && (
+          <AlertModal
+            isOpen={showAlertModal}
+            onClose={() => setShowAlertModal(false)}
+            stationId={stationID}
+            stationName={stationName}
+          />
+        )}
     </div>
   );
 }

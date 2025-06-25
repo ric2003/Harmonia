@@ -1,4 +1,4 @@
-import { useCallback, useMemo, ReactNode } from 'react';
+import { useCallback, useMemo, ReactNode, useState, useEffect } from 'react';
 
 interface Column {
   key: string;
@@ -23,6 +23,16 @@ export function DataTable<T>({
   rowsPerPage = 10,
   mobileCardRenderer,
 }: DataTableProps<T>) {
+  // Track if we're on mobile
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Calculate pagination values
   const totalPages = useMemo(() => {
     return Math.ceil(data.length / rowsPerPage);
@@ -104,14 +114,14 @@ export function DataTable<T>({
             <button
               onClick={() => handlePageChange(1)}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded-md transition-all ${
+              className={`px-2 sm:px-3 py-1 rounded-md transition-all ${
                 currentPage === 1 
                   ? 'text-gray500 cursor-not-allowed' 
                   : 'text-gray700 hover:glass-panel hover:text-primary'
               }`}
               title="First page"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
               </svg>
             </button>
@@ -120,40 +130,44 @@ export function DataTable<T>({
             <button
               onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded-md transition-all ${
+              className={`px-2 sm:px-3 py-1 rounded-md transition-all ${
                 currentPage === 1 
                   ? 'text-gray200 cursor-not-allowed' 
                   : 'text-gray700 hover:glass-panel hover:text-primary'
               }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             
             {/* Page numbers */}
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            {Array.from({ length: Math.min(isMobile ? 3 : 5, totalPages) }, (_, i) => {
+              // Responsive page count: 3 on mobile, 5 on desktop
+              const maxPages = isMobile ? 3 : 5;
+              const halfPages = Math.floor(maxPages / 2);
+              
               // Show pages around current page
               let pageNum;
-              if (totalPages <= 5) {
-                // If 5 or fewer pages, show all
+              if (totalPages <= maxPages) {
+                // If fewer pages than max, show all
                 pageNum = i + 1;
-              } else if (currentPage <= 3) {
-                // If near start, show first 5 pages
+              } else if (currentPage <= halfPages + 1) {
+                // If near start, show first pages
                 pageNum = i + 1;
-              } else if (currentPage >= totalPages - 2) {
-                // If near end, show last 5 pages
-                pageNum = totalPages - 4 + i;
+              } else if (currentPage >= totalPages - halfPages) {
+                // If near end, show last pages
+                pageNum = totalPages - maxPages + 1 + i;
               } else {
-                // Otherwise show 2 before and 2 after current page
-                pageNum = currentPage - 2 + i;
+                // Otherwise show pages around current page
+                pageNum = currentPage - halfPages + i;
               }
               
               return (
                 <button
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
-                  className={`px-3 py-1 rounded-md transition-all ${
+                  className={`px-2 sm:px-3 py-1 rounded-md transition-all text-sm ${
                     currentPage === pageNum
                       ? 'glass-panel text-primary font-semibold'
                       : 'text-gray700 hover:glass-panel hover:text-primary'
@@ -168,13 +182,13 @@ export function DataTable<T>({
             <button
               onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded-md transition-all ${
+              className={`px-2 sm:px-3 py-1 rounded-md transition-all ${
                 currentPage === totalPages
                   ? 'text-gray200 cursor-not-allowed'
                   : 'text-gray700 hover:glass-panel hover:text-primary'
               }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -183,14 +197,14 @@ export function DataTable<T>({
             <button
               onClick={() => handlePageChange(totalPages)}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded-md transition-all ${
+              className={`px-2 sm:px-3 py-1 rounded-md transition-all ${
                 currentPage === totalPages
                   ? 'text-gray200 cursor-not-allowed'
                   : 'text-gray700 hover:glass-panel hover:text-primary'
               }`}
               title="Last page"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7m-8-14l7 7-7 7" />
               </svg>
             </button>

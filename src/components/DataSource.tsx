@@ -8,9 +8,9 @@ import { SidebarHeaderContext } from '@/contexts/SidebarHeaderContext';
 interface DataSourceProps {
   className?: string;
   introTextKey: string;
-  textKey: string;
-  linkKey: string;
-  linkUrl: string;
+  textKey?: string;
+  linkKey?: string;
+  linkUrl?: string;
 }
 
 export default function DataSource({ 
@@ -60,25 +60,38 @@ export default function DataSource({
                 </p>
               </div>
               
-              {/* Data source information */}
-              <div className="glass-card rounded-xl p-4 shadow-sm">
-                <div className="flex items-center justify-between">
+              {/* Data source information - only render if linkKey and linkUrl are provided */}
+              {linkKey && linkUrl && textKey && (
+                <div className="glass-card rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray700">
+                        {t(textKey)}
+                      </span>
+                    </div>
+                    <a 
+                      href={linkUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-primary font-medium inline-flex items-center gap-2 text-sm hover:underline transition-colors duration-200"
+                    >
+                      {t(linkKey)}
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              )}
+              
+              {/* Data source information without link - render if no link provided */}
+              {(!linkKey || !linkUrl) && textKey && (
+                <div className="glass-card rounded-xl p-4 shadow-sm">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray700">
                       {t(textKey)}
                     </span>
                   </div>
-                  <a 
-                    href={linkUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-primary font-medium inline-flex items-center gap-2 text-sm hover:underline transition-colors duration-200"
-                  >
-                    {t(linkKey)}
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

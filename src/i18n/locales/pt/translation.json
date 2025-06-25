@@ -21,7 +21,10 @@
     "about": "Sobre",
     "aboutShort": "Sobre",
     "siteDetails": "Detalhes do Site",
-    "learnMore": "Saiba mais!"
+    "learnMore": "Saiba mais!",
+    "signIn": "Iniciar Sessão",
+    "notifications": "Notificações",
+    "notificationsShort": "Alertas"
   },
   "title": {
     "home": "Início",
@@ -99,6 +102,12 @@
     "noData": "Não existem dados para mostrar.",
     "getDataButton": "Obter Dados"
   },
+  "auth": {
+    "required": {
+      "title": "Autenticação Necessária",
+      "message": "Precisa de iniciar sessão para aceder a esta página. Por favor, inicie sessão para continuar."
+    }
+  },
   "station": {
     "imageAlt": "Imagem da estação {{station}}",
     "location": "Localização",
@@ -109,6 +118,7 @@
     "stationsOverviewIntro": "Navegue através de todas as nossas estações meteorológicas em Portugal. Cada cartão mostra uma estação com a sua localização e uma imagem de pré-visualização. Clique em qualquer estação para explorar medições meteorológicas detalhadas, dados históricos e tendências para essa localização específica.",
     "stationDetailIntro": "Explore dados meteorológicos detalhados para esta estação específica. Alterne entre intervalos diários, horários e de 10 minutos usando os separadores acima. Use o seletor de data para ver dados históricos e consulte o mapa para ver estações próximas. Perfeito para acompanhar padrões meteorológicos locais ao longo do tempo.",
     "stationGraphsIntro": "Veja gráficos detalhados para esta estação meteorológica. Compare tendências de temperatura, padrões de vento e mudanças de humidade durante a última semana. Estes insights visuais ajudam a identificar padrões meteorológicos e compreender variações climáticas locais rapidamente.",
+    "viewGraphs": "Ver Gráficos",
     "tabs": {
       "daily": "Dados Diários",
       "hourly": "Dados Horários",
@@ -300,6 +310,9 @@
     "loading": "A carregar dados base do mapa...",
     "error": "Erro: {{message}}",
     "noData": "Nenhuns dados de série temporal encontrados neste ficheiro.",
+    "dataSourceIntro": "Explore o nosso modelo preditivo de simulação de água para a bacia do rio Sorraia. Clique em qualquer ponto laranja para ver previsões hidrológicas detalhadas incluindo parâmetros de qualidade da água, taxas de fluxo e condições ambientais. Use os controlos de data para ver dados históricos e previsões, e selecione diferentes parâmetros no menu dropdown para analisar vários indicadores de qualidade da água.",
+    "dataSource": "Dados do modelo preditivo gerados por:",
+    "researchProject": "Projeto de Investigação Water Wise",
     "dateControls": {
       "day": "Dia",
       "month": "Mês",
@@ -356,31 +369,75 @@
     "title": "Carregar Dados Excel Manualmente",
     "purpose": {
       "title": "O que faz isto?",
-      "description": "Carregue dados de monitorização de barragens a partir de ficheiros Excel diretamente no nosso sistema. Os seus dados serão processados e integrados com as informações de monitorização existentes."
+      "description": "Carregue dados de monitorização de barragens de ficheiros Excel diretamente no nosso sistema. Os seus dados serão processados e integrados com as informações de monitorização existentes."
     },
     "dataFlow": {
       "step1": "Carregue o seu ficheiro Excel com dados de barragens",
       "step2": "Os dados são processados e armazenados na base de dados InfluxDB",
-      "step3": "Visualize os seus dados na tabela de Monitorização de Barragens e Visão Geral das Barragens"
+      "step3": "Visualize os seus dados na tabela de Monitorização de Barragens e na Visão Geral das Barragens"
     },
-    "infoButton": "Informações de Requisitos do Arquivo",
-    "selectFile": "Selecionar Arquivo Excel",
-    "chooseFile": "Escolher Arquivo",
-    "noFileSelected": "Nenhum arquivo selecionado",
-    "selectedFile": "Arquivo selecionado: {{fileName}}",
+    "infoButton": "Informações sobre Requisitos do Ficheiro",
+    "selectFile": "Selecionar Ficheiro Excel",
+    "chooseFile": "Escolher Ficheiro",
+    "noFileSelected": "Nenhum ficheiro selecionado",
+    "selectedFile": "Ficheiro selecionado: {{fileName}}",
     "uploadButton": "Carregar Excel",
     "uploading": "A carregar...",
     "errors": {
-      "selectFile": "Por favor, selecione um arquivo primeiro",
-      "excelOnly": "Por favor, carregue um arquivo Excel (.xlsx ou .xls)",
+      "selectFile": "Por favor selecione primeiro um ficheiro",
+      "excelOnly": "Por favor carregue um ficheiro Excel (.xlsx ou .xls)",
       "unknown": "Ocorreu um erro desconhecido"
     },
     "modal": {
-      "title": "Carregar Arquivo",
-      "description": "Aceitamos arquivos Excel (.xlsx) com colunas específicas: Barragem, Data, Nível, Volume, Enchimento, Fonte, Bacia e DRAP. O arquivo deve ter cabeçalhos corretos e estar bem estruturado.",
-      "exampleTitle": "Arquivo de Exemplo",
+      "title": "Carregar Ficheiro",
+      "description": "Aceitamos ficheiros Excel (.xlsx) com colunas específicas: Barragem, Data, Nível, Volume, Enchimento, Fonte, Bacia e DRAP. O ficheiro deve ter cabeçalhos corretos e estar bem estruturado.",
+      "exampleTitle": "Ficheiro de Exemplo",
       "exampleDescription": "Veja um modelo válido antes de carregar:",
-      "downloadButton": "Baixar template.xlsx"
+      "downloadButton": "Descarregar template.xlsx"
+    }
+  },
+  "notifications": {
+    "title": "Notificações",
+    "noNotifications": "Ainda não há notificações",
+    "markAllRead": "Marcar todas como lidas",
+    "alerts": "Alertas",
+    "alertSettings": "Configurações de Alerta",
+    "setupAlerts": "Configurar alertas de temperatura para esta estação",
+    "temperatureAlert": "Alerta de Temperatura",
+    "enableAlert": "Ativar alerta quando a temperatura média exceder:",
+    "threshold": "Limite (°C)",
+    "channels": "Canais de alerta:",
+    "channelToast": "Notificações na aplicação",
+    "channelEmail": "Notificações por email",
+    "channelPush": "Notificações do navegador",
+    "save": "Guardar Alerta",
+    "delete": "Eliminar Alerta",
+    "cancel": "Cancelar",
+    "alertSaved": "Configurações de alerta guardadas com sucesso",
+    "alertDeleted": "Alerta eliminado com sucesso",
+    "alertTriggered": "🌡️ Alerta de Temperatura: {{stationName}} atingiu {{currentTemp}}°C (limite: {{threshold}}°C)",
+    "websiteNotification": "Receberá notificações enquanto navega neste website",
+    "activeAlerts": "Alertas Ativos",
+    "noActiveAlerts": "Nenhum alerta ativo configurado",
+    "station": "Estação: {{stationName}}",
+    "tempThreshold": "Limite de temperatura: {{threshold}}°C",
+    "lastTriggered": "Último acionamento: {{date}}",
+    "neverTriggered": "Nunca acionado",
+    "markRead": "Marcar como lida",
+    "alertService": {
+      "checking": "A verificar {{count}} alerta(s){{stationId}}",
+      "forStation": " para a estação {{stationId}}",
+      "noAlertsToCheck": "Nenhum alerta para verificar{{stationId}}",
+      "currentTemp": "Estação {{stationId}}: Temp atual {{currentTemp}}°C, Limite {{threshold}}°C",
+      "alertTriggered": "🚨 ALERTA ACIONADO: Estação {{stationId}} temp {{currentTemp}}°C excede {{threshold}}°C",
+      "alertCooldown": "⏰ Período de espera: Estação {{stationId}} último acionamento há {{hours}}h",
+      "checkComplete": "✅ Verificação de alertas completa {{location}}: {{count}} alertas acionados",
+      "checkCompleteNoTriggers": "✅ Verificação de alertas completa {{location}}: Nenhum alerta acionado",
+      "temperatureAlertTitle": "Alerta de Temperatura Acionado",
+      "temperatureAlertMessage": "Estação {{stationName}} temperatura ({{currentTemp}}°C) excedeu o seu limite de {{threshold}}°C",
+      "stationFallback": "Estação {{stationId}}",
+      "temperatureExceeded": "{{stationName}} temperatura ({{currentTemp}}°C) excedeu limite de {{threshold}}°C",
+      "temperatureAlertGeneric": "{{stationName}} alerta de temperatura acionado"
     }
   },
   "sentinel": {

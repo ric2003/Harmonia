@@ -1,46 +1,13 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import StationImage from "@/components/StationImage";
 import { useTranslatedPageTitle } from '@/hooks/useTranslatedPageTitle';
 import DataSource from "@/components/DataSource";
+import { useStations } from "@/hooks/useStations";
 
 export default function StationsPage() {
-  const [stations, setStations] = useState<Station[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: stations = [], isLoading: loading, error } = useStations();
   useTranslatedPageTitle('title.stations');
-
-  interface Station {
-    id: string;
-    estacao: string;
-    loc: string;
-    lat: number;
-    lon: number;
-  }
-
-  async function fetchStations() {
-      try {
-        const res = await fetch('/api/stations')
-        if (!res.ok) throw new Error(`Status ${res.status}`)
-        const data: Station[] = await res.json()
-        setStations(data)
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message)
-        } else {
-          setError("An unknown error occurred")
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
-
-  
-
-  useEffect(() => {
-    fetchStations();
-  }, []);
 
   return (
     <div className="space-y-8">
@@ -68,7 +35,7 @@ export default function StationsPage() {
         </div>
       ) : error ? (
         <div className="glass-panel p-6">
-          <p className="text-red-500 dark:text-red-400 text-center">{error}</p>
+          <p className="text-red-500 dark:text-red-400 text-center">{error.message}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

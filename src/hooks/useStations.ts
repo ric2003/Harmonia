@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getStations, getStationDailyData, getStationHourlyData, getStation10MinData } from '@/services/irristratService';
+import { runConvexAlertChecks } from '@/services/convexAlertService';
 
 // Configure cache time constants for consistency
 const ONE_MINUTE = 1000 * 60;
@@ -35,11 +36,34 @@ export function useStationHourlyData(stationId: string) {
 }
 
 export function useStation10MinData(stationId: string) {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: ['station-10min', stationId],
-    queryFn: () => getStation10MinData(stationId),
+    queryFn: async () => {
+      const data = await getStation10MinData(stationId);
+      
+      // After fetching new data, trigger alert checks for this specific station
+      // This runs async so it doesn't block the UI and includes notification refresh
+      setTimeout(async () => {
+        try {
+          const results = await runConvexAlertChecks(stationId);
+          
+          // If any alerts were triggered, refresh notifications to show new ones
+          if (results.some((r: any) => r.triggered)) {
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+          }
+        } catch (error) {
+          console.error(`Error running alert checks for station ${stationId}:`, error);
+        }
+      }, 100); // Small delay to ensure data is available
+      
+      return data;
+    },
     staleTime: 10 * ONE_MINUTE, // 10-min data is fresh for only 10 minutes
-    gcTime: 6 * ONE_HOUR, // Keep in cache for 6 hours
+    gcTime:  ONE_HOUR, // Keep in cache for 6 hours
+    refetchInterval: 10 * ONE_MINUTE, // Auto-refetch every 10 minutes to check for new data
+    refetchIntervalInBackground: false, // Only refetch when tab is active
   });
 }
 

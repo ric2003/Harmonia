@@ -24,7 +24,7 @@ export default function SentinelMap() {
   return (
     <div className="flex flex-col">
       {/* Map Container */}
-      <div style={{ position: "relative", height: "75vh", width: "100%" }}>
+      <div style={{width: "100%" }} className="relative h-[50vh] sm:h-[60vh] md:h-[75vh]">
         <MapContainer 
           className="rounded-lg overflow-hidden" 
           center={[38.7223, -9.1293]} 
