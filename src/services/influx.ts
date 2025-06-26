@@ -1,18 +1,6 @@
 "use server";
 import { NextResponse } from "next/server";
 import { InfluxDB } from "@influxdata/influxdb-client";
-import { processExcelData } from "./excel-processor";
-import * as fs from 'fs';
-import path from 'path';
-
-interface ProcessedData {
-  barragem: string;
-  data: string | number | Date;
-  cotaLida: number;
-  volumeTotal: number;
-  enchimento: number;
-  volumeUtil: number;
-}
 
 const url = process.env.INFLUX_URL || "";
 const token = process.env.INFLUX_TOKEN || "";
@@ -98,27 +86,4 @@ export async function getInfluxData(): Promise<NextResponse> {
       }
     }
   );
-}
-
-// Extract the data formatting logic to a separate function
-function formatExcelData(rowData: ProcessedData[]) {
-  return rowData.map(row => {
-    let adjustedDate: string;
-    if (row.data instanceof Date) {
-      const date = new Date(row.data);
-      date.setDate(date.getDate() + 1);
-      adjustedDate = date.toISOString().split("T")[0];
-    } else {
-      adjustedDate = String(row.data);
-    }
-    
-    return {
-      _time: adjustedDate,
-      barragem: row.barragem,
-      cota_lida: row.cotaLida,
-      volume_total: row.volumeTotal,
-      enchimento: row.enchimento,
-      volume_util: row.volumeUtil
-    };
-  });
 }
