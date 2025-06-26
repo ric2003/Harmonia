@@ -49,62 +49,55 @@ export async function getUniqueDamNames(): Promise<Set<string>> {
 }
 
 export async function getInfluxData(): Promise<NextResponse> {
-  try {
-    const influxDB = new InfluxDB({ url, token });
-    const queryApi = influxDB.getQueryApi(org);
+  const influxDB = new InfluxDB({ url, token });
+  const queryApi = influxDB.getQueryApi(org);
 
-    const fluxQuery = `
-        from(bucket: "${bucket}")
-        |> range(start: 1970-01-01T00:00:00Z, stop: now())
-        |> filter(fn: (r) => r["_measurement"] == "barragem_data")
-        |> aggregateWindow(every: 24h, fn: mean, createEmpty: false)
-        |> pivot(rowKey:["_time", "barragem"], columnKey: ["_field"], valueColumn: "_value")
-        |> group(columns: ["barragem", "_time"])
-        |> group()
-        |> drop(columns: ["_start", "_stop"])
-        |> sort(columns: ["_time"], desc: true)
-        |> yield(name: "mean_joined")
-    `;
+  const fluxQuery = `
+      from(bucket: "${bucket}")
+      |> range(start: 1970-01-01T00:00:00Z, stop: now())
+      |> filter(fn: (r) => r["_measurement"] == "barragem_data")
+      |> aggregateWindow(every: 24h, fn: mean, createEmpty: false)
+      |> pivot(rowKey:["_time", "barragem"], columnKey: ["_field"], valueColumn: "_value")
+      |> group(columns: ["barragem", "_time"])
+      |> group()
+      |> drop(columns: ["_start", "_stop"])
+      |> sort(columns: ["_time"], desc: true)
+      |> yield(name: "mean_joined")
+  `;
 
-    const results: QueryResult[] = [];
+  const results: QueryResult[] = [];
 
-    try {
-      await new Promise<void>((resolve, reject) => {
-        queryApi.queryRows(fluxQuery, {
-          next(row, tableMeta) {
-            results.push(tableMeta.toObject(row) as QueryResult);
-          },
-          error(error) {
-            console.error("Query error:", error);
-            reject(error);
-          },
-          complete() {
-            resolve();
-          },
-        });
-      });
+  await new Promise<void>((resolve, reject) => {
+    queryApi.queryRows(fluxQuery, {
+      next(row, tableMeta) {
+        results.push(tableMeta.toObject(row) as QueryResult);
+      },
+      error(error) {
+        reject(error);
+      },
+      complete() {
+        resolve();
+      },
+    });
+  });
 
-      const formattedResults = results.map((row) => {
-        if (row._time) row._time = new Date(row._time).toISOString().split("T")[0];
-        return row;
-      });
-
-      return NextResponse.json(
-        { success: true, data: formattedResults },
-        {
-          headers: {
-            'Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=5184000' // 30 days cache, stale for 60 more days
-          }
-        }
-      );
-    } catch (error) {
-      console.error("Error fetching Influx data, trying fallback:", error);
-      return await getFallbackExcelData();
+  const formattedResults = results.map((row) => {
+    if (row._time) {
+      row._time = new Date(row._time).toISOString().split("T")[0];
     }
-  } catch (error) {
-    console.error("Error connecting to InfluxDB, trying fallback:", error);
-    return await getFallbackExcelData();
-  }
+    return row;
+  });
+
+  return NextResponse.json(
+    { success: true, data: formattedResults },
+    {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    }
+  );
 }
 
 /**
@@ -130,7 +123,9 @@ async function getFallbackExcelData(): Promise<NextResponse> {
           source: "excel_fallback_http"
         }, {
           headers: {
-            'Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=5184000' // 30 days cache, stale for 60 more days
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         });
       } else {
@@ -162,7 +157,9 @@ async function getFallbackExcelData(): Promise<NextResponse> {
             source: "excel_fallback_fs"
           }, {
             headers: {
-              'Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=5184000' // 30 days cache, stale for 60 more days
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
             }
           });
         }
