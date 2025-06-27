@@ -104,7 +104,7 @@ export default function DataSource({
             aria-label="Show site details"
           >
             <Layers className="w-4 h-4" />
-            <span>{t("siteDetails")}</span>
+            <span>{t("navigation.siteDetails")}</span>
             <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
           </button>
         </div>
