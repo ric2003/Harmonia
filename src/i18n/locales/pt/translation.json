@@ -119,6 +119,7 @@
     "stationDetailIntro": "Explore dados meteorológicos detalhados para esta estação específica. Alterne entre intervalos diários, horários e de 10 minutos usando os separadores acima. Use o seletor de data para ver dados históricos e consulte o mapa para ver estações próximas. Perfeito para acompanhar padrões meteorológicos locais ao longo do tempo.",
     "stationGraphsIntro": "Veja gráficos detalhados para esta estação meteorológica. Compare tendências de temperatura, padrões de vento e mudanças de humidade durante a última semana. Estes insights visuais ajudam a identificar padrões meteorológicos e compreender variações climáticas locais rapidamente.",
     "viewGraphs": "Ver Gráficos",
+    "howToUseThisPage": "Como usar esta página",
     "tabs": {
       "daily": "Dados Diários",
       "hourly": "Dados Horários",

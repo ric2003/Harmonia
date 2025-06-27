@@ -119,6 +119,7 @@
     "stationDetailIntro": "Explore detailed weather data for this specific station. Switch between daily, hourly, and 10-minute intervals using the tabs above. Use the date picker to view historical data, and check the map to see nearby stations. Perfect for tracking local weather patterns over time.",
     "stationGraphsIntro": "View detailed charts and graphs for this weather station. Compare temperature trends, wind patterns, and humidity changes over the past week. These visual insights help you spot weather patterns and understand local climate variations at a glance.",
     "viewGraphs": "View Graphs",
+    "howToUseThisPage": "How to use this page",
     "tabs": {
       "daily": "Daily Data",
       "hourly": "Hourly Data",

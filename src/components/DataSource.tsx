@@ -53,7 +53,7 @@ export default function DataSource({
               <div className="glass-card rounded-xl p-5 shadow-sm">
                 <h4 className="text-base font-medium text-gray700 mb-3 flex items-center gap-2">
                   <Info className="w-4 h-4 text-primary" />
-                  How to use this page
+                  {t('station.howToUseThisPage')}
                 </h4>
                 <p className="text-gray600 leading-relaxed text-sm">
                   {t(introTextKey)}
