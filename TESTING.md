@@ -1,6 +1,6 @@
-# Testing Guide for Water Wise
+# Testing Guide for Harmonia
 
-This document explains how to run tests and what types of tests are available in the Water Wise project.
+This document explains how to run tests and what types of tests are available in the Harmonia project.
 
 ## 🧪 Test Types
 

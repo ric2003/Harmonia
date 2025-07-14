@@ -7,7 +7,7 @@ interface PageTitleContextType {
 }
 
 const PageTitleContext = createContext<PageTitleContextType>({
-  pageTitle: 'Water Wise',
+  pageTitle: 'Harmonia',
   setPageTitle: () => {},
 });
 
@@ -16,7 +16,7 @@ interface PageTitleProviderProps {
 }
 
 export function PageTitleProvider({ children }: PageTitleProviderProps) {
-  const [pageTitle, setPageTitle] = useState<string>('Water Wise');
+  const [pageTitle, setPageTitle] = useState<string>('Harmonia');
 
   useEffect(() => {
     document.title = pageTitle;

@@ -29,10 +29,10 @@ export function Sidebar() {
             <div className={`flex flex-col items-center h-full ${sidebarOpen ? 'w-[225px]' : ''} bg-background shadow-[rgba(0,0,0,0.25)_2px_0_20px_1px] z-[2]`}>
                 <div className="h-[87px] flex items-center justify-center">
                     <Image 
-                        src={sidebarOpen ? theme === "light" ? "/logo.svg" : "/logoDarkMode.svg" : theme === "light" ? "/logoNoText.svg" : "/logoDarkModeNoText.svg"} 
-                        width={sidebarOpen ? 80 : 55} 
-                        height={sidebarOpen ? 80 : 55} 
-                        alt="Water Wise Logo"
+                        src={sidebarOpen ? "/logo.png" : "/logoNoText.png"} 
+                        width={sidebarOpen ? 65 : 55} 
+                        height={sidebarOpen ? 65 : 55} 
+                        alt="Harmonia Logo"
                         style={{ transition: 'height 0.05s ease-in-out, height 0.05s ease-in-out' }}
                     />
                 </div>

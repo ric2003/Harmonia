@@ -204,14 +204,14 @@ export default function NotificationDropdown({ compact = false }: NotificationDr
         <>
           {/* Mobile Background Overlay */}
           <div 
-            className="fixed inset-0 bg-black/50 z-40 sm:hidden" 
+            className="fixed inset-0 bg-black/50 z-[9999] sm:hidden" 
             onClick={() => setIsOpen(false)}
           />
           
           {/* Mobile Modal Content */}
           <div
             ref={mobileDropdownRef}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm z-50 sm:hidden bg-background shadow-lg rounded-lg max-h-[80vh] overflow-hidden"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm z-[9999] sm:hidden bg-background shadow-lg rounded-lg max-h-[80vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Mobile Header */}
@@ -249,7 +249,7 @@ export default function NotificationDropdown({ compact = false }: NotificationDr
           {/* Desktop Dropdown (shown on screens >= 640px) */}
           <div
             ref={desktopDropdownRef}
-            className={`hidden sm:block absolute mt-2 bg-background shadow-lg rounded-lg z-50 max-h-96 overflow-hidden w-80 ${
+            className={`hidden sm:block absolute mt-2 bg-background shadow-lg rounded-lg z-[9999] max-h-96 overflow-hidden w-80 ${
               compact ? 'left-0' : 'right-0'
             }`}
             onClick={(e) => e.stopPropagation()}

@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Water Wise",
+    "title": "Harmonia",
     "description": "Aplicação de gestão de recursos hídricos"
   },
   "navigation": {
@@ -36,11 +36,11 @@
     "sentinelMap": "Imagens de Satélite",
     "sorraiaMap": "Mapa Preditivo de Simulação de Água do Sorraia",
     "excelUpload": "Carregar Excel",
-    "about": "Sobre o Water Wise"
+    "about": "Sobre Harmonia"
   },
   "home": {
     "title": "Estações Meteorológicas",
-    "intro": "Bem‑vindo ao Water Wise, uma plataforma dedicada à monitorização e gestão de recursos hídricos em Portugal. O nosso sistema integra dados de várias fontes para fornecer informação precisa e atualizada sobre o estado das barragens, condições meteorológicas e recursos hídricos em todo o país.",
+    "intro": "Bem‑vindo ao Harmonia, uma plataforma dedicada à monitorização e gestão de recursos hídricos em Portugal. O nosso sistema integra dados de várias fontes para fornecer informação precisa e atualizada sobre o estado das barragens, condições meteorológicas e recursos hídricos em todo o país.",
     "purpose": "Este site foi desenvolvido para apoiar a gestão sustentável da água, disponibilizando ferramentas de visualização e análise para investigadores, gestores de recursos hídricos e o público em geral.",
     "monitoredData": "Dados Monitorizados:",
     "scrollForInfo": "Desça para saber mais",
@@ -313,7 +313,7 @@
     "noData": "Nenhuns dados de série temporal encontrados neste ficheiro.",
     "dataSourceIntro": "Explore o nosso modelo preditivo de simulação de água para a bacia do rio Sorraia. Clique em qualquer ponto laranja para ver previsões hidrológicas detalhadas incluindo parâmetros de qualidade da água, taxas de fluxo e condições ambientais. Use os controlos de data para ver dados históricos e previsões, e selecione diferentes parâmetros no menu dropdown para analisar vários indicadores de qualidade da água.",
     "dataSource": "Dados do modelo preditivo gerados por:",
-    "researchProject": "Projeto de Investigação Water Wise",
+    "researchProject": "Projeto de Investigação Harmonia",
     "dateControls": {
       "day": "Dia",
       "month": "Mês",
@@ -447,9 +447,9 @@
     "dataSourceIntro": "Explore imagens de satélite de Portugal do espaço! Alterne entre diferentes modos de visualização para ver saúde da vegetação, conteúdo de água, áreas urbanas ou cores naturais. Use os controlos do mapa para aproximar na sua área de interesse e observe como a paisagem muda ao longo do tempo."
   },
   "about": {
-    "title": "Sobre o Water Wise",
+    "title": "Sobre Harmonia",
     "subtitle": "Uma Plataforma Geoespacial para Gestão Inteligente de Recursos Hídricos",
-    "description": "O Water Wise é uma aplicação web desenvolvida como parte do Trabalho Final de Curso em Engenharia Informática na Universidade Lusófona. A plataforma tem como objetivo apoiar a gestão eficiente de recursos hídricos, focando-se em reservatórios, rios e zonas agrícolas.",
+    "description": "Harmonia é uma aplicação web desenvolvida como parte do Trabalho Final de Curso em Engenharia Informática na Universidade Lusófona. A plataforma tem como objetivo apoiar a gestão eficiente de recursos hídricos, focando-se em reservatórios, rios e zonas agrícolas.",
     "mission": {
       "title": "Missão",
       "description": "Fornecer uma visão integrada, visual e preditiva da situação hidrológica atual, coletando e integrando dados em tempo real e históricos para apoiar a gestão sustentável da água."
@@ -492,7 +492,7 @@
     },
     "architecture": {
       "title": "Arquitetura do Sistema",
-      "overview": "O Water Wise utiliza uma arquitetura moderna baseada em microserviços e integração de múltiplas fontes de dados:",
+      "overview": "Harmonia utiliza uma arquitetura moderna baseada em microserviços e integração de múltiplas fontes de dados:",
       "dataFlow": {
         "title": "Fluxo de Dados",
         "steps": [
