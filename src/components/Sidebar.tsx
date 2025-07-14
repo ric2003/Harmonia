@@ -4,13 +4,11 @@ import { LinkButton } from "./LinkButton";
 import { Building, Home, Sheet, Dam, Droplets, Map, Satellite, Info, User } from "lucide-react";
 import { useContext, useRef } from "react";
 import { SidebarHeaderContext } from "@/contexts/SidebarHeaderContext";
-import { ThemeContext } from "@/contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 
 export function Sidebar() {
     const { sidebarOpen } = useContext(SidebarHeaderContext);
-    const { theme } = useContext(ThemeContext);
     const { t } = useTranslation();
     const { isSignedIn, user } = useUser();
     const userButtonRef = useRef<HTMLDivElement>(null);
