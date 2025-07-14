@@ -27,10 +27,11 @@ export function Sidebar() {
             <div className={`flex flex-col items-center h-full ${sidebarOpen ? 'w-[225px]' : ''} bg-background shadow-[rgba(0,0,0,0.25)_2px_0_20px_1px] z-[2]`}>
                 <div className="h-[87px] flex items-center justify-center">
                     <Image 
-                        src={sidebarOpen ? "/logo.png" : "/logoNoText.png"} 
-                        width={sidebarOpen ? 65 : 55} 
-                        height={sidebarOpen ? 65 : 55} 
+                        src={sidebarOpen ? "/logoHarmonia.png" : "/logoHarmoniaNoText.png"} 
+                        width={sidebarOpen ? 75 : 55} 
+                        height={sidebarOpen ? 75 : 55} 
                         alt="Harmonia Logo"
+                        className="rounded-lg"
                         style={{ transition: 'height 0.05s ease-in-out, height 0.05s ease-in-out' }}
                     />
                 </div>
