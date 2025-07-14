@@ -28,11 +28,11 @@ export function Sidebar() {
                 <div className="h-[87px] flex items-center justify-center">
                     <Image 
                         src={sidebarOpen ? "/logoHarmonia.png" : "/logoHarmoniaNoText.png"} 
-                        width={sidebarOpen ? 75 : 55} 
-                        height={sidebarOpen ? 75 : 55} 
+                        width={sidebarOpen ? 75 : 50} 
+                        height={sidebarOpen ? 75 : 50} 
                         alt="Harmonia Logo"
                         className="rounded-lg"
-                        style={{ transition: 'height 0.05s ease-in-out, height 0.05s ease-in-out' }}
+                        style={{ transition: '0.1s ease-in-out, 0.1s ease-in-out' }}
                     />
                 </div>
                 <hr className="h-0.5 bg-lightGray w-4/5 mt-[1px]" />
